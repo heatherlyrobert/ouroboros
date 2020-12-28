@@ -31,8 +31,8 @@
 
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.1- build framework"
-#define     P_VERNUM    "0.1a"
-#define     P_VERTXT    "just adapted makefile and public header"
+#define     P_VERNUM    "0.1b"
+#define     P_VERTXT    "PROG and MAIN basics.  now compilies, but gutless"
 
 
 /*===[[ HEADER GUARD ]]=======================================================*/
@@ -45,6 +45,12 @@
 #include    <stdio.h>        /* C_ANSI : strcpy, strlen, strchr, strcmp, ...  */
 #include    <string.h>       /* C_ANSI : printf, snprintf, fgets, fopen, ...  */
 
+/*===[[ CUSTOM LIBRARIES ]]===================================================*/
+#include    <yUNIT.h>        /* CUSTOM : heatherly unit testing               */
+#include    <yLOG.h>         /* CUSTOM : heatherly program logging            */
+#include    <ySTR.h>         /* CUSTOM : heatherly safer string handling      */
+#include    <yURG.h>         /* CUSTOM : heatherly urgent processing          */
+
 
 typedef     struct cGLOBALS     tGLOBALS;
 struct cGLOBALS
@@ -56,6 +62,20 @@ struct cGLOBALS
 extern      tGLOBALS    my;
 
 
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+/*---(support)-----------------*/
+char*       PROG_version            (void);
+/*---(startup)-----------------*/
+char        PROG__init              (void);
+char        PROG__args              (int a_argc, char *a_argv[]);
+char        PROG__begin             (void);
+char        PROG_startup            (int a_argc, char *a_argv[]);
+char        PROG_final              (void);
+/*---(drivers)-----------------*/
+/*---(shutdown)----------------*/
+char        PROG__end               (void);
+char        PROG_shutdown           (void);
+/*---(done)--------------------*/
 
 
 
