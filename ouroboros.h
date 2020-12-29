@@ -31,9 +31,32 @@
 
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.1- build framework"
-#define     P_VERNUM    "0.1b"
-#define     P_VERTXT    "PROG and MAIN basics.  now compilies, but gutless"
+#define     P_VERNUM    "0.1c"
+#define     P_VERTXT    "WAVE is pretty solid and unit tested"
 
+
+/*
+ *  GRAND PLAN
+ *
+ *  start with reading wave files put out by koios
+ *
+ *  then incorporate wave/stage descriptors from master.unit
+ *
+ *  control execution of scripts in order
+ *
+ *  controllable reporting on results
+ *
+ *  then create a central database of outcomes
+ *
+ *  pull sequences/dependencies between programs
+ *
+ *  control full code-base wide execution of unit tests
+ *
+ *  central reporting on code readiness
+ *
+ *
+ *
+ */
 
 /*===[[ HEADER GUARD ]]=======================================================*/
 #ifndef YORUBOROS
@@ -44,6 +67,7 @@
 /*===[[ STANDARD C LIBRARIES ]]===============================================*/
 #include    <stdio.h>        /* C_ANSI : strcpy, strlen, strchr, strcmp, ...  */
 #include    <string.h>       /* C_ANSI : printf, snprintf, fgets, fopen, ...  */
+#include    <dirent.h>       /* POSIX  (11) opendir, readdir, alphasort       */
 
 /*===[[ CUSTOM LIBRARIES ]]===================================================*/
 #include    <yUNIT.h>        /* CUSTOM : heatherly unit testing               */
@@ -51,15 +75,38 @@
 #include    <ySTR.h>         /* CUSTOM : heatherly safer string handling      */
 #include    <yURG.h>         /* CUSTOM : heatherly urgent processing          */
 
+typedef struct dirent    tDIRENT;
+typedef struct FILE      tFILE;
 
 typedef     struct cGLOBALS     tGLOBALS;
 struct cGLOBALS
 {
    /*---(general)---------------*/
    char        version     [LEN_FULL];      /* program version info           */
+   char        unit_answer [LEN_RECD];      /* response from unit testing     */
    /*---(done)------------------*/
 };
 extern      tGLOBALS    my;
+
+
+
+
+typedef struct cWAVE  tWAVE;
+struct cWAVE {
+   uchar       wave;
+   uchar       stage;
+   uchar       unit        [LEN_DESC];
+   uchar       scrp;
+   uchar       desc        [LEN_HUND];
+   uchar       key         [LEN_HUND];
+   tWAVE      *s_next;
+   tWAVE      *s_prev;
+};
+extern tWAVE     *g_head;
+extern tWAVE     *g_tail;
+extern int        g_count;
+extern int        g_curr;
+
 
 
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
@@ -75,8 +122,32 @@ char        PROG_final              (void);
 /*---(shutdown)----------------*/
 char        PROG__end               (void);
 char        PROG_shutdown           (void);
+/*---(unittest)----------------*/
+char        PROG__unit_quiet        (void);
+char        PROG__unit_loud         (void);
+char        PROG__unit_end          (void);
 /*---(done)--------------------*/
 
+
+
+char        WAVE__wipe              (tWAVE *a_dst);
+char        WAVE__verify            (char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc, char *a_key);
+char        WAVE__hook              (tWAVE *a_new);
+char        WAVE__unhook            (tWAVE *a_old);
+char        WAVE__populate          (tWAVE *a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc, char *a_key);
+char        WAVE_new                (tWAVE **a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc);
+char        WAVE_force              (tWAVE **a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc);
+char        WAVE_free               (tWAVE **a_old);
+char        WAVE_purge              (void);
+char        WAVE_by_index           (tWAVE **a_cur, int n);
+char        WAVE_by_cursor          (tWAVE **a_cur, char a_move);
+char        WAVE_by_name            (tWAVE **a_cur, char *a_name);
+char        WAVE_parse              (char *a_recd, char a_call);
+char        WAVE_read               (char *a_name, char a_call);
+char        WAVE_inventory          (char *a_path, char a_call);
+char        WAVE_swap               (tWAVE *a_one, tWAVE *a_two);
+char        WAVE_gnome              (void);
+char*       WAVE__unit              (char *a_question, int n);
 
 
 #endif

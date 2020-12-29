@@ -157,5 +157,49 @@ PROG_shutdown      (void)
 
 
 
+/*====================------------------------------------====================*/
+/*===----                          unit testing                        ----===*/
+/*====================------------------------------------====================*/
+static void  o___UNITTEST________o () { return; }
+
+char       /*----: set up programgents/debugging -----------------------------*/
+PROG__unit_quiet   (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rc          =    0;
+   int         x_argc      =    1;
+   char       *x_argv [1]  = { "ouroboros" };
+   /*---(run)----------------------------*/
+   rc = PROG_startup (x_argc, x_argv);
+   /*---(complete)-----------------------*/
+   return rc;
+}
+
+char       /*----: set up programgents/debugging -----------------------------*/
+PROG__unit_loud    (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rc          =    0;
+   int         x_argc      = 2;
+   char       *x_argv [2]  = { "ouroboros_unit", "@@kitchen" };
+   /*---(run)----------------------------*/
+   rc = PROG_startup (x_argc, x_argv);
+   /*---(complete)-----------------------*/
+   return rc;
+}
+
+char       /*----: set up program urgents/debugging --------------------------*/
+PROG__unit_end     (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rc          =    0;
+   /*---(run)----------------------------*/
+   rc = PROG_shutdown  ();
+   /*---(complete)-----------------------*/
+   return rc;
+}
+
+
+
 
 
