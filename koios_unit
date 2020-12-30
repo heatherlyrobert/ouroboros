@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [[ $1 == "01" ]]; then
+     echo  "SCRP [01] (WAVE) verify allocating and freeing script entries ===========[è1]=[00015]"                   > koios.urun
+     echo  "\e[43mPRCS -------- cond=160   test=205   [ pass=200   fail=0     badd=5     void=0     ]\e[0m"         >> koios.urun
+fi
+if [[ $1 == "02" ]]; then
+     echo  "SCRP [02] (WAVE) verify allocating and freeing script entries ===========[è1]=[00015]"                   > koios.urun
+     echo  "\e[42mPRCS -------- cond=13    test=50    [ pass=50    fail=0     badd=0     void=0     ]\e[0m"         >> koios.urun
+fi
+if [[ $1 == "03" ]]; then
+     echo  "SCRP [03] (WAVE) verify allocating and freeing script entries ===========[è1]=[00015]"                   > koios.urun
+     echo  "\e[41mPRCS -------- cond=3     test=27    [ pass=20    fail=5     badd=2     void=0     ]\e[0m"         >> koios.urun
+fi

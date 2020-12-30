@@ -17,6 +17,9 @@ main               (int a_argc, char *a_argv[])
       return rc;
    }
    /*---(normal)-------------------------*/
+   WAVE_here     ();
+   RPTG_heading  ();
+   RPTG_lines    ();
    /*---(complete)-----------------------*/
    PROG_shutdown ();
    return 0;

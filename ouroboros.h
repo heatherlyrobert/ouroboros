@@ -31,8 +31,8 @@
 
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.1- build framework"
-#define     P_VERNUM    "0.1c"
-#define     P_VERTXT    "WAVE is pretty solid and unit tested"
+#define     P_VERNUM    "0.1d"
+#define     P_VERTXT    "TEST run and check basic code and unit testing done"
 
 
 /*
@@ -68,12 +68,14 @@
 #include    <stdio.h>        /* C_ANSI : strcpy, strlen, strchr, strcmp, ...  */
 #include    <string.h>       /* C_ANSI : printf, snprintf, fgets, fopen, ...  */
 #include    <dirent.h>       /* POSIX  (11) opendir, readdir, alphasort       */
+#include    <unistd.h>       /* POSIX  (11) opendir, readdir, alphasort       */
 
 /*===[[ CUSTOM LIBRARIES ]]===================================================*/
 #include    <yUNIT.h>        /* CUSTOM : heatherly unit testing               */
 #include    <yLOG.h>         /* CUSTOM : heatherly program logging            */
 #include    <ySTR.h>         /* CUSTOM : heatherly safer string handling      */
 #include    <yURG.h>         /* CUSTOM : heatherly urgent processing          */
+#include    <yCOLOR_solo.h>  /* CUSTOM : heatherly colorization library       */
 
 typedef struct dirent    tDIRENT;
 typedef struct FILE      tFILE;
@@ -84,21 +86,33 @@ struct cGLOBALS
    /*---(general)---------------*/
    char        version     [LEN_FULL];      /* program version info           */
    char        unit_answer [LEN_RECD];      /* response from unit testing     */
+   char        path        [LEN_PATH];      /* base directory                 */
+   char        wave_min;
+   char        wave_max;
    /*---(done)------------------*/
 };
 extern      tGLOBALS    my;
 
 
+extern char      *g_greek;
 
 
 typedef struct cWAVE  tWAVE;
 struct cWAVE {
    uchar       wave;
    uchar       stage;
-   uchar       unit        [LEN_DESC];
+   uchar      *path;
+   uchar      *unit;
    uchar       scrp;
-   uchar       desc        [LEN_HUND];
-   uchar       key         [LEN_HUND];
+   uchar      *desc;
+   uchar      *key;
+   uchar       resu;
+   int         cond;
+   int         test;
+   int         pass;
+   int         fail;
+   int         badd;
+   int         othr;
    tWAVE      *s_next;
    tWAVE      *s_prev;
 };
@@ -130,7 +144,7 @@ char        PROG__unit_end          (void);
 
 
 
-char        WAVE__wipe              (tWAVE *a_dst);
+char        WAVE__wipe              (tWAVE *a_dst, char a_new);
 char        WAVE__verify            (char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc, char *a_key);
 char        WAVE__hook              (tWAVE *a_new);
 char        WAVE__unhook            (tWAVE *a_old);
@@ -145,10 +159,21 @@ char        WAVE_by_name            (tWAVE **a_cur, char *a_name);
 char        WAVE_parse              (char *a_recd, char a_call);
 char        WAVE_read               (char *a_name, char a_call);
 char        WAVE_inventory          (char *a_path, char a_call);
+char        WAVE_here               (void);
 char        WAVE_swap               (tWAVE *a_one, tWAVE *a_two);
 char        WAVE_gnome              (void);
 char*       WAVE__unit              (char *a_question, int n);
 
+
+
+char        RPTG_clear              (void);
+char        RPTG_spread             (char a_wave, char a_stage);
+char        RPTG_heading            (void);
+
+
+char        TEST_result             (tWAVE *a_cur);
+char        TEST_run                (tWAVE *a_cur);
+char*       TEST__unit              (char *a_question, int n);
 
 #endif
 /*============================[[ end-of-code ]]===============================*/

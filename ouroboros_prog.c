@@ -136,6 +136,7 @@ char                /* PURPOSE : shutdown program and free memory ------------*/
 PROG__end           (void)
 {
    DEBUG_TOPS   yLOG_enter   (__FUNCTION__);
+   WAVE_purge ();
    DEBUG_TOPS   yLOG_exit    (__FUNCTION__);
    return 0;
 }
