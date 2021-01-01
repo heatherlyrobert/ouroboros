@@ -43,10 +43,24 @@ PROG__init          (void)
    /*---(header)-------------------------*/
    DEBUG_TOPS   yLOG_enter   (__FUNCTION__);
    /*---(files)--------------------------*/
+   strlcpy (my.n_db, "", LEN_PATH);
+   my.f_db = NULL;
+   my.projs = 0;
+   my.units = 0;
+   my.scrps = 0;
+   my.conds = 0;
+   my.steps = 0;
+   my.ready = 0;
+   my.pass  = 0;
+   my.fail  = 0;
+   my.badd  = 0;
+   my.othr  = 0;
    /*---(complete)-----------------------*/
    DEBUG_TOPS   yLOG_exit    (__FUNCTION__);
    return 0;
 }
+
+#define  TWOARG  if (++i >= a_argc)  yURG_error ("FATAL, %s argument requires an additional string", a, --rc); else 
 
 char               /* PURPOSE : process the command line arguments            */
 PROG__args          (int a_argc, char *a_argv[])
@@ -61,12 +75,15 @@ PROG__args          (int a_argc, char *a_argv[])
    /*---(begin)--------------------------*/
    DEBUG_TOPS  yLOG_enter   (__FUNCTION__);
    /*---(process)------------------------*/
+   /*> printf ("testing %d\n", a_argc);                                               <*/
    for (i = 1; i < a_argc; ++i) {
       a = a_argv[i];
+      /*> printf ("a = [%s]\n", a);                                                   <*/
       ++x_total;
       if (a[0] == '@')  continue;
       DEBUG_ARGS  yLOG_info    ("cli arg", a);
       ++x_args;
+      if      (strcmp (a, "--db"        ) == 0)  TWOARG rc = strlfile  ("--db", my.n_db, a_argv [i], "db", LEN_PATH);
       /*> if      (strncmp (a, "--create"     , 10) == 0)    my.run_type = G_RUN_CREATE;                                                                                    <* 
        *> else if (strncmp (a, "--compile"    , 10) == 0)    my.run_type = G_RUN_CREATE;                                                                                    <* 
        *> else if (strncmp (a, "--debug"      , 10) == 0)    my.run_type = G_RUN_DEBUG;                                                                                     <* 
@@ -79,6 +96,7 @@ PROG__args          (int a_argc, char *a_argv[])
        *>       DEBUG_TOPS  yLOG_exitr  (__FUNCTION__, rce);                                                                                                                <* 
        *>    }                                                                                                                                                              <* 
        *> }                                                                                                                                                                 <*/
+      if (rc < 0)  break;
    }
    DEBUG_ARGS  yLOG_value  ("entries"   , x_total);
    DEBUG_ARGS  yLOG_value  ("arguments" , x_args);
@@ -87,7 +105,7 @@ PROG__args          (int a_argc, char *a_argv[])
    }
    /*---(complete)-----------------------*/
    DEBUG_TOPS  yLOG_exit  (__FUNCTION__);
-   return 0;
+   return rc;
 }
 
 char
@@ -95,6 +113,7 @@ PROG__begin         (void)
 {
    DEBUG_TOPS   yLOG_enter   (__FUNCTION__);
    /*---(file names)---------------------*/
+   if (strcmp (my.n_db, "") == 0)  strlcpy (my.n_db, F_DB, LEN_PATH);
    /*---(complete)-----------------------*/
    DEBUG_TOPS   yLOG_exit    (__FUNCTION__);
    return 0;

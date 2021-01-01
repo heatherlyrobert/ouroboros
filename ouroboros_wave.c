@@ -19,7 +19,6 @@
 
 tWAVE     *g_head   = NULL;
 tWAVE     *g_tail   = NULL;
-int        g_count  = 0;
 int        g_curr   = 0;
 
 
@@ -51,30 +50,28 @@ WAVE__wipe              (tWAVE *a_dst, char a_new)
 {
    if (a_dst == NULL)  return -1;
    DEBUG_DATA   yLOG_snote   ("wipe");
-   /*---(free)--------------*/
-   if (a_new != 'y') {
-      if (a_dst->path != NULL)  free (a_dst->path);
-      if (a_dst->unit != NULL)  free (a_dst->unit);
-      if (a_dst->desc != NULL)  free (a_dst->desc);
-      if (a_dst->key  != NULL)  free (a_dst->key);
-   }
-   /*---(master)------------*/
+   /*---(basic)----------------*/
    a_dst->wave     =  '-';
    a_dst->stage    =    0;
-   a_dst->path     = NULL;
-   a_dst->unit     = NULL;
+   a_dst->path [0] = '\0';
+   a_dst->unit [0] = '\0';
    a_dst->scrp     =    0;
-   a_dst->desc     = NULL;
-   a_dst->key      = NULL;
-   a_dst->resu     =    0;
+   a_dst->desc [0] = '\0';
+   a_dst->key  [0] = '\0';
+   /*---(statistics)-----------*/
+   a_dst->cond     =    0;
    a_dst->test     =    0;
+   /*---(results)--------------*/
+   a_dst->ready    =  '-';
+   a_dst->resu     =    0;
    a_dst->pass     =    0;
    a_dst->fail     =    0;
    a_dst->badd     =    0;
    a_dst->othr     =    0;
+   /*---(links)----------------*/
    a_dst->s_next   = NULL;
    a_dst->s_prev   = NULL;
-   /*---(done)--------------*/
+   /*---(done)-----------------*/
    return 1;
 }
 
@@ -84,8 +81,11 @@ WAVE__verify            (char a_wave, char a_stage, char *a_unit, char a_scrp, c
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    tWAVE      *x_old       = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_DATA   yLOG_senter  (__FUNCTION__);
    /*---(defense)------------------------*/
-   --rce;  if (strchr ("èéêëìíîïðñòóôõö÷øùúûüýþÿ",a_wave) == NULL) {
+   DEBUG_DATA   yLOG_schar   (a_stage);
+   --rce;  if (strchr (LTRS_GREEK, a_wave) == NULL) {
       DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
       return rce;
    }
@@ -118,6 +118,7 @@ WAVE__verify            (char a_wave, char a_stage, char *a_unit, char a_scrp, c
       return rce;
    }
    /*---(complete)-----------------------*/
+   DEBUG_DATA   yLOG_sexit   (__FUNCTION__);
    return 0;
 }
 
@@ -137,8 +138,27 @@ WAVE__hook              (tWAVE *a_new)
       g_tail          = a_new;
    }
    /*---(update counter)-----------------*/
-   ++g_count;
+   ++my.scrps;
    /*---(complete)-----------------------*/
+   return 0;
+}
+
+char
+WAVE__populate          (tWAVE *a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc, char *a_key)
+{
+   /*---(complete)-----------------------*/
+   DEBUG_DATA   yLOG_sexit   (__FUNCTION__);
+   /*---(populate)-----------------------*/
+   a_new->wave  = a_wave;
+   a_new->stage = a_stage;
+   strlcpy (a_new->path, my.path, LEN_PATH);
+   strlcpy (a_new->unit, a_unit , LEN_TITLE);
+   a_new->scrp  = a_scrp;
+   strlcpy (a_new->desc, a_desc , LEN_DESC);
+   strlcpy (a_new->key , a_key  , LEN_HUND);
+   RPTG_spread (a_wave, a_stage);
+   /*---(complete)-----------------------*/
+   DEBUG_DATA   yLOG_sexit   (__FUNCTION__);
    return 0;
 }
 
@@ -154,25 +174,7 @@ WAVE__unhook            (tWAVE *a_old)
    if (a_old->s_prev != NULL)  a_old->s_prev->s_next = a_old->s_next;
    else                        g_head                = a_old->s_next;
    /*---(update counter)-----------------*/
-   --g_count;
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char
-WAVE__populate          (tWAVE *a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc, char *a_key)
-{
-   /*---(wipe)---------------------------*/
-   WAVE__wipe (a_new, 'y');
-   /*---(populate)-----------------------*/
-   a_new->wave  = a_wave;
-   a_new->stage = a_stage;
-   a_new->path  = strdup (my.path);
-   a_new->unit  = strdup (a_unit);
-   a_new->scrp  = a_scrp;
-   a_new->desc  = strdup (a_desc);
-   a_new->key   = strdup (a_key);
-   RPTG_spread (a_wave, a_stage);
+   --my.scrps;
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -185,14 +187,13 @@ WAVE__populate          (tWAVE *a_new, char a_wave, char a_stage, char *a_unit, 
 static void  o___MEMORY__________o () { return; }
 
 char
-WAVE__new               (tWAVE **a_new, char a_force, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc)
+WAVE__new               (tWAVE **a_new, char a_force)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
    tWAVE      *x_new       = NULL;
    int         x_tries     =    0;
-   char        x_key       [LEN_HUND]  = "";
    /*---(header)-------------------------*/
    DEBUG_DATA   yLOG_senter  (__FUNCTION__);
    /*---(default return)-----------------*/
@@ -203,12 +204,6 @@ WAVE__new               (tWAVE **a_new, char a_force, char a_wave, char a_stage,
          return rce;
       }
       *a_new = NULL;
-   }
-   /*---(defense)------------------------*/
-   rc = WAVE__verify (a_wave, a_stage, a_unit, a_scrp, a_desc, x_key);
-   --rce;  if (rc < 0) {
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
    }
    /*---(allocate)-----------------------*/
    while (x_new == NULL) {
@@ -222,12 +217,8 @@ WAVE__new               (tWAVE **a_new, char a_force, char a_wave, char a_stage,
       DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
       return rce;
    }
-   /*---(populate)-----------------------*/
-   rc = WAVE__populate (x_new, a_wave, a_stage, a_unit, a_scrp, a_desc, x_key);
-   --rce;  if (rc < 0) {
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
+   /*---(wipe)---------------------------*/
+   WAVE__wipe (x_new, 'y');
    /*---(into linked list)---------------*/
    rc = WAVE__hook (x_new);
    --rce;  if (rc < 0) {
@@ -241,16 +232,45 @@ WAVE__new               (tWAVE **a_new, char a_force, char a_wave, char a_stage,
    return 1;
 }
 
+char WAVE_new      (tWAVE **a_new) { return WAVE__new (a_new, '-'); }
+char WAVE_force    (tWAVE **a_new) { return WAVE__new (a_new, 'y'); }
+
 char
-WAVE_new                (tWAVE **a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc)
+WAVE_populate           (tWAVE *a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc)
 {
-   return WAVE__new (a_new, '-', a_wave, a_stage, a_unit, a_scrp, a_desc);
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char        x_key       [LEN_HUND]  = "";
+   DEBUG_DATA   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   rc = WAVE__verify (a_wave, a_stage, a_unit, a_scrp, a_desc, x_key);
+   --rce;  if (rc < 0) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(populate)-----------------------*/
+   rc = WAVE__populate (a_new, a_wave, a_stage, a_unit, a_scrp, a_desc, x_key);
+   --rce;  if (rc < 0) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_DATA   yLOG_exit    (__FUNCTION__);
+   return 0;
 }
 
 char
-WAVE_force              (tWAVE **a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc)
+WAVE_results            (tWAVE *x_wave, uchar a_resu, int a_cond, int a_test, int a_pass, int a_fail, int a_badd, int a_othr)
 {
-   return WAVE__new (a_new, 'y', a_wave, a_stage, a_unit, a_scrp, a_desc);
+   x_wave->resu = a_resu;
+   x_wave->cond = a_cond;
+   x_wave->test = a_test;
+   x_wave->pass = a_pass;
+   x_wave->fail = a_fail;
+   x_wave->badd = a_badd;
+   x_wave->othr = a_othr;
+   return 0;
 }
 
 char
@@ -328,7 +348,7 @@ WAVE_by_index            (tWAVE **a_cur, int n)
    *a_cur = NULL;
    /*---(defense)------------------------*/
    DEBUG_DATA   yLOG_sint    (n);
-   --rce;  if (n < 0 || n >= g_count) {
+   --rce;  if (n < 0 || n >= my.scrps) {
       DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
       return rce;
    }
@@ -422,7 +442,7 @@ WAVE_by_name             (tWAVE **a_cur, char *a_name)
    /*---(walk)---------------------------*/
    x_cur = g_head;
    while (x_cur != NULL) {
-      if (strcmp (a_name, x_cur->key) == 0) {
+      if (x_cur->key != NULL && strcmp (a_name, x_cur->key) == 0) {
          DEBUG_DATA   yLOG_snote   ("FOUND");
          *a_cur = x_cur;
          DEBUG_DATA   yLOG_sexit   (__FUNCTION__);
@@ -458,6 +478,7 @@ WAVE_parse              (char *a_recd, char a_call)
    char       *q           = "";
    char       *r           = NULL;
    char        t           [LEN_RECD]  = "";
+   tWAVE      *x_wave      = NULL;
    /*---(header)-------------------------*/
    DEBUG_ENVI   yLOG_enter   (__FUNCTION__);
    /*---(defaults)-----------------------*/
@@ -522,7 +543,10 @@ WAVE_parse              (char *a_recd, char a_call)
    /*---(call new)-----------------------*/
    DEBUG_ENVI   yLOG_value   ("c"         , c);
    DEBUG_ENVI   yLOG_char    ("a_call"    , a_call);
-   if (a_call == 'y')  WAVE_new (NULL, s_wave, s_stage, s_unit, s_scrp, s_desc);
+   if (a_call == 'y') {
+      WAVE_new      (&x_wave);
+      WAVE_populate (x_wave, s_wave, s_stage, s_unit, s_scrp, s_desc);
+   }
    /*---(complete)-----------------------*/
    DEBUG_ENVI   yLOG_exit    (__FUNCTION__);
    return c;
@@ -576,6 +600,8 @@ WAVE_read               (char *a_name, char a_call)
       DEBUG_ENVI   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(update globals)-----------------*/
+   ++my.units;
    /*---(complete)-----------------------*/
    DEBUG_ENVI   yLOG_exit    (__FUNCTION__);
    return c;
@@ -636,6 +662,8 @@ WAVE_inventory          (char *a_path, char a_call)
    /*---(sort)---------------------------*/
    WAVE_gnome ();
    /*> rc = ySORT_troll (YSORT_NONE, YSORT_ASCEND, &(a_parent->c_head), &(a_parent->c_tail));   <*/
+   /*---(update globals)-----------------*/
+   ++my.projs;
    /*---(complete)-----------------------*/
    DEBUG_ENVI   yLOG_exit    (__FUNCTION__);
    return c;
@@ -797,7 +825,7 @@ WAVE_gnome              (void)
       p = p->s_prev;
       /*---(next)------------------------*/
    }
-   DEBUG_SORT   yLOG_value   ("size"       , g_count);
+   DEBUG_SORT   yLOG_value   ("size"       , my.scrps);
    DEBUG_SORT   yLOG_value   ("compares"   , s_comps);
    DEBUG_SORT   yLOG_value   ("teleports"  , s_teles);
    DEBUG_SORT   yLOG_value   ("swaps"      , s_swaps);
@@ -820,8 +848,8 @@ WAVE__unit              (char *a_question, int n)
    char        rce         =  -10;
    int         rc          =    0;
    int         c           =    0;
-   char        s           [LEN_DESC]  = "";
-   char        t           [LEN_HUND]  = "";
+   char        s           [LEN_DESC]  = " -[]";
+   char        t           [LEN_HUND]  = " -[]";
    tWAVE      *x_cur       = NULL;
    /*---(prepare)------------------------*/
    strlcpy  (my.unit_answer, "WAVE             : question not understood", LEN_RECD);
@@ -835,10 +863,10 @@ WAVE__unit              (char *a_question, int n)
    else if (strcmp (a_question, "entry"         )  == 0) {
       WAVE_by_index (&x_cur, n);
       if (x_cur == NULL) {
-         snprintf (my.unit_answer, LEN_RECD, "WAVE entry  (%2d) : -  -   -[]                      --   -[]", n);
+         snprintf (my.unit_answer, LEN_RECD, "WAVE entry  (%2d) : -  -   -[]                       -   -[]", n);
       } else {
-         sprintf (s, "%2d[%.20s]", strlen (x_cur->unit), x_cur->unit);
-         sprintf (t, "%2d[%.40s]", strlen (x_cur->desc), x_cur->desc);
+         if (x_cur->unit != NULL)  sprintf (s, "%2d[%.20s]", strlen (x_cur->unit), x_cur->unit);
+         if (x_cur->desc != NULL)  sprintf (t, "%2d[%.40s]", strlen (x_cur->desc), x_cur->desc);
          snprintf (my.unit_answer, LEN_RECD, "WAVE entry  (%2d) : %c  %d  %-24.24s  %2d  %s",
                n, x_cur->wave, x_cur->stage, s, x_cur->scrp, t);
       }

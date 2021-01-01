@@ -16,7 +16,7 @@
 
 #define     P_ONELINE   P_NAMESAKE " " P_SUBJECT
 
-#define     P_BASENAME  ""
+#define     P_BASENAME  "ouroboros"
 #define     P_FULLPATH  ""
 #define     P_SUFFIX    ""
 #define     P_CONTENT   ""
@@ -31,8 +31,8 @@
 
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.1- build framework"
-#define     P_VERNUM    "0.1d"
-#define     P_VERTXT    "TEST run and check basic code and unit testing done"
+#define     P_VERNUM    "0.1e"
+#define     P_VERTXT    "database writes and reads now, basic unit testing in place"
 
 
 /*
@@ -54,6 +54,12 @@
  *
  *  central reporting on code readiness
  *
+ *
+ * questions..
+ *    -- keep a database?
+ *    -- store program version?
+ *    -- give scripts an enduring ID?
+ *    -- keep old test results?
  *
  *
  */
@@ -80,45 +86,66 @@
 typedef struct dirent    tDIRENT;
 typedef struct FILE      tFILE;
 
+
+
+#define     F_DB          "/var/lib/ouroboros/ouroboros.db"
+
 typedef     struct cGLOBALS     tGLOBALS;
 struct cGLOBALS
 {
-   /*---(general)---------------*/
+   /*---(general)--------------*/
    char        version     [LEN_FULL];      /* program version info           */
    char        unit_answer [LEN_RECD];      /* response from unit testing     */
    char        path        [LEN_PATH];      /* base directory                 */
    char        wave_min;
    char        wave_max;
-   /*---(done)------------------*/
-};
-extern      tGLOBALS    my;
-
-
-extern char      *g_greek;
-
-
-typedef struct cWAVE  tWAVE;
-struct cWAVE {
-   uchar       wave;
-   uchar       stage;
-   uchar      *path;
-   uchar      *unit;
-   uchar       scrp;
-   uchar      *desc;
-   uchar      *key;
-   uchar       resu;
-   int         cond;
-   int         test;
+   char        n_db        [LEN_PATH];      /* database name                  */
+   FILE       *f_db;                        /* database file pointer          */
+   /*---(statistics)-----------*/
+   int         projs;
+   int         units;
+   int         scrps;
+   int         conds;
+   int         steps;
+   /*---(results)--------------*/
+   int         ready;
    int         pass;
    int         fail;
    int         badd;
    int         othr;
+   /*---(done)-----------------*/
+};
+extern      tGLOBALS    my;
+
+
+
+typedef struct cWAVE  tWAVE;
+struct cWAVE {
+   /*---(basic)----------------*/
+   uchar       wave;
+   uchar       stage;
+   uchar       path        [LEN_PATH];
+   uchar       unit        [LEN_TITLE];
+   uchar       scrp;
+   uchar       desc        [LEN_DESC];
+   uchar       key         [LEN_HUND];
+   /*---(statistics)-----------*/
+   int         cond;
+   int         test;
+   /*---(results)--------------*/
+   char        ready;
+   uchar       resu;
+   int         pass;
+   int         fail;
+   int         badd;
+   int         othr;
+   /*---(links)----------------*/
    tWAVE      *s_next;
    tWAVE      *s_prev;
+   /*---(done)-----------------*/
 };
 extern tWAVE     *g_head;
 extern tWAVE     *g_tail;
-extern int        g_count;
 extern int        g_curr;
 
 
@@ -149,8 +176,10 @@ char        WAVE__verify            (char a_wave, char a_stage, char *a_unit, ch
 char        WAVE__hook              (tWAVE *a_new);
 char        WAVE__unhook            (tWAVE *a_old);
 char        WAVE__populate          (tWAVE *a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc, char *a_key);
-char        WAVE_new                (tWAVE **a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc);
-char        WAVE_force              (tWAVE **a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc);
+char        WAVE_populate           (tWAVE *a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc);
+char        WAVE_results            (tWAVE *x_wave, uchar a_resu, int a_cond, int a_test, int a_pass, int a_fail, int a_badd, int a_othr);
+char        WAVE_new                (tWAVE **a_new);
+char        WAVE_force              (tWAVE **a_new);
 char        WAVE_free               (tWAVE **a_old);
 char        WAVE_purge              (void);
 char        WAVE_by_index           (tWAVE **a_cur, int n);
@@ -174,6 +203,13 @@ char        RPTG_heading            (void);
 char        TEST_result             (tWAVE *a_cur);
 char        TEST_run                (tWAVE *a_cur);
 char*       TEST__unit              (char *a_question, int n);
+
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+char        DB__open                (char a_mode, int *a_projs, int *a_units, int *a_scrps, int *a_conds, int *a_steps);
+char        DB__close               (void);
+char*       DB__unit                (char *a_question, int n);
+
+
 
 #endif
 /*============================[[ end-of-code ]]===============================*/
