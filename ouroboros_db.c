@@ -163,7 +163,7 @@ DB_write              (void)
    }
    DEBUG_INPT   yLOG_value   ("my.scrps"  , my.scrps);
    /*---(prepare)------------------------*/
-   x_curr = g_head;
+   x_curr = s_head;
    /*---(walk projects)------------------*/
    while (x_curr != NULL) {
       /*---(write)-----------------------*/

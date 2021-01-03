@@ -31,8 +31,8 @@
 
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.1- build framework"
-#define     P_VERNUM    "0.1e"
-#define     P_VERTXT    "database writes and reads now, basic unit testing in place"
+#define     P_VERNUM    "0.1f"
+#define     P_VERTXT    "gnome sort in ySORT and working for script and project orders"
 
 
 /*
@@ -81,6 +81,7 @@
 #include    <yLOG.h>         /* CUSTOM : heatherly program logging            */
 #include    <ySTR.h>         /* CUSTOM : heatherly safer string handling      */
 #include    <yURG.h>         /* CUSTOM : heatherly urgent processing          */
+#include    <ySORT.h>        /* CUSTOM : heatherly sorting library            */
 #include    <yCOLOR_solo.h>  /* CUSTOM : heatherly colorization library       */
 
 typedef struct dirent    tDIRENT;
@@ -97,6 +98,7 @@ struct cGLOBALS
    char        version     [LEN_FULL];      /* program version info           */
    char        unit_answer [LEN_RECD];      /* response from unit testing     */
    char        path        [LEN_PATH];      /* base directory                 */
+   char        proj        [LEN_LABEL];     /* project name                   */
    char        wave_min;
    char        wave_max;
    char        n_db        [LEN_PATH];      /* database name                  */
@@ -125,10 +127,10 @@ struct cWAVE {
    uchar       wave;
    uchar       stage;
    uchar       path        [LEN_PATH];
+   uchar       proj        [LEN_LABEL];
    uchar       unit        [LEN_TITLE];
    uchar       scrp;
    uchar       desc        [LEN_DESC];
-   uchar       key         [LEN_HUND];
    /*---(statistics)-----------*/
    int         cond;
    int         test;
@@ -139,14 +141,22 @@ struct cWAVE {
    int         fail;
    int         badd;
    int         othr;
-   /*---(links)----------------*/
-   tWAVE      *s_next;
+   /*---(project links)--------*/
+   uchar       sort        [LEN_HUND];
+   tWAVE      *p_prev;
+   tWAVE      *p_next;
+   /*---(script links)---------*/
+   uchar       key         [LEN_HUND];
    tWAVE      *s_prev;
+   tWAVE      *s_next;
    /*---(done)-----------------*/
 };
-extern tWAVE     *g_head;
-extern tWAVE     *g_tail;
-extern int        g_curr;
+
+extern tWAVE     *p_head;
+extern tWAVE     *p_tail;
+
+extern tWAVE     *s_head;
+extern tWAVE     *s_tail;
 
 
 
@@ -171,26 +181,41 @@ char        PROG__unit_end          (void);
 
 
 
+/*---(support)-----------------*/
 char        WAVE__wipe              (tWAVE *a_dst, char a_new);
 char        WAVE__verify            (char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc, char *a_key);
-char        WAVE__hook              (tWAVE *a_new);
-char        WAVE__unhook            (tWAVE *a_old);
+char        WAVE__phook             (tWAVE *a_ref, tWAVE *a_new);
+char        WAVE__shook             (tWAVE *a_ref, tWAVE *a_new);
+char        WAVE__punhook           (tWAVE *a_old);
+char        WAVE__sunhook           (tWAVE *a_old);
 char        WAVE__populate          (tWAVE *a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc, char *a_key);
-char        WAVE_populate           (tWAVE *a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc);
-char        WAVE_results            (tWAVE *x_wave, uchar a_resu, int a_cond, int a_test, int a_pass, int a_fail, int a_badd, int a_othr);
+/*---(memory)------------------*/
 char        WAVE_new                (tWAVE **a_new);
 char        WAVE_force              (tWAVE **a_new);
 char        WAVE_free               (tWAVE **a_old);
 char        WAVE_purge              (void);
+char        WAVE_purge_by_unit      (char *a_unit);
+char        WAVE_purge_by_path      (char *a_path);
+/*---(data)--------------------*/
+char        WAVE_populate           (tWAVE *a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc);
+char        WAVE_results            (tWAVE *x_wave, uchar a_resu, int a_cond, int a_test, int a_pass, int a_fail, int a_badd, int a_othr);
+/*---(search)------------------*/
 char        WAVE_by_index           (tWAVE **a_cur, int n);
+char        PROJ_by_index           (tWAVE **a_cur, int n);
 char        WAVE_by_cursor          (tWAVE **a_cur, char a_move);
-char        WAVE_by_name            (tWAVE **a_cur, char *a_name);
+char        PROJ_by_cursor          (tWAVE **a_cur, char a_move);
+char        WAVE_by_sortkey         (tWAVE **a_cur, char *a_name);
+char        PROJ_by_sortkey         (tWAVE **a_cur, char *a_name);
+/*---(import)------------------*/
 char        WAVE_parse              (char *a_recd, char a_call);
 char        WAVE_read               (char *a_name, char a_call);
 char        WAVE_inventory          (char *a_path, char a_call);
 char        WAVE_here               (void);
+/*---(sort)--------------------*/
 char        WAVE_swap               (tWAVE *a_one, tWAVE *a_two);
 char        WAVE_gnome              (void);
+char        WAVE_gnome_by_script    (void);
+/*---(unittest)----------------*/
 char*       WAVE__unit              (char *a_question, int n);
 
 

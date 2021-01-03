@@ -59,18 +59,20 @@ RPTG_lines               (void)
    char        rc          =    0;
    int         i           = 0;
    int         c           =    0;
+   tWAVE      *x_prv       = NULL;
    tWAVE      *x_cur       = NULL;
    char       *p           = NULL;
    int         a           =    0;
    rc = WAVE_by_cursor (&x_cur, '[');
    while (rc >= 0 && x_cur != NULL) {
-      if (c % 5 == 0)  printf ("\n");
+      if (x_prv != NULL && strcmp (x_prv->unit, x_cur->unit) != 0)  printf ("\n");
       ++c;
       printf ("%-20.20s %2d %c %d   ", x_cur->unit, x_cur->scrp, x_cur->wave, x_cur->stage);
       p = strchr (LTRS_GREEK, x_cur->wave);
       a = g_places [p - LTRS_GREEK] + x_cur->stage;
       for (i = 0; i < a; ++i)  printf (" ");
       printf ("Ï\n");
+      x_prv = x_cur;
       rc = WAVE_by_cursor (&x_cur, '>');
    }
    return 0;
