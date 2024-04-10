@@ -28,10 +28,10 @@ DB__open                (char a_mode, int *a_projs, int *a_units, int *a_scrps, 
    DEBUG_FILE   yLOG_char    ("a_mode"    , a_mode);
    --rce;  switch (a_mode) {
    case 'r' :
-      strlcpy (x_mode, "rb", LEN_TERSE);
+      ystrlcpy (x_mode, "rb", LEN_TERSE);
       break;
    case 'w' :
-      strlcpy (x_mode, "wb", LEN_TERSE);
+      ystrlcpy (x_mode, "wb", LEN_TERSE);
       break;
    default  :
       DEBUG_FILE   yLOG_exitr   (__FUNCTION__, rce);
@@ -155,6 +155,7 @@ DB_write              (void)
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(open)---------------------------*/
+   /*> printf ("---write--------------------------------------------------\n");       <*/
    rc = DB__open ('w', &my.projs, &my.units, &my.scrps, &my.conds, &my.steps);
    DEBUG_OUTP   yLOG_value   ("open"      , rc);
    --rce;  if (rc < 0) {
@@ -163,15 +164,16 @@ DB_write              (void)
    }
    DEBUG_INPT   yLOG_value   ("my.scrps"  , my.scrps);
    /*---(prepare)------------------------*/
-   x_curr = s_head;
+   PROJ_by_cursor (&x_curr, 'º');
    /*---(walk projects)------------------*/
    while (x_curr != NULL) {
       /*---(write)-----------------------*/
-      DEBUG_OUTP   yLOG_info    ("x_curr"    , x_curr->desc);
+      /*> printf ("%s\n", x_curr->sort);                                              <*/
+      DEBUG_OUTP   yLOG_info    ("x_curr"    , x_curr->w_desc);
       fwrite (x_curr  , sizeof (tWAVE), 1, my.f_db);
       ++c;
       /*---(next)------------------------*/
-      x_curr = x_curr->s_next;
+      PROJ_by_cursor (&x_curr, 'Õ');
    }
    /*---(close)--------------------------*/
    rc = DB__close ();
@@ -202,14 +204,17 @@ DB_read               (void)
    int         i           =    0;
    tWAVE      *x_wave      = NULL;
    int         c           =    0;
-   tWAVE      *x_next      = NULL;
-   tWAVE      *x_prev      = NULL;
+   tWAVE      *s_next      = NULL;
+   tWAVE      *s_prev      = NULL;
+   tWAVE      *p_next      = NULL;
+   tWAVE      *p_prev      = NULL;
    int         x_scrps     =    0;
    int         x_conds     =    0;
    int         x_steps     =    0;
    /*---(header)-------------------------*/
    DEBUG_INPT   yLOG_enter   (__FUNCTION__);
    /*---(open)---------------------------*/
+   /*> printf ("---read---------------------------------------------------\n");       <*/
    rc = DB__open ('r', &my.projs, &my.units, &x_scrps, &x_conds, &x_steps);
    DEBUG_OUTP   yLOG_value   ("open"      , rc);
    --rce;  if (rc < 0) {
@@ -226,8 +231,10 @@ DB_read               (void)
          DEBUG_INPT   yLOG_exitr   (__FUNCTION__, rce);
          return rce;
       }
-      x_next = x_wave->s_next;
-      x_prev = x_wave->s_prev;
+      s_next = x_wave->s_next;
+      s_prev = x_wave->s_prev;
+      p_next = x_wave->p_next;
+      p_prev = x_wave->p_prev;
       /*---(read)---------------------------*/
       rc = fread  (x_wave, sizeof (tWAVE), 1, my.f_db);
       DEBUG_INPT   yLOG_value   ("fread"     , rc);
@@ -235,19 +242,22 @@ DB_read               (void)
          DEBUG_INPT   yLOG_exitr   (__FUNCTION__, rce);
          return rce;
       }
-      DEBUG_INPT   yLOG_info    ("desc"      , x_wave->desc);
+      DEBUG_INPT   yLOG_info    ("desc"      , x_wave->w_desc);
       /*---(fix pointers)-------------------*/
-      x_wave->s_next = x_next;
-      x_wave->s_prev = x_prev;
+      x_wave->s_next = s_next;
+      x_wave->s_prev = s_prev;
+      x_wave->p_next = p_next;
+      x_wave->p_prev = p_prev;
       /*---(totals)-------------------------*/
-      my.conds += x_wave->cond;
-      my.steps += x_wave->test;
-      if (x_wave->ready == 'y')  ++my.ready;
-      my.pass  += x_wave->pass;
-      my.fail  += x_wave->fail;
-      my.badd  += x_wave->badd;
-      my.othr  += x_wave->othr;
+      my.conds += x_wave->w_ncond;
+      my.steps += x_wave->w_nstep;
+      if (x_wave->w_ready == 'y')  ++my.ready;
+      my.pass  += x_wave->w_npass;
+      my.fail  += x_wave->w_nfail;
+      my.badd  += x_wave->w_nbadd;
+      my.othr  += x_wave->w_nvoid;
       /*---(counter)------------------------*/
+      /*> printf ("%s\n", x_wave->sort);                                              <*/
       ++c;
       /*---(done)---------------------------*/
    }
@@ -265,6 +275,8 @@ DB_read               (void)
       DEBUG_INPT   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(sort it)------------------------*/
+   WAVE_gnome ();
    /*---(complete)-----------------------*/
    DEBUG_INPT   yLOG_exit    (__FUNCTION__);
    return c;
@@ -285,7 +297,7 @@ DB__unit                (char *a_question, int n)
    int         rc          =    0;
    tWAVE      *x_cur       = NULL;
    /*---(prepare)------------------------*/
-   strlcpy  (my.unit_answer, "DB               : question not understood", LEN_RECD);
+   ystrlcpy  (my.unit_answer, "DB               : question not understood", LEN_RECD);
    /*---(crontab name)-------------------*/
    if      (strcmp (a_question, "stats"         )  == 0) {
       snprintf (my.unit_answer, LEN_RECD, "DB stats         : %5dp, %5du, %5ds, %5dc, %5ds    %5dr, %5dp, %5df, %5db, %5do",

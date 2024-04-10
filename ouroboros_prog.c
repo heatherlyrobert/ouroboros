@@ -41,9 +41,10 @@ char         /*--> shutdown program ----------------------[ ------ [ ------ ]-*/
 PROG__init          (void)
 {
    /*---(header)-------------------------*/
-   DEBUG_TOPS   yLOG_enter   (__FUNCTION__);
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(files)--------------------------*/
-   strlcpy (my.n_db, "", LEN_PATH);
+   my.run_mode = RUN_UPDATE;
+   ystrlcpy (my.n_db, "", LEN_PATH);
    my.f_db = NULL;
    my.projs = 0;
    my.units = 0;
@@ -55,12 +56,13 @@ PROG__init          (void)
    my.fail  = 0;
    my.badd  = 0;
    my.othr  = 0;
+   WAVE_init ();
    /*---(complete)-----------------------*/
-   DEBUG_TOPS   yLOG_exit    (__FUNCTION__);
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
-#define  TWOARG  if (++i >= a_argc)  yURG_error ("FATAL, %s argument requires an additional string", a, --rc); else 
+#define  TWOARG  if (++i >= a_argc)  yURG_err ("FATAL, %s argument requires an additional string", a, --rc); else 
 
 char               /* PURPOSE : process the command line arguments            */
 PROG__args          (int a_argc, char *a_argv[])
@@ -73,7 +75,7 @@ PROG__args          (int a_argc, char *a_argv[])
    int         x_total     =    0;
    int         x_args      =    0;
    /*---(begin)--------------------------*/
-   DEBUG_TOPS  yLOG_enter   (__FUNCTION__);
+   DEBUG_PROG  yLOG_enter   (__FUNCTION__);
    /*---(process)------------------------*/
    /*> printf ("testing %d\n", a_argc);                                               <*/
    for (i = 1; i < a_argc; ++i) {
@@ -83,20 +85,23 @@ PROG__args          (int a_argc, char *a_argv[])
       if (a[0] == '@')  continue;
       DEBUG_ARGS  yLOG_info    ("cli arg", a);
       ++x_args;
-      if      (strcmp (a, "--db"        ) == 0)  TWOARG rc = strlfile  ("--db", my.n_db, a_argv [i], "db", LEN_PATH);
-      /*> if      (strncmp (a, "--create"     , 10) == 0)    my.run_type = G_RUN_CREATE;                                                                                    <* 
-       *> else if (strncmp (a, "--compile"    , 10) == 0)    my.run_type = G_RUN_CREATE;                                                                                    <* 
-       *> else if (strncmp (a, "--debug"      , 10) == 0)    my.run_type = G_RUN_DEBUG;                                                                                     <* 
-       *> else if (strncmp (a, "--convert"    , 10) == 0)    my.run_type = G_RUN_UPDATE;                                                                                    <* 
-       *> else if (strncmp (a, "--update"     , 10) == 0)  { my.run_type = G_RUN_UPDATE;  my.replace = G_RUN_REPLACE; }                                                     <* 
-       *> else if (strncmp (a, "-"            ,  1) == 0)  { printf ("FATAL, arg <<%s>> not understood\n", a); DEBUG_TOPS  yLOG_exitr  (__FUNCTION__, rce); return rce; }   <* 
-       *> else {                                                                                                                                                            <* 
-       *>    rc = PROG_file (a);                                                                                                                                            <* 
-       *>    if (rc < 0) {                                                                                                                                                  <* 
-       *>       DEBUG_TOPS  yLOG_exitr  (__FUNCTION__, rce);                                                                                                                <* 
-       *>    }                                                                                                                                                              <* 
-       *> }                                                                                                                                                                 <*/
+      /*---(configuration)---------------*/
+      if      (strcmp (a, "--db"        ) == 0)  TWOARG rc = ystrlfile  ("--db", my.n_db, a_argv [i], "db", LEN_PATH);
+      /*---(major actions)---------------*/
+      else if (strcmp (a, "--here"      ) == 0)  my.run_mode = RUN_HERE;
+      else if (strcmp (a, "--purge"     ) == 0)  my.run_mode = RUN_PURGE;
+      else if (strcmp (a, "--create"    ) == 0)  my.run_mode = RUN_CREATE;
+      else if (strcmp (a, "--update"    ) == 0)  my.run_mode = RUN_UPDATE;
+      else if (strcmp (a, "--remove"    ) == 0)  my.run_mode = RUN_REMOVE;
+      /*---(reporting)-------------------*/
+      else if (strcmp (a, "--dump"      ) == 0)  my.run_mode = RUN_DUMP;
+      else if (strcmp (a, "--list"      ) == 0)  my.run_mode = RUN_LIST;
+      else if (strcmp (a, "--seq"       ) == 0)  my.run_mode = RUN_SEQ;
+      /*---(unknown)---------------------*/
+      else                                       rc = rce;
+      /*---(fall-out)--------------------*/
       if (rc < 0)  break;
+      /*---(done)------------------------*/
    }
    DEBUG_ARGS  yLOG_value  ("entries"   , x_total);
    DEBUG_ARGS  yLOG_value  ("arguments" , x_args);
@@ -104,18 +109,22 @@ PROG__args          (int a_argc, char *a_argv[])
       DEBUG_ARGS  yLOG_note   ("no arguments identified");
    }
    /*---(complete)-----------------------*/
-   DEBUG_TOPS  yLOG_exit  (__FUNCTION__);
+   DEBUG_PROG  yLOG_exit  (__FUNCTION__);
    return rc;
 }
 
 char
 PROG__begin         (void)
 {
-   DEBUG_TOPS   yLOG_enter   (__FUNCTION__);
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(file names)---------------------*/
-   if (strcmp (my.n_db, "") == 0)  strlcpy (my.n_db, F_DB, LEN_PATH);
+   if (strcmp (my.n_db, "") == 0)  ystrlcpy (my.n_db, F_DB, LEN_PATH);
+   /*---(prepare)------------------------*/
+   RPTG_clear ();
+   my.wave_min = 'è';
+   my.wave_max = 'è';
    /*---(complete)-----------------------*/
-   DEBUG_TOPS   yLOG_exit    (__FUNCTION__);
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -137,10 +146,49 @@ PROG_startup       (int a_argc, char *a_argv[])
 char
 PROG_final         (void)
 {
-   DEBUG_TOPS   yLOG_enter   (__FUNCTION__);
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(file names)---------------------*/
    /*---(complete)-----------------------*/
-   DEBUG_TOPS   yLOG_exit    (__FUNCTION__);
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
+
+/*====================------------------------------------====================*/
+/*===----                      runtime driver                          ----===*/
+/*====================------------------------------------====================*/
+static void  o___RUNTIME_________o () { return; }
+
+char
+PROG_driver             (void)
+{
+   switch (my.run_mode) {
+   case RUN_HERE   :
+      WAVE_here     ();
+      break;
+   case RUN_PURGE  :
+      DB_write      ();
+      break;
+   case RUN_CREATE :
+      WAVE_here     ();
+      DB_write      ();
+      break;
+   case RUN_UPDATE :
+      DB_read       ();
+      WAVE_here     ();
+      DB_write      ();
+      break;
+   case RUN_SEQ    :
+      DB_read       ();
+      RPTG_heading  ();
+      RPTG_lines    ();
+      break;
+   case RUN_DUMP   :
+      DB_read       ();
+      RPTG_dump     ();
+      break;
+   }
    return 0;
 }
 
@@ -154,9 +202,9 @@ static void  o___WRAPUP__________o () { return; }
 char                /* PURPOSE : shutdown program and free memory ------------*/
 PROG__end           (void)
 {
-   DEBUG_TOPS   yLOG_enter   (__FUNCTION__);
-   WAVE_purge ();
-   DEBUG_TOPS   yLOG_exit    (__FUNCTION__);
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   WAVE_wrap ();
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -166,11 +214,11 @@ PROG_shutdown      (void)
    /*---(locals)-----------+-----------+-*/
    char        rc          = 0;
    /*---(header)-------------------------*/
-   DEBUG_TOPS   yLOG_enter   (__FUNCTION__);
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(normal sequence)----------------*/
    if (rc >= 0)  rc = PROG__end  ();
    /*---(complete)-----------------------*/
-   DEBUG_TOPS   yLOG_exit    (__FUNCTION__);
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    yLOGS_end     ();
    return rc;
 }
@@ -200,8 +248,8 @@ PROG__unit_loud    (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
-   int         x_argc      = 2;
-   char       *x_argv [2]  = { "ouroboros_unit", "@@kitchen" };
+   int         x_argc      = 3;
+   char       *x_argv [3]  = { "ouroboros_unit", "@@kitchen" , "@@yparse"  };
    /*---(run)----------------------------*/
    rc = PROG_startup (x_argc, x_argv);
    /*---(complete)-----------------------*/

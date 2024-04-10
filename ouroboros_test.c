@@ -17,7 +17,7 @@ TEST_result             (tWAVE *a_cur)
    char       *q           = "=";
    char       *r           = NULL;
    /*---(prepare)------------------------*/
-   sprintf (x_urun, "%s/%s.urun", a_cur->path, a_cur->unit);
+   /*> sprintf (x_urun, "%s/%s.urun", a_cur->w_path, a_cur->w_unit);                  <*/
    strncpy (x_recd, "", LEN_RECD);
    /*---(open file)----------------------*/
    f = fopen (x_urun, "rt");
@@ -39,36 +39,36 @@ TEST_result             (tWAVE *a_cur)
    p = strtok_r (NULL  , q, &r);
    --rce;  if (p == NULL)  return rce;
    p [5] = '\0';
-   a_cur->cond = atoi (p);
+   a_cur->w_ncond = atoi (p);
    /*---(test)---------------------------*/
    p = strtok_r (NULL  , q, &r);
    --rce;  if (p == NULL)  return rce;
    p [5] = '\0';
-   a_cur->test = atoi (p);
+   a_cur->w_nstep = atoi (p);
    /*---(pass)---------------------------*/
    p = strtok_r (NULL  , q, &r);
    --rce;  if (p == NULL)  return rce;
    p [5] = '\0';
-   a_cur->pass = atoi (p);
+   a_cur->w_npass = atoi (p);
    /*---(fail)---------------------------*/
    p = strtok_r (NULL  , q, &r);
    --rce;  if (p == NULL)  return rce;
    p [5] = '\0';
-   a_cur->fail = atoi (p);
+   a_cur->w_nfail = atoi (p);
    /*---(badd)---------------------------*/
    p = strtok_r (NULL  , q, &r);
    --rce;  if (p == NULL)  return rce;
    p [5] = '\0';
-   a_cur->badd = atoi (p);
+   a_cur->w_nbadd = atoi (p);
    /*---(othr)---------------------------*/
    p = strtok_r (NULL  , q, &r);
    --rce;  if (p == NULL)  return rce;
    p [5] = '\0';
-   a_cur->othr = atoi (p);
+   a_cur->w_nvoid = atoi (p);
    /*---(result)-------------------------*/
-   if      (a_cur->fail >  0)   a_cur->resu = YUNIT_FAIL;
-   else if (a_cur->badd >  0)   a_cur->resu = YUNIT_WARN;
-   else                         a_cur->resu = YUNIT_SUCC;
+   if      (a_cur->w_nfail >  0)   a_cur->w_result = YUNIT_FAIL;
+   else if (a_cur->w_nbadd >  0)   a_cur->w_result = YUNIT_WARN;
+   else                            a_cur->w_result = YUNIT_SUCC;
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -81,13 +81,13 @@ TEST_run                (tWAVE *a_cur)
    char        x_urun      [LEN_RECD]  = "";
    /*---(header)-------------------------*/
    DEBUG_DATA   yLOG_enter   (__FUNCTION__);
-   sprintf (x_cmd, "%s/%s_unit %02d --test", a_cur->path, a_cur->unit, a_cur->scrp);
+   /*> sprintf (x_cmd, "%s/%s_unit %02d --test", a_cur->w_path, a_cur->w_unit, a_cur->w_scrp);   <*/
    DEBUG_DATA   yLOG_info    ("x_cmd"     , x_cmd);
    rc = system  (x_cmd);
    DEBUG_DATA   yLOG_value   ("rc"        , rc);
-   if      (rc == -1  )   a_cur->resu = YUNIT_NORUN;
-   else if (rc ==  127)   a_cur->resu = YUNIT_NORUN;
-   else if (rc <   0  )   a_cur->resu = YUNIT_FAIL;
+   if      (rc == -1  )   a_cur->w_result = YUNIT_NORUN;
+   else if (rc ==  127)   a_cur->w_result = YUNIT_NORUN;
+   else if (rc <   0  )   a_cur->w_result = YUNIT_FAIL;
    else {
       DEBUG_DATA   yLOG_note    ("run result checker");
       TEST_result (a_cur);
@@ -111,16 +111,16 @@ TEST__unit              (char *a_question, int n)
    int         rc          =    0;
    tWAVE      *x_cur       = NULL;
    /*---(prepare)------------------------*/
-   strlcpy  (my.unit_answer, "TEST             : question not understood", LEN_RECD);
+   ystrlcpy  (my.unit_answer, "TEST             : question not understood", LEN_RECD);
    /*---(crontab name)-------------------*/
    if      (strcmp (a_question, "urun"          )  == 0) {
-      WAVE_by_index (&x_cur, n);
+      WAVE_by_index (n, &x_cur);
       if (x_cur == NULL) {
          snprintf (my.unit_answer, LEN_RECD, "TEST urun   (%2d) : -     -c,     -t,     -p,     -f,     -w,     -b,     -v", n);
       } else {
          snprintf (my.unit_answer, LEN_RECD, "TEST urun   (%2d) : %-2d %4dc, %5dt, %5dp, %5df, %5db, %5dv",
-               n, x_cur->resu, x_cur->cond, x_cur->test,
-               x_cur->pass, x_cur->fail, x_cur->badd, x_cur->othr);
+               n, x_cur->w_result, x_cur->w_ncond, x_cur->w_nstep,
+               x_cur->w_npass, x_cur->w_nfail, x_cur->w_nbadd, x_cur->w_nvoid);
       }
    }
    /*---(complete)-----------------------*/
