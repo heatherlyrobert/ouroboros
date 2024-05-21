@@ -752,6 +752,7 @@ WAVE_inventory          (char *a_path)
       else if (strncmp (x_entry->d_name, "unit_daemon" , 11) == 0)     ;
       else if (strncmp (x_entry->d_name, "unit_badrc"  , 10) == 0)     ;
       /*---(filter extension)------------*/
+      else if (l >= 8 && strcmp  (x_entry->d_name, "Makefile"       ) == 0)  x_keep = 'M';
       else if (l >= 8 && strcmp  (x_entry->d_name + l - 7, "_unit.c") == 0)  ;
       else if (l >= 6 && strcmp  (x_entry->d_name + l - 5, ".wave"  ) == 0)  x_keep = 'w';
       else if (l >= 6 && strcmp  (x_entry->d_name + l - 5, ".unit"  ) == 0)  x_keep = 'u';

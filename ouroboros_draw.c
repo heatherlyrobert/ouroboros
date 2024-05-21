@@ -21,10 +21,12 @@ static struct {
    char        b_4th;
    char        b_4th_title [LEN_TITLE];
 } s_blocks [LEN_LABEL] = {
-   /*----- -block-  ---title------------- ---focus----------- -a- ---label------------ -a- ---label------------ -a- ---label------------ -a- ---label------------ */
-   { 'F' , "I"    , "FOUNDATION"         , "ySTR,yENV"       ,  1, "build∑base"       ,  4, "unit∑testing"     ,  6, "execution∑logging", 99, "core"              },
-   { '\0', ""     , "end"                , ""                , -1, ""                 , -1, ""                 , -1, ""                 , -1, ""                  },
+   /*----- -block-  ---title------------- ---focus----------- -a- ---label----------------- -a- ---label----------------- -a- ---label----------------- -a- ---label----------------- */
+   { 'F' , "I"    , "FOUNDATION"         , "ySTR,yENV"       ,  1, "build∑base"            ,  4, "unit∑testing∑framework",  6, "execution∑logging"     , 99, "core"                   },
+   { '\0', ""     , "end"                , ""                , -1, ""                      , -1, ""                      , -1, ""                      , -1, ""                       },
 };
+
+
 
 
 /*====================------------------------------------====================*/
@@ -142,8 +144,8 @@ DRAW_init               (char a_ornament, char a_style, char a_cols, char a_rows
       yASCII_print (my.x_min - 2 +  97, my.y_end - 1, "06", YASCII_CLEAR);
       yASCII_print (my.x_min - 2 + 112, my.y_end - 1, "07", YASCII_CLEAR);
       /*---(nodes)-----------------------*/
-      DRAW_node (0, 6, 'Ë');
-      DRAW_node (my.x_end - 5, 6, 'È');
+      yASCII_node (0, 6, 'Ë');
+      yASCII_node (my.x_end - 5, 6, 'È');
    }
    /*---(complete)-----------------------*/
    return 0;
@@ -268,17 +270,17 @@ DRAW_boxes         (char a_style)
    return 0;
 }
 
-char
-DRAW_node               (short x, short y, char a)
-{
-   char        s           [LEN_SHORT] = "";
-   yASCII_print (x, y    , "ÉÄÄÄÇ", YASCII_CLEAR);
-   yASCII_print (x, y + 1, "Å   Å", YASCII_CLEAR);
-   yASCII_print (x, y + 2, "ÑÄÄÄÖ", YASCII_CLEAR);
-   sprintf (s, "%c", a);
-   yASCII_print (x + 2, y + 1, s, YASCII_CLEAR);
-   return 0;
-}
+/*> char                                                                              <* 
+ *> DRAW_node               (short x, short y, char a)                                <* 
+ *> {                                                                                 <* 
+ *>    char        s           [LEN_SHORT] = "";                                      <* 
+ *>    yASCII_print (x, y    , "ÉÄÄÄÇ", YASCII_CLEAR);                                <* 
+ *>    yASCII_print (x, y + 1, "Å   Å", YASCII_CLEAR);                                <* 
+ *>    yASCII_print (x, y + 2, "ÑÄÄÄÖ", YASCII_CLEAR);                                <* 
+ *>    sprintf (s, "%c", a);                                                          <* 
+ *>    yASCII_print (x + 2, y + 1, s, YASCII_CLEAR);                                  <* 
+ *>    return 0;                                                                      <* 
+ *> }                                                                                 <*/
 
 char
 DRAW_box                (char a_col, char a_row, char a_name [LEN_TITLE], char a_npred, char a_nsucc)
@@ -560,6 +562,14 @@ GRAPH_dump_box_pretty   (int a_node)
    /*---(complete)-----------------------*/
    return 0;
 }
+
+
+
+
+/*====================------------------------------------====================*/
+/*===----                     line drawing version                     ----===*/
+/*====================------------------------------------====================*/
+static void  o__CONNECTOR________o () { return; }
 
 /*
  *    É≤≤≤Ü   á≤≤≤Ç        É≤≤âÄÄÄâ≤≤Ç
