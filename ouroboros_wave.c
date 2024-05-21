@@ -9,11 +9,27 @@
  *>                                                                                                                                                                                                                                                               <*/
 
 /*
- *  0) read in master.unit entries for stage/wave
+ * wave
+ *    0   within single object file (.o), can include external library calls
+ *    1   all level 0 complete and only requires wave 0 outside object
  *
- *  1) take in all *.wave files
- *  2) execute as requested
- *  3) report out
+ *
+ *
+ *
+ *   s    critical/frequent, but straight-forward, zero static/global data references
+ *   M    critical/frequent, dynamic memory (alloc/free)     (can't get wrong)
+ *   D    critical/frequent, input data parsing/filtering    (can't get wrong)
+ *
+ *
+ *   A    complex and require tight scrutiny
+ *   B    frequently used and so important
+ *   C    used, but less common
+ *   D    keepers, but limited use
+ *   S    security infrastructure related
+ *   o    old unit tests that need updating
+ *   z    deprecated, on the way out, put to sleep
+ *
+ *
  *
  *
  *
@@ -45,6 +61,11 @@ static   char        s_unit      [LEN_DESC]  = "";
 static   char        s_scrp      =    0;
 static   char        s_desc      [LEN_LONG]  = "";
 
+static int   G_nproj;
+static int   G_nunit, G_nscrp, G_ncond, G_nstep, G_est, G_npass, G_nfail, G_nbadd, G_nvoid, G_nmiss, G_act, G_PASS, G_FAIL, G_WARN, G_NONE;
+static int   P_nunit, P_nscrp, P_ncond, P_nstep, P_est, P_npass, P_nfail, P_nbadd, P_nvoid, P_nmiss, P_act, P_PASS, P_FAIL, P_WARN, P_NONE;
+static int   U_nunit, U_nscrp, U_ncond, U_nstep, U_est, U_npass, U_nfail, U_nbadd, U_nvoid, U_nmiss, U_act, U_PASS, U_FAIL, U_WARN, U_NONE;
+
 
 
 /*====================------------------------------------====================*/
@@ -59,8 +80,9 @@ WAVE__wipe              (tWAVE *a_dst, char a_new)
    DEBUG_DATA   yLOG_snote   ("wipe");
    /*---(project)--------------*/
    if (a_new == 'y') {
-      strcpy (a_dst->w_hint   , "··");
+      a_dst->w_verb      =  '·';
       a_dst->w_found     =  '·';
+      strcpy (a_dst->w_hint   , "··");
       strcpy (a_dst->w_proj   , "·");
    }
    /*---(unit)-----------------*/
@@ -70,6 +92,7 @@ WAVE__wipe              (tWAVE *a_dst, char a_new)
    /*---(script)---------------*/
    if (a_new == 'y') {
       a_dst->w_scrp      =    0;
+      a_dst->w_source    =  '·';
       strcpy (a_dst->w_desc   , "·");
       strcpy (a_dst->w_expe   , "·");
       a_dst->w_expect    =    0;
@@ -79,6 +102,7 @@ WAVE__wipe              (tWAVE *a_dst, char a_new)
    if (a_new == 'y') {
       a_dst->w_wave      =  '·';
       a_dst->w_stage     =  '·';
+      a_dst->w_rating    =  '·';
    }
    /*---(statistics)-----------*/
    if (a_new == 'y') {
@@ -97,6 +121,12 @@ WAVE__wipe              (tWAVE *a_dst, char a_new)
    a_dst->w_nfail     =    0;
    a_dst->w_nbadd     =    0;
    a_dst->w_nvoid     =    0;
+   a_dst->w_nmiss     =    0;
+   /*---(proj/unit only)-------*/
+   a_dst->w_pass      =  '·';
+   a_dst->w_fail      =  '·';
+   a_dst->w_warn      =  '·';
+   a_dst->w_none      =  '·';
    /*---(ysort)----------------*/
    if (a_new == 'y') {
       a_dst->w_unique[0] = '\0';
@@ -107,13 +137,14 @@ WAVE__wipe              (tWAVE *a_dst, char a_new)
 }
 
 char
-WAVE__key               (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char a_scrp, char r_key [LEN_LONG])
+WAVE__key               (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char a_scrp, char r_key [LEN_LONG], char *r_verb)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
    int         l           =    0;
    char        x_key       [LEN_LONG]  = "";
+   char        x_verb      =  '·';
    /*---(header)-------------------------*/
    DEBUG_DATA   yLOG_enter   (__FUNCTION__);
    /*---(default)------------------------*/
@@ -155,59 +186,23 @@ WAVE__key               (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char 
       return rce;
    }
    /*---(make key)-----------------------*/
-   if (a_scrp == 0)  sprintf (x_key, "%-20.20s %-30.30s   ", a_proj, a_unit);
-   else              sprintf (x_key, "%-20.20s %-30.30s %02d", a_proj, a_unit, a_scrp);
-   DEBUG_DATA   yLOG_info    ("x_key"     , x_key);
+   if (strcmp (a_unit, "") == 0 || strcmp (a_unit, "·") == 0) {
+      x_verb = 'p';
+      sprintf (x_key, "%-20.20s                                  "  , a_proj);
+   } else if (a_scrp == 0) {
+      x_verb = 'u'; 
+      sprintf (x_key, "%-20.20s %-30.30s   "  , a_proj, a_unit);
+   } else {
+      x_verb = 'w';
+      sprintf (x_key, "%-20.20s %-30.30s %02d", a_proj, a_unit, a_scrp);
+   }
+   DEBUG_DATA   yLOG_delim   ("x_key"     , x_key);
    /*---(save-back)----------------------*/
    if (r_key  != NULL)  ystrlcpy (r_key, x_key, LEN_LONG);
+   if (r_verb != NULL)  *r_verb = x_verb;
    /*---(complete)-----------------------*/
    DEBUG_DATA   yLOG_exit    (__FUNCTION__);
    return 1;
-}
-
-char
-WAVE__verify            (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char a_scrp, char a_desc [LEN_LONG], char a_expect [LEN_SHORT], char a_terse [LEN_LABEL], char a_wave, char a_stage, char *r_key)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   tWAVE      *x_old       = NULL;
-   /*---(header)-------------------------*/
-   DEBUG_DATA   yLOG_senter  (__FUNCTION__);
-   /*---(sequencing)---------------------*/
-   DEBUG_DATA   yLOG_schar   (a_wave);
-   --rce;  if (strchr ("·" YSTR_NUMBER, a_wave) == NULL) {
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_DATA   yLOG_schar   (a_stage);
-   --rce;  if (strchr ("·" YSTR_LOWER, a_stage) == NULL) {
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(defense)------------------------*/
-   DEBUG_DATA   yLOG_spoint  (a_unit);
-   --rce;  if (a_unit == NULL) {
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_DATA   yLOG_sint    (a_scrp);
-   --rce;  if (a_scrp < 1 || a_scrp > 99) {
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_DATA   yLOG_spoint  (a_desc);
-   --rce;  if (a_desc == NULL) {
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(check for existing)-------------*/
-   sprintf (r_key , "%c.%c.%-20.20s.%02d", a_wave, a_stage, a_unit, a_scrp);
-   WAVE_by_sortkey (&x_old, r_key);
-   --rce;  if (x_old != NULL) {
-      return rce;
-   }
-   /*---(complete)-----------------------*/
-   return 0;
 }
 
 
@@ -258,6 +253,7 @@ WAVE_purge_all          (void)
    DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_wave);
    while (rc >= 0 && x_wave != NULL) {
       rc = WAVE__free (&x_wave);
+      if (rc < 0)  break;
       rc = ySORT_by_cursor (B_WAVE, YDLST_HEAD, &x_wave);
       DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_wave);
    }
@@ -334,7 +330,7 @@ WAVE_wrap               (void)
 static void  o___MEMORY__________o () { return; }
 
 char
-WAVE__new               (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char a_scrp, char a_force, tWAVE **r_new)
+WAVE__new               (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char a_scrp, char a_gather, tWAVE **r_new)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -342,21 +338,18 @@ WAVE__new               (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char 
    char        x_key       [LEN_LONG]  = "";
    tWAVE      *x_new       = NULL;
    int         x_tries     =    0;
+   char        x_verb      =  '·';
    /*---(header)-------------------------*/
    DEBUG_DATA   yLOG_enter   (__FUNCTION__);
-   DEBUG_DATA   yLOG_char    ("a_force"   , a_force);
    /*---(default return)-----------------*/
    DEBUG_DATA   yLOG_point   ("r_new"     , r_new);
    --rce;  if (r_new != NULL)  {
       DEBUG_DATA   yLOG_point   ("*r_new"    , *r_new);
-      if (*r_new != NULL && a_force != 'y') {
-         DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-         return rce;
-      }
+      DEBUG_DATA   yLOG_note    ("warning, r_new had previous data");
       *r_new = NULL;
    }
    /*---(check values)-------------------*/
-   rc = WAVE__key (a_proj, a_unit, a_scrp, x_key);
+   rc = WAVE__key (a_proj, a_unit, a_scrp, x_key, &x_verb);
    DEBUG_DATA   yLOG_value   ("key"       , rc);
    --rce;  if (rc < 0) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
@@ -385,10 +378,12 @@ WAVE__new               (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char 
    /*---(wipe)---------------------------*/
    WAVE__wipe (x_new, 'y');
    /*---(populate base)------------------*/
+   x_new->w_verb = x_verb;
    ystrlcpy (x_new->w_proj  , a_proj, LEN_LABEL);
    ystrlcpy (x_new->w_unit  , a_unit, LEN_TITLE);
    x_new->w_scrp = a_scrp;
    ystrlcpy (x_new->w_unique, x_key , LEN_LONG);
+   if (a_gather == 'y')  x_new->w_found = 'y';
    /*---(hook tsae)----------------------*/
    rc = ySORT_hook (B_WAVE, x_new, x_new->w_unique, &(x_new->w_ysort));
    DEBUG_DATA   yLOG_value   ("hook"      , rc);
@@ -408,9 +403,6 @@ WAVE__new               (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char 
    DEBUG_DATA   yLOG_exit    (__FUNCTION__);
    return 0;
 }
-
-char WAVE_new      (tWAVE **a_new) { return WAVE__new (a_new, '-', NULL, NULL, 0); }
-char WAVE_force    (tWAVE **a_new) { return WAVE__new (a_new, 'y', NULL, NULL, 0); }
 
 char
 WAVE__free              (tWAVE **r_old)
@@ -456,10 +448,16 @@ WAVE__free              (tWAVE **r_old)
 
 }
 
-/*
- *> /+--    timestamp-----------------    epoch-----    project-------------    unit--------------------------   scrp   descrition-------------------------------------------------------    terse---------------   unit   scrp   cond   step   expect  wav  sta   rs  pass   fair   badd   void   actual   <* 
- *> WAVE  24.04.09.04.37.46.2.15.100  1234567890  ouroboros             ouroboros_db.unit                1  a  1  (DB) verify openning and closing database                          access                123  123  123  123  12345  y   123  123  123  123  12345                   <* 
- */
+
+
+/*====================------------------------------------====================*/
+/*===----                          yparse                              ----===*/
+/*====================------------------------------------====================*/
+static void  o___YPARSE__________o () { return; }
+
+static   char   s_gather  =  '-';
+static   int    s_central =    0;
+static   int    s_read    =    0;
 
 char
 WAVE_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_handler)
@@ -473,14 +471,26 @@ WAVE_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_
    char        x_proj      [LEN_LABEL] = "";
    char        x_unit      [LEN_TITLE] = "";
    short       x_scrp      =    0;
-   char        x_wave, x_stage;
+   char        x_source    =  '·';
+   char        x_wave      =  '·';
+   char        x_stage     =  '·';
+   char        x_rating    =  '·';
    char        x_desc      [LEN_LONG]  = "";
    char        x_terse     [LEN_LABEL] = "";
-   short       x_nunit, x_nscrp, x_ncond, x_nstep;
+   int         x_nunit     =    0;
+   int         x_nscrp     =    0;
+   int         x_ncond     =    0;
+   int         x_nstep     =    0;
    char        x_expe      [LEN_SHORT] = "";
-   long        x_expect, x_actual;
-   char        x_result;
-   short       x_npass, x_nfail, x_nbadd, x_nvoid;
+   int         x_expect    =    0;
+   char        x_result    =  '-';
+   int         x_npass     =    0;
+   int         x_nfail     =    0;
+   int         x_nbadd     =    0;
+   int         x_nvoid     =    0;
+   int         x_nmiss     =    0;
+   int         x_actual    =    0;
+   int         c           =    0;
    /*---(header)-------------------------*/
    DEBUG_CONF  yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -490,12 +500,33 @@ WAVE_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_
       return rce;
    }
    DEBUG_CONF  yLOG_info    ("a_verb"     , a_verb);
-   --rce;  if (strcmp (a_verb, "WAVE") != 0) {
+   rc = yPARSE_ready (&c);
+   DEBUG_CONF  yLOG_value   ("rc"         , rc);
+   DEBUG_CONF  yLOG_value   ("c"          , c);
+   /*---(read details)-------------------*/
+   --rce; if (strncmp (a_verb, "PROJ", 4) == 0) {
+      rc = yPARSE_scanf (a_verb, "--L-------------------"  , x_proj);
+   }
+   else if   (strncmp (a_verb, "UNIT", 4) == 0) {
+      rc = yPARSE_scanf (a_verb, "--L3------------------"  , x_proj, x_unit);
+   }
+   else if   (strncmp (a_verb, "WAVE", 4) == 0) {
+      switch (c) {
+      case 23 : case 28 :
+         rc = yPARSE_scanf (a_verb, "3lL3s7LCCiiiiSiCiiiiii"  , x_time, &x_epoch, x_proj, x_unit, &x_scrp, x_desc, x_terse, &x_wave, &x_stage, &x_nunit, &x_nscrp, &x_ncond, &x_nstep, x_expe, &x_expect, &x_result, &x_npass, &x_nfail, &x_nbadd, &x_nvoid, &x_nmiss, &x_actual);
+         break;
+      case 24 : case 29 :
+         rc = yPARSE_scanf (a_verb, "3lL3s7LCCCiiiiSiCiiiiii" , x_time, &x_epoch, x_proj, x_unit, &x_scrp, x_desc, x_terse, &x_wave, &x_stage, &x_rating, &x_nunit, &x_nscrp, &x_ncond, &x_nstep, x_expe, &x_expect, &x_result, &x_npass, &x_nfail, &x_nbadd, &x_nvoid, &x_nmiss, &x_actual);
+         break;
+      case 25 : case 30 :
+         rc = yPARSE_scanf (a_verb, "3lL3sC7LCCCiiiiSiCiiiiii", x_time, &x_epoch, x_proj, x_unit, &x_scrp, &x_source, x_desc, x_terse, &x_wave, &x_stage, &x_rating, &x_nunit, &x_nscrp, &x_ncond, &x_nstep, x_expe, &x_expect, &x_result, &x_npass, &x_nfail, &x_nbadd, &x_nvoid, &x_nmiss, &x_actual);
+         break;
+      }
+   }
+   else {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   /*---(read details)-------------------*/
-   rc = yPARSE_scanf (a_verb, "3lL3s7LCCssssSsCsssss"  , x_time, &x_epoch, x_proj, x_unit, &x_scrp, x_desc, x_terse, &x_wave, &x_stage, &x_nunit, &x_nscrp, &x_ncond, &x_nstep, x_expe, &x_expect, &x_result, &x_npass, &x_nfail, &x_nbadd, &x_nvoid, &x_actual);
    DEBUG_CONF  yLOG_value   ("scanf"      , rc);
    if (rc < 0) {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
@@ -505,7 +536,7 @@ WAVE_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_
    DEBUG_CONF  yLOG_info    ("x_proj"     , x_proj);
    DEBUG_CONF  yLOG_info    ("x_unit"     , x_unit);
    DEBUG_CONF  yLOG_value   ("x_stage"    , x_stage);
-   rc = WAVE__new (x_proj, x_unit, x_scrp, '-', &x_new);
+   rc = WAVE__new (x_proj, x_unit, x_scrp, s_gather, &x_new);
    DEBUG_CONF  yLOG_value   ("new"        , rc);
    --rce;  if (rc < 0) {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
@@ -518,10 +549,12 @@ WAVE_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_
       DEBUG_PROG  yLOG_note    ("UPDATING");
    }
    /*---(save)---------------------------*/
+   x_new->w_source  = x_source;
    ystrlcpy (x_new->w_time   , x_time   , LEN_TITLE);
    x_new->w_last    = x_epoch;
    x_new->w_wave    = x_wave;
    x_new->w_stage   = x_stage;
+   x_new->w_rating  = x_rating;
    ystrlcpy (x_new->w_desc   , x_desc   , LEN_LONG);
    ystrlcpy (x_new->w_terse  , x_terse  , LEN_LABEL);
    x_new->w_nunit   = x_nunit;
@@ -529,32 +562,36 @@ WAVE_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_
    x_new->w_ncond   = x_ncond;
    x_new->w_nstep   = x_nstep;
    ystrlcpy (x_new->w_expe   , x_expe   , LEN_SHORT);
+   ystrlunage (x_expe, &x_expect);
    x_new->w_expect  = x_expect;
    x_new->w_result  = x_result;
    x_new->w_npass   = x_npass;
    x_new->w_nfail   = x_nfail;
    x_new->w_nbadd   = x_nbadd;
    x_new->w_nvoid   = x_nvoid;
+   x_new->w_nmiss   = x_new->w_nstep - x_new->w_npass - x_new->w_nfail - x_new->w_nbadd - x_new->w_nvoid;
    x_new->w_actual  = x_actual;
-   /*> DEBUG_CONF  yLOG_info    ("x_full"     , x_time);                              <*/
-   /*> DEBUG_CONF  yLOG_value   ("x_epoch"    , x_epoch);                             <*/
-   /*> DEBUG_CONF  yLOG_info    ("x_terse"    , x_terse);                             <*/
-   /*> DEBUG_CONF  yLOG_info    ("x_written"  , x_written);                           <*/
-   /*> ystrlcpy (s_tsae, x_full, LEN_TERSE);                                          <*/
+   /*---(update totals)------------------*/
+   if (strncmp (x_time, "··´", 3) == 0) {
+      rc = WAVE__new (x_proj, x_unit, 0, '-', NULL);
+   }
+   /*---(update totals)------------------*/
+   ++s_read;
    /*---(complete)-----------------------*/
    DEBUG_CONF  yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
-WAVE_pull               (cchar a_file [LEN_PATH])
+WAVE__pull              (char a_gather, cchar a_file [LEN_PATH])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
    /*---(header)-------------------------*/
    DEBUG_DATA  yLOG_enter   (__FUNCTION__);
-   yURG_msg ('>', "reading wave file...");
+   /*---(prepare)------------------------*/
+   s_gather = a_gather;
    /*---(purge the tables)---------------*/
    rc = yPARSE_reset_in ();
    DEBUG_DATA   yLOG_value   ("purge_in"  , rc);
@@ -568,8 +605,6 @@ WAVE_pull               (cchar a_file [LEN_PATH])
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   /*> rc = DATA_purge ();                                                            <*/
-   /*> DEBUG_DATA   yLOG_value   ("purge"     , rc);                                  <*/
    /*---(defense)------------------------*/
    DEBUG_DATA  yLOG_point   ("a_file"     , a_file);
    --rce;  if (a_file == NULL) {
@@ -593,235 +628,38 @@ WAVE_pull               (cchar a_file [LEN_PATH])
    return 0;
 }
 
-/*> char                                                                              <* 
- *> WAVE_purge              (void)                                                    <* 
- *> {                                                                                 <* 
- *>    tWAVE      *x_cur       = NULL;                                                <* 
- *>    tWAVE      *x_next      = NULL;                                                <* 
- *>    x_cur = s_head;                                                                <* 
- *>    while (x_cur != NULL) {                                                        <* 
- *>       x_next = x_cur->s_next;                                                     <* 
- *>       WAVE_free (&x_cur);                                                         <* 
- *>       x_cur = x_next;                                                             <* 
- *>    }                                                                              <* 
- *>    return 0;                                                                      <* 
- *> }                                                                                 <*/
-
 char
-WAVE_purge_by_unit      (char *a_unit)
+WAVE_pull_local         (cchar a_file [LEN_PATH])
 {
-   tWAVE      *x_cur       = NULL;
-   tWAVE      *x_next      = NULL;
-   int         c           =    0;
-   char        x_unit      [LEN_TITLE] = "";
-   DEBUG_DATA   yLOG_enter   (__FUNCTION__);
-   ystrlcpy (x_unit, a_unit, LEN_TITLE);
-   DEBUG_DATA   yLOG_complex ("x_unit"    , "%2d[%s]", strlen (x_unit), x_unit);
-   x_cur = s_head;
-   while (x_cur != NULL) {
-      x_next = x_cur->s_next;
-      DEBUG_DATA   yLOG_complex ("current"   , "%-10p, %-10p, %2d[%s], %s", x_cur, x_next, strlen (x_cur->w_unit), x_cur->w_unit, x_cur->w_desc);
-      if (strcmp (x_unit, x_cur->w_unit) == 0) {
-         WAVE__free (&x_cur);
-         ++c;
-      }
-      x_cur = x_next;
-   }
-   if (c > 0)  --my.units;
-   DEBUG_DATA   yLOG_exit    (__FUNCTION__);
-   return c;
-}
-
-char
-WAVE_purge_by_path      (char *a_path)
-{
-   tWAVE      *x_cur       = NULL;
-   tWAVE      *x_next      = NULL;
-   int         c           =    0;
-   char        x_path      [LEN_PATH] = "";
-   DEBUG_DATA   yLOG_enter   (__FUNCTION__);
-   ystrlcpy (x_path, a_path, LEN_PATH);
-   DEBUG_DATA   yLOG_info    ("x_path"    , x_path);
-   x_cur = s_head;
-   while (x_cur != NULL) {
-      x_next = x_cur->s_next;
-      /*> if (strcmp (x_path, x_cur->w_path) == 0) {                                  <* 
-       *>    c += WAVE_purge_by_unit (x_cur->w_unit);                                 <* 
-       *>    x_cur = x_next = s_head;                                                 <* 
-       *> }                                                                           <*/
-      x_cur = x_next;
-   }
-   if (c > 0)  --my.projs;
-   DEBUG_DATA   yLOG_exit    (__FUNCTION__);
-   return c;
-}
-
-
-
-/*====================------------------------------------====================*/
-/*===----                    hooking and unhooking                     ----===*/
-/*====================------------------------------------====================*/
-static void  o___HOOKING_________o () { return; }
-
-char
-WAVE__hook              (tWAVE *a_ref, tWAVE *a_cur)
-{
-   /*---(into wave list)-----------------*/
-   /*> DEBUG_DATA   yLOG_point   ("head"      , s_head);                              <*/
-   /*> DEBUG_DATA   yLOG_point   ("tail"      , s_tail);                              <*/
-   /*> DEBUG_DATA   yLOG_snote   (__FUNCTION__);                                      <*/
-   /*---(append normally)---------------*/
-   if (a_ref == NULL) {
-      if (s_head  == NULL) {
-         /*> DEBUG_DATA   yLOG_note    ("first");                                     <*/
-         s_head  = s_tail  = a_cur;
-      } else {
-         /*> DEBUG_DATA   yLOG_note    ("append");                                    <*/
-         a_cur->s_prev   = s_tail;
-         s_tail->s_next  = a_cur;
-         s_tail          = a_cur;
-      }
-   }
-   /*---(insert before ref)--------------*/
-   else {
-      if (a_ref->s_prev != NULL)   a_ref->s_prev->s_next = a_cur;
-      else                         s_head                = a_cur;
-      a_cur->s_prev   = a_ref->s_prev;
-      a_cur->s_next   = a_ref;
-      a_ref->s_prev   = a_cur;
-   }
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char
-PROJ__hook              (tWAVE *a_ref, tWAVE *a_cur)
-{
-   /*---(into project list)--------------*/
-   /*> DEBUG_DATA   yLOG_point   ("head"      , p_head);                              <*/
-   /*> DEBUG_DATA   yLOG_point   ("tail"      , p_tail);                              <*/
-   /*> DEBUG_DATA   yLOG_snote   (__FUNCTION__);                                      <*/
-   /*---(append normally)---------------*/
-   if (a_ref == NULL) {
-      if (p_head  == NULL) {
-         /*> DEBUG_DATA   yLOG_note    ("first");                                     <*/
-         p_head  = p_tail  = a_cur;
-      } else {
-         /*> DEBUG_DATA   yLOG_note    ("append");                                    <*/
-         a_cur->p_prev   = p_tail;
-         p_tail->p_next  = a_cur;
-         p_tail          = a_cur;
-      }
-   }
-   /*---(insert before ref)--------------*/
-   else {
-      if (a_ref->p_prev != NULL)   a_ref->p_prev->p_next = a_cur;
-      else                         p_head                = a_cur;
-      a_cur->p_prev   = a_ref->p_prev;
-      a_cur->p_next   = a_ref;
-      a_ref->p_prev   = a_cur;
-   }
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char
-WAVE__unhook            (tWAVE *a_cur)
-{
-   /*---(out of linked list)-------------*/
-   /*> DEBUG_DATA   yLOG_spoint  (s_head);                                            <*/
-   /*> DEBUG_DATA   yLOG_spoint  (s_tail);                                            <*/
-   /*> DEBUG_DATA   yLOG_snote   (__FUNCTION__);                                      <*/
-   if (a_cur->s_next != NULL)  a_cur->s_next->s_prev = a_cur->s_prev;
-   else                        s_tail                = a_cur->s_prev;
-   if (a_cur->s_prev != NULL)  a_cur->s_prev->s_next = a_cur->s_next;
-   else                        s_head                = a_cur->s_next;
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char
-PROJ__unhook            (tWAVE *a_cur)
-{
-   /*---(out of linked list)-------------*/
-   /*> DEBUG_DATA   yLOG_spoint  (p_head);                                            <*/
-   /*> DEBUG_DATA   yLOG_spoint  (p_tail);                                            <*/
-   /*> DEBUG_DATA   yLOG_snote   (__FUNCTION__);                                      <*/
-   if (a_cur->p_next != NULL)  a_cur->p_next->p_prev = a_cur->p_prev;
-   else                        p_tail                = a_cur->p_prev;
-   if (a_cur->p_prev != NULL)  a_cur->p_prev->p_next = a_cur->p_next;
-   else                        p_head                = a_cur->p_next;
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-
-
-/*====================------------------------------------====================*/
-/*===----                      data maintainence                       ----===*/
-/*====================------------------------------------====================*/
-static void  o___DATA____________o () { return; }
-
-char
-WAVE__populate          (tWAVE *a_new, uchar a_wave, uchar a_stage, char *a_unit, char a_scrp, char *a_desc, char *a_key)
-{
-   /*---(complete)-----------------------*/
-   DEBUG_DATA   yLOG_senter  (__FUNCTION__);
-   /*---(populate)-----------------------*/
-   a_new->w_wave  = a_wave;
-   a_new->w_stage = a_stage;
-   ystrlcpy (a_new->w_unit, a_unit , LEN_LABEL);
-   a_new->w_scrp  = a_scrp;
-   ystrlcpy (a_new->w_desc, a_desc , LEN_LONG);
-   /*---(sorting)------------------------*/
-   sprintf (a_new->sort, "%-15.15s.%-20.20s.%02d", my.proj, a_unit, a_scrp);
-   ystrlcpy (a_new->key , a_key  , LEN_HUND);
-   /*---(reporting)----------------------*/
-   RPTG_spread (a_wave, a_stage);
-   /*---(complete)-----------------------*/
-   DEBUG_DATA   yLOG_sexit   (__FUNCTION__);
-   return 0;
-}
-
-char
-WAVE_populate           (tWAVE *a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
    char        rc          =    0;
-   char        x_key       [LEN_HUND]  = "";
-   /*---(header)-------------------------*/
-   DEBUG_DATA   yLOG_enter   (__FUNCTION__);
-   /*---(defense)------------------------*/
-   /*> rc = WAVE__verify (a_wave, a_stage, a_unit, a_scrp, a_desc, x_key);            <*/
-   DEBUG_DATA   yLOG_value   ("verify"    , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(populate)-----------------------*/
-   rc = WAVE__populate (a_new, a_wave, a_stage, a_unit, a_scrp, a_desc, x_key);
-   DEBUG_DATA   yLOG_value   ("populate"  , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_DATA   yLOG_exit    (__FUNCTION__);
-   return 0;
+   int         a           =    0;
+   int         b           =    0;
+   char        t           [LEN_SHORT] = "";
+   if (s_central == s_read)   yURG_msg ('>', "gathering local files...");
+   a  = s_read;
+   rc = WAVE__pull ('y', a_file);
+   b  = s_read;
+   if (b - a > 0)  sprintf (t, "%2d", b - a);
+   else            strcpy  (t, " ·");
+   yURG_msg ('-', "read %2.2s from å%sæ", t, a_file);
+   return rc;
 }
 
 char
-WAVE_results            (tWAVE *x_wave, uchar a_resu, int a_cond, int a_test, int a_pass, int a_fail, int a_badd, int a_othr)
+WAVE_pull_central       (cchar a_file [LEN_PATH])
 {
-   x_wave->w_result  = a_resu;
-   x_wave->w_ncond   = a_cond;
-   x_wave->w_nstep   = a_test;
-   x_wave->w_npass   = a_pass;
-   x_wave->w_nfail   = a_fail;
-   x_wave->w_nbadd   = a_badd;
-   x_wave->w_nvoid   = a_othr;
-   return 0;
+   char        rc          =    0;
+   int         a           =    0;
+   int         b           =    0;
+   s_read = 0;
+   yURG_msg ('>', "pull records from central database...");
+   yURG_msg ('-', "database is å%sæ", a_file);
+   a  = s_read;
+   rc = WAVE__pull ('-', a_file);
+   b  = s_read;
+   yURG_msg ('-', "read %2d wave records", b - a);
+   s_central = b;
+   return rc;
 }
 
 
@@ -831,176 +669,9 @@ WAVE_results            (tWAVE *x_wave, uchar a_resu, int a_cond, int a_test, in
 /*====================------------------------------------====================*/
 static void  o___SEARCH__________o () { return; }
 
-#define     IF_SCRP   (a_type == 's') ? 
-
-char
-WAVE__by_index           (char a_type, tWAVE **a_cur, int n)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   int         c           =    0;
-   tWAVE      *x_cur       = NULL;
-   /*---(header)-------------------------*/
-   DEBUG_DATA   yLOG_senter  (__FUNCTION__);
-   /*---(check return)-------------------*/
-   DEBUG_DATA   yLOG_spoint  (a_cur);
-   --rce;  if (a_cur == NULL) {
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   *a_cur = NULL;
-   /*---(defense)------------------------*/
-   DEBUG_DATA   yLOG_sint    (n);
-   --rce;  if (n < 0 || n >= my.scrps) {
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(walk)---------------------------*/
-   x_cur = IF_SCRP  s_head : p_head;
-   while (x_cur != NULL) {
-      if (n == c) {
-         DEBUG_DATA   yLOG_snote   ("FOUND");
-         *a_cur = x_cur;
-         DEBUG_DATA   yLOG_sexit   (__FUNCTION__);
-         return 0;
-      }
-      x_cur = IF_SCRP x_cur->s_next : x_cur->p_next;
-      ++c;
-   }
-   /*---(no match)-----------------------*/
-   DEBUG_DATA   yLOG_snote   ("no match");
-   --rce;
-   /*---(complete)-----------------------*/
-   DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-   return rce;
-}
-
-int  WAVE_count     (void)                  { return  ySORT_count    (B_WAVE); }
-char WAVE_by_index  (int n, tWAVE **a_cur)  { return  ySORT_by_index (B_WAVE, n, a_cur); }
-char PROJ_by_index  (tWAVE **a_cur, int n)  { return  WAVE__by_index ('p', a_cur, n); }
-
-char
-WAVE__by_cursor          (char a_type, tWAVE **a_cur, char a_move)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   int         c           =    0;
-   tWAVE      *x_cur       = NULL;
-   /*---(header)-------------------------*/
-   DEBUG_DATA   yLOG_senter  (__FUNCTION__);
-   /*---(defense)------------------------*/
-   DEBUG_DATA   yLOG_sint    (my.scrps);
-   DEBUG_DATA   yLOG_spoint  (a_cur);
-   --rce;  if (a_cur == NULL) {
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   x_cur = *a_cur;
-   DEBUG_DATA   yLOG_spoint  (x_cur);
-   --rce;  if (x_cur == NULL) {
-      /*---(non-bounce)------------------*/
-      if (strchr ("Ö´Õ", a_move) != NULL) {
-         DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-         return rce;
-      }
-      /*---(bounce types)----------------*/
-      x_cur = IF_SCRP  s_head : p_head;
-      DEBUG_DATA   yLOG_spoint  (x_cur);
-      if (x_cur == NULL) {
-         DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-         return rce;
-      }
-   }
-   /*---(move)---------------------------*/
-   DEBUG_DATA   yLOG_schar   (a_move);
-   --rce;  switch (a_move) {
-   case YDLST_HEAD : case YDLST_DHEAD :
-      x_cur = IF_SCRP  s_head : p_head;
-      break;
-   case YDLST_PREV : case YDLST_DPREV :
-      x_cur = IF_SCRP  x_cur->s_prev : x_cur->p_prev;
-      break;
-   case YDLST_CURR : case YDLST_DCURR :
-      x_cur = x_cur;
-      break;
-   case YDLST_NEXT : case YDLST_DNEXT :
-      x_cur = IF_SCRP  x_cur->s_next : x_cur->p_next;
-      break;
-   case YDLST_TAIL : case YDLST_DTAIL :
-      x_cur = IF_SCRP  s_tail : p_tail;
-      break;
-   default  :
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(check end)----------------------*/
-   DEBUG_DATA   yLOG_spoint  (x_cur);
-   --rce;  if (x_cur == NULL) {
-      /*---(non-bounce)------------------*/
-      if (strchr ("ºÖ´Õ»", a_move) != NULL) {
-         *a_cur = x_cur;
-      }
-      /*---(all types)-------------------*/
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(save back)----------------------*/
-   *a_cur = x_cur;
-   /*---(complete)-----------------------*/
-   DEBUG_DATA   yLOG_sexit   (__FUNCTION__);
-   return 0;
-}
-
-char WAVE_by_cursor (tWAVE **a_cur, char a_move)  { return  WAVE__by_cursor ('s', a_cur, a_move); }
-char PROJ_by_cursor (tWAVE **a_cur, char a_move)  { return  WAVE__by_cursor ('p', a_cur, a_move); }
-
-char
-WAVE__by_sortkey         (char a_type, tWAVE **a_cur, char *a_name)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   int         c           =    0;
-   tWAVE      *x_cur       = NULL;
-   /*---(header)-------------------------*/
-   DEBUG_DATA   yLOG_senter  (__FUNCTION__);
-   /*---(check return)-------------------*/
-   DEBUG_DATA   yLOG_spoint  (a_cur);
-   --rce;  if (a_cur == NULL) {
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   *a_cur = NULL;
-   /*---(defense)------------------------*/
-   DEBUG_DATA   yLOG_spoint  (a_name);
-   --rce;  if (a_name == NULL) {
-      DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_DATA   yLOG_snote   (a_name);
-   /*---(walk)---------------------------*/
-   x_cur = IF_SCRP s_head : p_head;
-   while (x_cur != NULL) {
-      if (x_cur->key != NULL && x_cur->sort != NULL) {
-         if (strcmp (a_name, IF_SCRP x_cur->key : x_cur->sort) == 0) {
-            DEBUG_DATA   yLOG_snote   ("FOUND");
-            *a_cur = x_cur;
-            DEBUG_DATA   yLOG_sexit   (__FUNCTION__);
-            return 0;
-         }
-      }
-      x_cur = IF_SCRP x_cur->s_next : x_cur->p_next;
-      ++c;
-   }
-   /*---(no match)-----------------------*/
-   DEBUG_DATA   yLOG_snote   ("no match");
-   --rce;
-   /*---(complete)-----------------------*/
-   DEBUG_DATA   yLOG_sexitr  (__FUNCTION__, rce);
-   return rce;
-}
-
-char WAVE_by_sortkey (tWAVE **a_cur, char *a_sortkey)  { return  WAVE__by_sortkey ('s', a_cur, a_sortkey); }
-char PROJ_by_sortkey (tWAVE **a_cur, char *a_sortkey)  { return  WAVE__by_sortkey ('p', a_cur, a_sortkey); }
+int  WAVE_count     (void)                       { return  ySORT_count     (B_WAVE); }
+char WAVE_by_index  (int n, tWAVE **a_cur)       { return  ySORT_by_index  (B_WAVE, n, a_cur); }
+char WAVE_by_cursor (char a_dir, tWAVE **a_cur)  { return  ySORT_by_cursor (B_WAVE, a_dir, a_cur); }
 
 
 
@@ -1010,150 +681,7 @@ char PROJ_by_sortkey (tWAVE **a_cur, char *a_sortkey)  { return  WAVE__by_sortke
 static void  o___IMPORT__________o () { return; }
 
 char
-WAVE_parse              (char *a_recd, char a_call)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   int         rc          =    0;
-   int         c           =    0;
-   int         i           =    0;
-   char       *p           = NULL;
-   char       *q           = "";
-   char       *r           = NULL;
-   char        t           [LEN_RECD]  = "";
-   tWAVE      *x_wave      = NULL;
-   /*---(header)-------------------------*/
-   DEBUG_ENVI   yLOG_enter   (__FUNCTION__);
-   /*---(defaults)-----------------------*/
-   s_wave  = '-';
-   s_stage =  0;
-   ystrlcpy (s_unit , "", LEN_LABEL);
-   s_scrp  =  0;
-   ystrlcpy (s_desc , "", LEN_LONG);
-   /*---(defense)------------------------*/
-   DEBUG_ENVI   yLOG_point   ("a_recd"    , a_recd);
-   --rce;  if (a_recd == NULL) {
-      DEBUG_ENVI   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_ENVI   yLOG_info    ("a_recd"    , a_recd);
-   c = ystrldcnt (a_recd, '', LEN_RECD);
-   DEBUG_ENVI   yLOG_value   ("c"         , c);
-   --rce;  if (c < 4) {
-      DEBUG_ENVI   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(prepare)------------------------*/
-   ystrlcpy (t, a_recd, LEN_RECD);
-   p = strtok_r (t, q, &r);
-   c = 0;
-   /*---(walk fields)--------------------*/
-   --rce;  for (i = 0; i < 5; ++i) {
-      DEBUG_DATA   yLOG_point   ("p"         , p);
-      if (p == NULL) {
-         DEBUG_ENVI   yLOG_exitr   (__FUNCTION__, rce);
-         return rce;
-      }
-      ystrltrim (p, ySTR_BOTH, LEN_RECD);
-      DEBUG_DATA   yLOG_info    ("p"         , p);
-      /*---(handle fields)---------------*/
-      switch (i) {
-      case OURU_WAVE  :
-         s_wave  = p [0];
-         DEBUG_DATA   yLOG_char    ("s_wave"    , s_wave);
-         break;
-      case OURU_STAGE :
-         s_stage = p [0];
-         DEBUG_DATA   yLOG_char    ("s_stage"   , s_stage);
-         break;
-      case OURU_UNIT  :
-         ystrlcpy (s_unit, p, LEN_LABEL);
-         DEBUG_DATA   yLOG_info    ("s_unit"    , s_unit);
-         break;
-      case OURU_SCRP  :
-         s_scrp  = atoi (p);
-         DEBUG_DATA   yLOG_char    ("s_scrp"    , s_scrp);
-         break;
-      case OURU_DESC  :
-         ystrlcpy (s_desc, p, LEN_LONG);
-         DEBUG_DATA   yLOG_info    ("s_desc"    , s_desc);
-         break;
-      }
-      /*---(next record)-----------------*/
-      p = strtok_r (NULL  , q, &r);
-      ++c;
-   } 
-   /*---(call new)-----------------------*/
-   DEBUG_ENVI   yLOG_value   ("c"         , c);
-   DEBUG_ENVI   yLOG_char    ("a_call"    , a_call);
-   if (a_call == 'y') {
-      rc = WAVE_new      (&x_wave);
-      DEBUG_ENVI   yLOG_value   ("new"       , rc);
-      rc = WAVE_populate (x_wave, s_wave, s_stage, s_unit, s_scrp, s_desc);
-      DEBUG_ENVI   yLOG_value   ("populate"  , rc);
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_ENVI   yLOG_exit    (__FUNCTION__);
-   return c;
-}
-
-char
-WAVE_read               (char *a_name, char a_call)
-{
-   /*---(local variables)--+-----+-----+-*/
-   char        rce         =  -10;
-   int         rc          =    0;
-   FILE       *f           = NULL;
-   int         l           =    0;
-   int         c           =    0;
-   /*---(header)-------------------------*/
-   DEBUG_ENVI   yLOG_enter   (__FUNCTION__);
-   /*---(defense)------------------------*/
-   DEBUG_ENVI   yLOG_point   ("a_name"    , a_name);
-   --rce;  if (a_name == NULL) {
-      DEBUG_ENVI   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_ENVI   yLOG_info    ("a_name"    , a_name);
-   /*---(open to read)-------------------*/
-   f = fopen (a_name, "rt");
-   DEBUG_ENVI   yLOG_point   ("f"         , f);
-   --rce;  if (f == NULL) {
-      DEBUG_ENVI   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(walk entries)-------------------*/
-   --rce; while (1) {
-      fgets (s_recd, LEN_RECD, f);
-      if (feof (f))  {
-         DEBUG_ENVI   yLOG_note    ("end-of-file");
-         break;
-      }
-      if (s_recd [0] == '#' )  continue;
-      if (s_recd [0] == '\0')  continue;
-      /*---(trim newline)----------------*/
-      l = strlen (s_recd);
-      if (l <= 0)              continue;
-      s_recd [--l] = '\0';
-      /*---(call parse)------------------*/
-      ++c;
-      if (a_call == 'y')  WAVE_parse (s_recd, a_call);
-   }
-   /*---(close reading)------------------*/
-   rc = fclose (f);
-   --rce;  if (rc != 0) {
-      DEBUG_ENVI   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(update globals)-----------------*/
-   ++my.units;
-   /*---(complete)-----------------------*/
-   DEBUG_ENVI   yLOG_exit    (__FUNCTION__);
-   return c;
-}
-
-char
-WAVE_inventory          (char *a_path, char a_call)
+WAVE_inventory          (char *a_path)
 {
    /*---(local variables)--+-----+-----+-*/
    char        rce         =  -10;
@@ -1161,7 +689,11 @@ WAVE_inventory          (char *a_path, char a_call)
    int         c           =    0;
    DIR        *x_dir       = NULL;          /* directory pointer              */
    tDIRENT    *x_entry     = NULL;          /* directory entry                */
+   int         l           =    0;
    char        x_name      [LEN_PATH]  = "";
+   char        x_keep      =  '-';
+   int         x_end       =   -1;
+   char        x_header    [LEN_TITLE] = "";
    /*---(header)-------------------------*/
    DEBUG_ENVI   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -1181,6 +713,8 @@ WAVE_inventory          (char *a_path, char a_call)
    }
    DEBUG_DATA   yLOG_info    ("my.path"   , my.path);
    DEBUG_DATA   yLOG_info    ("my.proj"   , my.proj);
+   sprintf (x_header, "%s.h", my.proj);
+   DEBUG_DATA   yLOG_info    ("x_header"  , x_header);
    /*---(open directory)-----------------*/
    x_dir = opendir (a_path);
    DEBUG_ENVI   yLOG_point   ("x_dir"     , x_dir);
@@ -1188,33 +722,93 @@ WAVE_inventory          (char *a_path, char a_call)
       DEBUG_ENVI   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(add project record)-------------*/
+   rc = WAVE__new (my.proj, "" , 0, 'y', NULL);
+   DEBUG_DATA   yLOG_value   ("project"   , rc);
+   --rce;  if (rc < 0)  {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(clear include lists)------------*/
+   INCL_list_clear ();
    /*---(walk entries)-------------------*/
    --rce; while (1) {
+      /*---(prepare)---------------------*/
+      x_keep = '-';
       /*---(read)------------------------*/
       x_entry = readdir (x_dir);
-      DEBUG_ENVI   yLOG_point   ("X_ENTRY"   , x_entry);
       if (x_entry == NULL)                            break;
       /*---(filter)----------------------*/
       if (x_entry->d_name   == NULL)                  continue;
       DEBUG_ENVI   yLOG_info    ("d_name"    , x_entry->d_name);
-      if (strcmp (x_entry->d_name, "."    ) == 0)     continue;
-      if (strcmp (x_entry->d_name, ".."   ) == 0)     continue;
-      if (strstr (x_entry->d_name, ".wave") == NULL)  continue;
-      /*---(process)---------------------*/
-      ++c;
-      sprintf (x_name, "%s/%s", a_path, x_entry->d_name);
-      /*> printf ("%s\n", x_name);                                                    <*/
-      if (a_call == 'y')  WAVE_read (x_name, a_call);
+      l = strlen (x_entry->d_name);
+      /*---(filter obvious)--------------*/
+      if      (strcmp  (x_entry->d_name, "."               ) == 0)     ;
+      else if (strcmp  (x_entry->d_name, ".."              ) == 0)     ;
+      else if (strncmp (x_entry->d_name, "."       , 1     ) == 0)     ;
+      else if (strcmp  (x_entry->d_name + l - 1, "~"       ) == 0)     ;
+      /*> else if (strcmp  (x_entry->d_name, "master.h"        ) == 0)          x_keep = 'h';   <*/
+      else if (strncmp (x_entry->d_name, "master."     ,  7) == 0)     ;
+      else if (strncmp (x_entry->d_name, "unit_daemon" , 11) == 0)     ;
+      else if (strncmp (x_entry->d_name, "unit_badrc"  , 10) == 0)     ;
+      /*---(filter extension)------------*/
+      else if (l >= 8 && strcmp  (x_entry->d_name + l - 7, "_unit.c") == 0)  ;
+      else if (l >= 6 && strcmp  (x_entry->d_name + l - 5, ".wave"  ) == 0)  x_keep = 'w';
+      else if (l >= 6 && strcmp  (x_entry->d_name + l - 5, ".unit"  ) == 0)  x_keep = 'u';
+      else if (l >= 7 && strcmp  (x_entry->d_name + l - 5, ".munit" ) == 0)  x_keep = 'm';
+      else if (l >= 3 && strcmp  (x_entry->d_name        , x_header ) == 0)  x_keep = 'h';
+      else if (l >= 3 && strcmp  (x_entry->d_name + l - 7, "_priv.h") == 0)  x_keep = 'h';
+      else if (l >= 3 && strcmp  (x_entry->d_name + l - 7, "_solo.h") == 0)  x_keep = 'h';
+      else if (l >= 3 && strcmp  (x_entry->d_name + l - 7, "_uver.h") == 0)  x_keep = 'h';
+/*> else if (l >= 8 && strncmp (x_entry->d_name, "unit_", 5       ) == 0                   <* 
+       *>                 && strcmp  (x_entry->d_name + l - 2, ".c"     ) == 0)  x_keep = 'm';   <*/
+      /*> else if (l >= 3 && strcmp  (x_entry->d_name + l - 2, ".c"     ) == 0)  x_keep = 'c';   <*/
+      if (x_keep == '-') {
+         DEBUG_DATA   yLOG_note    ("skipping");
+         continue;
+      }
+      /*---(handle)----------------------*/
+      l = strlen (a_path);
+      if (a_path [l - 1] == '/') sprintf (x_name, "%s%s" , a_path, x_entry->d_name);
+      else                       sprintf (x_name, "%s/%s", a_path, x_entry->d_name);
+      DEBUG_DATA   yLOG_char    ("x_keep"    , x_keep);
+      switch (x_keep) {
+      case 'u' :
+         DEBUG_DATA   yLOG_note    ("handle unit test file");
+         ystrlcpy (x_name, x_entry->d_name, l - 4);
+         rc = WAVE__new (my.proj, x_name, 0, 'y', NULL);
+         DEBUG_DATA   yLOG_value   ("unit"      , rc);
+         if (x_end < 0) {
+            x_end = GRAPH_add_node (my.proj);
+            INCL_add_by_name (x_end, "koios");
+            GRAPH_add_edge   ("koios", x_end);
+         }
+         break;
+      case 'm' :
+         DEBUG_DATA   yLOG_note    ("mini unit test file");
+         if (x_end < 0) {
+            x_end = GRAPH_add_node (my.proj);
+            GRAPH_add_edge ("yUNIT_solo", x_end);
+            INCL_list_add  ('u', "yUNIT_solo");
+         }
+         rc = INCL_gather_in_c (my.proj, x_name);
+         break;
+      case 'w' :
+         DEBUG_DATA   yLOG_note    ("handle normal wave file");
+         ++c;
+         rc = WAVE_pull_local (x_name);
+         break;
+      case 'c' : case 'h' :
+         DEBUG_DATA   yLOG_note    ("handle inclusion file processing");
+         rc = INCL_gather_in_c (my.proj, x_name);
+         break;
+      }
       /*---(done)------------------------*/
    }
    /*---(close)--------------------------*/
    closedir (x_dir);
-   /*---(sort)---------------------------*/
-   /*> WAVE_gnome ();                                                                 <*/
-   /*> rc = ySORT_troll (YSORT_NONE, YSORT_ASCEND, &(a_parent->c_head), &(a_parent->c_tail));   <*/
-   WAVE_gnome ();
-   /*---(update globals)-----------------*/
-   ++my.projs;
+   /*---(write includes)-----------------*/
+   INCL_block (my.proj);
    /*---(complete)-----------------------*/
    DEBUG_ENVI   yLOG_exit    (__FUNCTION__);
    return c;
@@ -1223,71 +817,224 @@ WAVE_inventory          (char *a_path, char a_call)
 char
 WAVE_here               (void)
 {
+   /*> /+---(locals)-----------+-----+-----+-+/                                       <* 
+    *> char        rce         =  -10;                                                <* 
+    *> char        rc          =    0;                                                <* 
+    *> char       *p           = NULL;                                                <* 
+    *> int         c           =    0;                                                <* 
+    *> /+---(header)-------------------------+/                                       <* 
+    *> DEBUG_DATA   yLOG_enter   (__FUNCTION__);                                      <* 
+    *> /+---(get the home)-------------------+/                                       <* 
+    *> rc = ystrlhome (my.path);                                                      <* 
+    *> DEBUG_DATA   yLOG_value   ("strlhere"  , rc);                                  <* 
+    *> --rce;  if (rc < 0)  {                                                         <* 
+    *>    DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);                              <* 
+    *>    return rce;                                                                 <* 
+    *> }                                                                              <* 
+    *> DEBUG_DATA   yLOG_info    ("my.path"   , my.path);                             <* 
+    *> /+---(clear existing)-----------------+/                                       <* 
+    *> WAVE_purge_by_path (my.path);                                                  <* 
+    *> /+---(run inventory)------------------+/                                       <* 
+    *> c = WAVE_inventory (my.path, 'y');                                             <* 
+    *> /+---(complete)-----------------------+/                                       <* 
+    *> DEBUG_ENVI   yLOG_exit    (__FUNCTION__);                                      <* 
+    *> return c;                                                                      <*/
+}
+
+
+
+/*====================------------------------------------====================*/
+/*===----                       data export                            ----===*/
+/*====================------------------------------------====================*/
+static void  o___EXPORT__________o () { return; }
+
+char
+WAVE_total_proj         (tWAVE *a_proj)
+{
+   a_proj->w_nunit  = P_nunit;
+   a_proj->w_nscrp  = P_nscrp;
+   a_proj->w_ncond  = P_ncond;
+   a_proj->w_nstep  = P_nstep;
+   a_proj->w_expect = P_est;
+   a_proj->w_npass  = P_npass;
+   a_proj->w_nfail  = P_nfail;
+   a_proj->w_nbadd  = P_nbadd;
+   a_proj->w_nvoid  = P_nvoid;
+   a_proj->w_nmiss  = P_nmiss;
+   a_proj->w_actual = P_act;
+   a_proj->w_pass   = P_PASS;
+   a_proj->w_fail   = P_FAIL;
+   a_proj->w_warn   = P_WARN;
+   a_proj->w_none   = P_NONE;
+   return 0;
+}
+
+char
+WAVE_total_unit         (tWAVE *a_unit)
+{
+   a_unit->w_nunit  = U_nunit;
+   a_unit->w_nscrp  = U_nscrp;
+   a_unit->w_ncond  = U_ncond;
+   a_unit->w_nstep  = U_nstep;
+   a_unit->w_expect = U_est;
+   a_unit->w_npass  = U_npass;
+   a_unit->w_nfail  = U_nfail;
+   a_unit->w_nbadd  = U_nbadd;
+   a_unit->w_nvoid  = U_nvoid;
+   a_unit->w_nmiss  = U_nmiss;
+   a_unit->w_actual = U_act;
+   a_unit->w_pass   = U_PASS;
+   a_unit->w_fail   = U_FAIL;
+   a_unit->w_warn   = U_WARN;
+   a_unit->w_none   = U_NONE;
+   return 0;
+}
+
+char
+WAVE_totalize           (void)
+{
    /*---(locals)-----------+-----+-----+-*/
+   char        rc          =    0;
+   tWAVE      *x_proj      = NULL;
+   tWAVE      *x_unit      = NULL;
+   tWAVE      *x_wave      = NULL;
+   int         x_none      =    0;
+   /*---(prepare)------------------------*/
+   G_nproj = 0;
+   G_nunit = G_nscrp = G_ncond = G_nstep = G_npass = G_est = G_nfail = G_nbadd = G_nvoid = G_nmiss = G_act = G_PASS = G_FAIL = G_WARN = G_NONE = 0;
+   P_nunit = P_nscrp = P_ncond = P_nstep = P_npass = P_est = P_nfail = P_nbadd = P_nvoid = P_nmiss = P_act = P_PASS = P_FAIL = P_WARN = P_NONE = 0;
+   U_nunit = U_nscrp = U_ncond = U_nstep = U_npass = U_est = U_nfail = U_nbadd = U_nvoid = U_nmiss = U_act = U_PASS = U_FAIL = U_WARN = U_NONE = 0;
+   /*---(walk database)------------------*/
+   rc = WAVE_by_cursor (YDLST_HEAD, &x_wave);
+   while (rc >= 0) {
+      /*---(project)---------------------*/
+      switch (x_wave->w_verb) {
+      case 'p' :
+         ++G_nproj;
+         if (x_unit != NULL)   WAVE_total_unit (x_unit);
+         if (x_proj != NULL)   WAVE_total_proj (x_proj);
+         x_proj = x_wave;
+         x_unit = NULL;
+         P_nunit = P_nscrp = P_ncond = P_nstep = P_npass = P_est = P_nfail = P_nbadd = P_nvoid = P_nmiss = P_act = P_PASS = P_FAIL = P_WARN = P_NONE = 0;
+         U_nunit = U_nscrp = U_ncond = U_nstep = U_npass = U_est = U_nfail = U_nbadd = U_nvoid = U_nmiss = U_act = U_PASS = U_FAIL = U_WARN = U_NONE = 0;
+         break;
+         /*---(unit)------------------------*/
+      case 'u' :
+         if (x_unit != NULL)   WAVE_total_unit (x_unit);
+         x_unit = x_wave;
+         G_nunit  += 1;       P_nunit  += 1;
+         U_nunit = U_nscrp = U_ncond = U_nstep = U_npass = U_est = U_nfail = U_nbadd = U_nvoid = U_nmiss = U_act = U_PASS = U_FAIL = U_WARN = U_NONE = 0;
+         break;
+         /*---(wave)------------------------*/
+      case 'w' :
+         G_nscrp  += 1;                P_nscrp  += 1;                U_nscrp  += 1; 
+         G_ncond  += x_wave->w_ncond;  P_ncond  += x_wave->w_ncond;  U_ncond  += x_wave->w_ncond; 
+         G_nstep  += x_wave->w_nstep;  P_nstep  += x_wave->w_nstep;  U_nstep  += x_wave->w_nstep; 
+         G_est    += x_wave->w_expect; P_est    += x_wave->w_expect; U_est    += x_wave->w_expect;
+         G_npass  += x_wave->w_npass;  P_npass  += x_wave->w_npass;  U_npass  += x_wave->w_npass; 
+         G_nfail  += x_wave->w_nfail;  P_nfail  += x_wave->w_nfail;  U_nfail  += x_wave->w_nfail;
+         G_nbadd  += x_wave->w_nbadd;  P_nbadd  += x_wave->w_nbadd;  U_nbadd  += x_wave->w_nbadd;
+         G_nvoid  += x_wave->w_nvoid;  P_nvoid  += x_wave->w_nvoid;  U_nvoid  += x_wave->w_nvoid;
+         G_nmiss  += x_wave->w_nmiss;  P_nmiss  += x_wave->w_nmiss;  U_nmiss  += x_wave->w_nmiss;
+         G_act    += x_wave->w_actual; P_act    += x_wave->w_actual; U_act    += x_wave->w_actual;
+         switch (x_wave->w_result) {
+         case 'Ï' : G_PASS  += 1; P_PASS  += 1; U_PASS  += 1; x_wave->w_pass = 'Ï'; break;
+         case 'F' : G_FAIL  += 1; P_FAIL  += 1; U_FAIL  += 1; x_wave->w_fail = 'Ï'; break;
+         case '?' : G_WARN  += 1; P_WARN  += 1; U_WARN  += 1; x_wave->w_warn = 'Ï'; break;
+         default  : G_NONE  += 1; P_NONE  += 1; U_NONE  += 1; x_wave->w_none = 'Ï'; break;
+         }
+         break;
+      }
+      /*---(next)------------------------*/
+      rc = WAVE_by_cursor (YDLST_NEXT, &x_wave);
+   }
+   if (x_unit != NULL)   WAVE_total_unit (x_unit);
+   if (x_proj != NULL)   WAVE_total_proj (x_proj);
+   return 0;
+}
+
+char
+WAVE_write              (char a_file [LEN_PATH])
+{
    char        rce         =  -10;
    char        rc          =    0;
-   char       *p           = NULL;
+   long        x_now       =    0;
+   tTIME      *x_broke     = NULL;
+   FILE       *f           = NULL;
+   tWAVE      *x_wave      = NULL;
    int         c           =    0;
+   char        x_heart     [LEN_HUND]  = "";
+   char        x_est       [LEN_SHORT] = "";
+   char        x_act       [LEN_SHORT] = "";
+   /*---(defense)------------------------*/
+   --rce; if (a_file == NULL)  return rce;
+   /*---(open file)----------------------*/
+   f = fopen (a_file, "wt");
+   --rce; if (f      == NULL)  return rce;
    /*---(header)-------------------------*/
-   DEBUG_DATA   yLOG_enter   (__FUNCTION__);
-   /*---(get the home)-------------------*/
-   rc = ystrlhome (my.path);
-   DEBUG_DATA   yLOG_value   ("strlhere"  , rc);
-   --rce;  if (rc < 0)  {
-      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
+   x_now   = time (NULL);
+   x_broke = localtime (&x_now);
+   strftime (x_heart, LEN_TITLE, "%y.%m.%d.%H.%M.%S.%u.%W.%j", x_broke);
+   fprintf (f, "## ouroboros-aperantos (tail-eater) master unit testing sequencer\n");
+   fprintf (f, "## central wave database\n");
+   fprintf (f, "## last update å%sæ %ld\n", x_heart, x_now);
+   WAVE_totalize ();
+   /*---(prepare)------------------------*/
+   rc = WAVE_by_cursor (YDLST_HEAD, &x_wave);
+   /*---(walk database)------------------*/
+   while (rc >= 0) {
+      /*---(project)---------------------*/
+      switch (x_wave->w_verb) {
+      case 'p' :
+         ystrldur (x_wave->w_expect, '-', x_est);
+         ystrldur (x_wave->w_actual, '-', x_act);
+         fprintf (f, "\n\n\n");
+         fprintf (f, "##------  ---timestamp--------------  ---epoch--  ---project----------  ---unit-----------------------  sc  S  ---description--------------------------------------------------------  ---terse------------  w  s  i  #units  #scrps  #conds  #steps  est  expect  R  #pass#  #fail#  #badd#  #void#  #miss#  actual  act  -pass-  -fail-  -warn-  -none- \n");
+         fprintf (f, "PROJ====  =========´=========´======  =========´  %-20.20s  ##=======´=========´=========´  ==  =  =========´=========´=========´=========´=========´=========´=========´  =========´=========´  =  =  =  %6d  %6d  %6d  %6d  %3s  %6d  =  %6d  %6d  %6d  %6d  %6d  %6d  %3s  %6d  %6d  %6d  %6d \n",
+               x_wave->w_proj, x_wave->w_nunit, x_wave->w_nscrp, x_wave->w_ncond, x_wave->w_nstep, x_est, x_wave->w_expect, x_wave->w_npass, x_wave->w_nfail, x_wave->w_nbadd, x_wave->w_nvoid, x_wave->w_nmiss, x_wave->w_actual, x_act, x_wave->w_pass, x_wave->w_fail, x_wave->w_warn, x_wave->w_none);
+         break;
+         /*---(unit)------------------------*/
+      case 'u' :
+         ystrldur (x_wave->w_expect, '-', x_est);
+         ystrldur (x_wave->w_actual, '-', x_act);
+         fprintf (f, "\n");
+         fprintf (f, "  UNIT··  ··························  ··········  %-20.20s  %-30.30s  ##  S  ---description--------------------------------------------------------  ---terse------------  -  -  -  %6d  %6d  %6d  %6d  %3s  %6d  R  %6d  %6d  %6d  %6d  %6d  %6d  %3s  %6d  %6d  %6d  %6d \n",
+               x_wave->w_proj, x_wave->w_unit, x_wave->w_nunit, x_wave->w_nscrp, x_wave->w_ncond, x_wave->w_nstep, x_est, x_wave->w_expect, x_wave->w_npass, x_wave->w_nfail, x_wave->w_nbadd, x_wave->w_nvoid, x_wave->w_nmiss, x_wave->w_actual, x_act, x_wave->w_pass, x_wave->w_fail, x_wave->w_warn, x_wave->w_none);
+         break;
+         /*---(wave)------------------------*/
+      case 'w' :
+         ystrldur (x_wave->w_actual, '-', x_act);
+         fprintf (f, "    WAVE  %-26.26s  %10ld  %-20.20s  %-30.30s  %02d  %c  %-70.70s  %-20.20s  %c  %c  %c  %6d  %6d  %6d  %6d  %3.3s  %6d  %c  %6d  %6d  %6d  %6d  %6d  %6d  %3s       %c       %c       %c       %c \n",
+               x_wave->w_time, x_wave->w_last, x_wave->w_proj, x_wave->w_unit,
+               x_wave->w_scrp, x_wave->w_source, x_wave->w_desc, x_wave->w_terse,
+               x_wave->w_wave, x_wave->w_stage, x_wave->w_rating,
+               x_wave->w_nunit, x_wave->w_nscrp, x_wave->w_ncond, x_wave->w_nstep,
+               x_wave->w_expe, x_wave->w_expect,
+               x_wave->w_result,
+               x_wave->w_npass, x_wave->w_nfail, x_wave->w_nbadd, x_wave->w_nvoid, x_wave->w_nmiss,
+               x_wave->w_actual, x_act,
+               x_wave->w_pass, x_wave->w_fail, x_wave->w_warn, x_wave->w_none);
+         break;
+      }
+      /*---(next)------------------------*/
+      rc = WAVE_by_cursor (YDLST_NEXT, &x_wave);
    }
-   DEBUG_DATA   yLOG_info    ("my.path"   , my.path);
-   /*---(clear existing)-----------------*/
-   WAVE_purge_by_path (my.path);
-   /*---(run inventory)------------------*/
-   c = WAVE_inventory (my.path, 'y');
+   /*---(footer)-------------------------*/
+   ystrldur (G_est, '-', x_est);
+   ystrldur (G_act, '-', x_act);
+   fprintf (f, "\n\n\n");
+   fprintf (f, "##------  ---timestamp--------------  ---epoch--  ---project----------  ---unit-----------------------  sc  S  ---description--------------------------------------------------------  ---terse------------  w  s  i  #units  #scrps  #conds  #steps  est  expect  R  #pass#  #fail#  #badd#  #void#  #miss#  actual  act  -pass-  -fail-  -warn-  -none- \n");
+   fprintf (f, "## GRAND  =========´=========´======  =========´  %3d =====´=========´  ##=======´=========´=========´  ==  =  =========´=========´=========´=========´=========´=========´=========´  =========´=========´  =  =  =  %6d  %6d  %6d  %6d  %3s  %6d  =  %6d  %6d  %6d  %6d  %6d  %6d  %3s  %6d  %6d  %6d  %6d \n",
+         G_nproj, G_nunit, G_nscrp, G_ncond, G_nstep, x_est, G_est, G_npass, G_nfail, G_nbadd, G_nvoid, G_nmiss, G_act, x_act, G_PASS, G_FAIL, G_WARN, G_NONE);
+   fprintf (f, "\n\n\n");
+   fprintf (f, "## end-of-data.  done, finito, completare, whimper [Ï´···\n");
+   /*---(close)--------------------------*/
+   rc = fclose (f);
+   --rce; if (rc != 0)         return rce;
    /*---(complete)-----------------------*/
-   DEBUG_ENVI   yLOG_exit    (__FUNCTION__);
-   return c;
-}
-
-
-
-/*====================------------------------------------====================*/
-/*===----                          sorting                             ----===*/
-/*====================------------------------------------====================*/
-static void  o___SORT____________o () { return; }
-
-/*> char* WAVE__key   (tWAVE *a_cur) { return (a_cur != NULL) ? a_cur->key  : ""; }   <*/
-char* PROJ__key   (tWAVE *a_cur) { return (a_cur != NULL) ? a_cur->sort : ""; }
-
-char
-WAVE_hints              (void)
-{
-   char        rc          =    0;
-   int         p           =   -1;
-   int         u           =   -1;
-   int         s           =   -1;
-   tWAVE      *x_prv       = NULL;
-   tWAVE      *x_cur       = NULL;
-   rc = PROJ_by_cursor (&x_cur, '[');
-   /*> while (rc >= 0 && x_cur != NULL) {                                                                           <* 
-    *>    if (x_prv == NULL || strcmp (x_prv->w_proj, x_cur->w_proj) != 0) ystrlhint (++p, "99", x_cur->w_phint);   <* 
-    *>    else                                                         ystrlhint (p  , "99", x_cur->w_phint);       <* 
-    *>    if (x_prv == NULL || strcmp (x_prv->w_unit, x_cur->w_unit) != 0) ystrlhint (++u, "uu", x_cur->w_uhint);   <* 
-    *>    else                                                         ystrlhint (u  , "uu", x_cur->w_uhint);       <* 
-    *>    ystrlhint (++s, "ll", x_cur->w_shint);                                                                    <* 
-    *>    /+> printf ("%s\n", x_cur->sort);                                               <+/                       <* 
-    *>    x_prv = x_cur;                                                                                            <* 
-    *>    rc = PROJ_by_cursor (&x_cur, '>');                                                                        <* 
-    *> }                                                                                                            <*/
    return 0;
 }
 
-char
-WAVE_gnome              (void)
-{
-   ySORT_pixie  (WAVE_by_cursor, WAVE__key, WAVE__unhook, WAVE__hook);
-   ySORT_pixie  (PROJ_by_cursor, PROJ__key, PROJ__unhook, PROJ__hook);
-   WAVE_hints ();
-   return 0;
-}
 
 
 
@@ -1340,28 +1087,28 @@ WAVE__unit              (char *a_question, int n)
                n, x_cur->w_found, x_cur->w_hint, x_cur->w_proj, x_cur->w_unit, x_cur->w_scrp, x_cur->w_wave, x_cur->w_stage, x_cur->w_terse, x_cur->w_desc, t, u, x_cur->w_time, x_cur->w_last);
       }
    }
-   else if (strcmp (a_question, "project"       )  == 0) {
-      PROJ_by_index (&x_cur, n);
-      if (x_cur == NULL) {
-         snprintf (my.unit_answer, LEN_RECD, "PROJ entry  (%2d) : -  -   -[]                       -   -[]", n);
-      } else {
-         if (x_cur->w_unit != NULL)  sprintf (s, "%2d[%.20s]", strlen (x_cur->w_unit), x_cur->w_unit);
-         if (x_cur->w_desc != NULL)  sprintf (t, "%2d[%.40s]", strlen (x_cur->w_desc), x_cur->w_desc);
-         snprintf (my.unit_answer, LEN_RECD, "PROJ entry  (%2d) : %c  %c  %-24.24s  %2d  %s",
-               n, x_cur->w_wave, x_cur->w_stage, s, x_cur->w_scrp, t);
-      }
-   }
-   else if (strcmp (a_question, "sortkey"       )  == 0) {
-      WAVE_by_index (n, &x_cur);
-      if (x_cur == NULL) {
-         snprintf (my.unit_answer, LEN_RECD, "WAVE sortkey(%2d) :  -[]                                 -[]", n);
-      } else {
-         if (x_cur->key  != NULL)  sprintf (s, "%2d[%.30s]", strlen (x_cur->key ), x_cur->key );
-         if (x_cur->sort != NULL)  sprintf (t, "%2d[%.40s]", strlen (x_cur->sort), x_cur->sort);
-         snprintf (my.unit_answer, LEN_RECD, "WAVE sortkey(%2d) : %-34.34s  %s",
-               n, s, t);
-      }
-   }
+   /*> else if (strcmp (a_question, "project"       )  == 0) {                                                         <* 
+    *>    PROJ_by_index (&x_cur, n);                                                                                   <* 
+    *>    if (x_cur == NULL) {                                                                                         <* 
+    *>       snprintf (my.unit_answer, LEN_RECD, "PROJ entry  (%2d) : -  -   -[]                       -   -[]", n);   <* 
+    *>    } else {                                                                                                     <* 
+    *>       if (x_cur->w_unit != NULL)  sprintf (s, "%2d[%.20s]", strlen (x_cur->w_unit), x_cur->w_unit);             <* 
+    *>       if (x_cur->w_desc != NULL)  sprintf (t, "%2d[%.40s]", strlen (x_cur->w_desc), x_cur->w_desc);             <* 
+    *>       snprintf (my.unit_answer, LEN_RECD, "PROJ entry  (%2d) : %c  %c  %-24.24s  %2d  %s",                      <* 
+    *>             n, x_cur->w_wave, x_cur->w_stage, s, x_cur->w_scrp, t);                                             <* 
+    *>    }                                                                                                            <* 
+    *> }                                                                                                               <*/
+   /*> else if (strcmp (a_question, "sortkey"       )  == 0) {                                                         <* 
+    *>    WAVE_by_index (n, &x_cur);                                                                                   <* 
+    *>    if (x_cur == NULL) {                                                                                         <* 
+    *>       snprintf (my.unit_answer, LEN_RECD, "WAVE sortkey(%2d) :  -[]                                 -[]", n);   <* 
+    *>    } else {                                                                                                     <* 
+    *>       if (x_cur->key  != NULL)  sprintf (s, "%2d[%.30s]", strlen (x_cur->key ), x_cur->key );                   <* 
+    *>       if (x_cur->sort != NULL)  sprintf (t, "%2d[%.40s]", strlen (x_cur->sort), x_cur->sort);                   <* 
+    *>       snprintf (my.unit_answer, LEN_RECD, "WAVE sortkey(%2d) : %-34.34s  %s",                                   <* 
+    *>             n, s, t);                                                                                           <* 
+    *>    }                                                                                                            <* 
+    *> }                                                                                                               <*/
    /*---(complete)-----------------------*/
    return my.unit_answer;
 }

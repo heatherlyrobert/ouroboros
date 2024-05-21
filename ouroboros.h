@@ -1,41 +1,50 @@
 /*===============================[[ beg code ]]===============================*/
 
-
-/*===[[ HEADER ]]=============================================================*/
-/*345678901-12345678901-123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
-
+/*===[[ ONE_LINERS ]]=========================================================*/
+/*                      ´·········1·········2·········3·········4·········5·········6·········7*/
+/*--------- 12345678901 ´123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
+/*········· ··········· ´·····························´········································*/
 #define     P_FOCUS     "PS (programming support)"
 #define     P_NICHE     "ut (unit testing)"
-#define     P_SUBJECT   "master unit testing sequencer"
+#define     P_SUBJECT   "master unit test sequencer"
 #define     P_PURPOSE   "provide simple unit testing framework for writing scripts"
-
+/*········· ··········· ´·····························´········································*/
 #define     P_NAMESAKE  "ouroboros-aperantos (tail-eater)"
+#define     P_PRONOUNCE "ohr·oh·bohr·ohs"
+#define     P_TRANSLATE "oura (tail) boros (eater) aperantos (vast, infinite, limitless)"
 #define     P_HERITAGE  "the world serpent symbolizing eternal cyclic renewal"
+#define     P_BRIEFLY   "symbol of cyclic renewal"
 #define     P_IMAGERY   "powerful, world-encircling serpent swallowing its own tail"
 #define     P_REASON    "symbol of life, death, and renewal matching up with testing"
-
-/* ouroboros literally means tail (oura) eater (boros)
- * aperantos is greek for vast, infinite, limitless */
-
+/*········· ··········· ´·····························´········································*/
 #define     P_ONELINE   P_NAMESAKE " " P_SUBJECT
-
+/*········· ··········· ´·····························´········································*/
+#define     P_HOMEDIR   "/home/system/ouroboros.master_test_sequencer"
 #define     P_BASENAME  "ouroboros"
-#define     P_FULLPATH  ""
-#define     P_SUFFIX    ""
-#define     P_CONTENT   ""
-
+#define     P_FULLPATH  "/usr/local/bin/ouroboros"
+#define     P_SUFFIX    "···"
+#define     P_CONTENT   "···"
+/*········· ··········· ´·····························´········································*/
 #define     P_SYSTEM    "gnu/linux   (powerful, ubiquitous, technical, and hackable)"
 #define     P_LANGUAGE  "ansi-c      (wicked, limitless, universal, and everlasting)"
+#define     P_COMPILER  "gcc 5.3.0"
 #define     P_CODESIZE  "small       (appoximately 1,000 slocl)"
-#define     P_DEPENDS   "none"
-
+/*········· ··········· ´·····························´········································*/
 #define     P_AUTHOR    "heatherlyrobert"
 #define     P_CREATED   "2020-12"
-
+/*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2a"
-#define     P_VERTXT    "brought in yPARSE and new WAVE data format for better outcomes"
+#define     P_VERNUM    "0.2c"
+#define     P_VERTXT    "drawing is working on foundation subset"                     
+/*········· ··········· ´·····························´········································*/
+#define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
+#define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
+#define     P_REMINDER  "there are many better options, but i *own* every byte of this one"
+/*········· ··········· ´·····························´········································*/
+#define     P_HEADERS   P_FOCUS, P_NICHE, P_SUBJECT, P_PURPOSE, P_NAMESAKE, P_PRONOUNCE, P_HERITAGE, P_BRIEFLY, P_IMAGERY, P_REASON, P_ONELINE, P_HOMEDIR, P_BASENAME, P_FULLPATH, P_SUFFIX, P_CONTENT, P_SYSTEM, P_LANGUAGE, P_COMPILER, P_CODESIZE, NULL, NULL, NULL, NULL, NULL, NULL, NULL, P_AUTHOR, P_CREATED, P_VERMAJOR, P_VERMINOR, P_VERNUM, P_VERTXT
+/*········· ··········· ´·····························´········································*/
+/*--------- 12345678901 ´123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
 
 
 /*
@@ -78,21 +87,28 @@
 #include    <string.h>       /* C_ANSI : printf, snprintf, fgets, fopen, ...  */
 #include    <dirent.h>       /* POSIX  (11) opendir, readdir, alphasort       */
 #include    <unistd.h>       /* POSIX  (11) opendir, readdir, alphasort       */
+#include    <time.h>
 
 /*===[[ CUSTOM LIBRARIES ]]===================================================*/
-#include    <yUNIT.h>        /* CUSTOM : heatherly unit testing               */
 #include    <yLOG.h>         /* CUSTOM : heatherly program logging            */
 #include    <ySTR.h>         /* CUSTOM : heatherly safer string handling      */
 #include    <yURG.h>         /* CUSTOM : heatherly urgent processing          */
+#include    <yENV.h>
+#include    <yUNIT.h>        /* CUSTOM : heatherly unit testing               */
 #include    <ySORT.h>        /* CUSTOM : heatherly sorting library            */
 #include    <yPARSE.h>       /* CUSTOM : heatherly record parsing             */
+#include    <yJOBS.h>
+#include    <yASCII.h>
 #include    <yCOLOR_solo.h>  /* CUSTOM : heatherly colorization library       */
 #include    <yDLST_solo.h>   /* CUSTOM : heatherly linked-list library        */
 
 typedef struct dirent    tDIRENT;
 typedef struct FILE      tFILE;
+typedef struct tm        tTIME;
 
 
+#define     FILE_CENTRAL   "/var/lib/polymnia/ouroboros.tdb"
+#define     FILE_UCENTRAL  "/tmp/ouroboros_central.tdb"
 
 #define     F_DB          "/var/lib/ouroboros/ouroboros.db"
 
@@ -109,126 +125,119 @@ typedef struct FILE      tFILE;
 typedef     struct cGLOBALS     tGLOBALS;
 struct cGLOBALS
 {
-   /*---(general)--------------*/
+   /*---(yJOBS)--------------------------*/
+   char        run_as;                      /* khronos, eos, heracles, ...    */
+   char        run_mode;                    /* verify, install, audit, ...    */
+   char        run_file    [LEN_PATH];      /* file to act on                 */
+   int         run_uid;                     /* uid of person who launched     */
+   long        run_start;
+   /*---(general)------------------------*/
    char        version     [LEN_FULL];      /* program version info           */
    char        unit_answer [LEN_RECD];      /* response from unit testing     */
-   char        run_mode;
    char        path        [LEN_PATH];      /* base directory                 */
    char        proj        [LEN_LABEL];     /* project name                   */
    char        wave_min;
    char        wave_max;
    char        n_db        [LEN_PATH];      /* database name                  */
    FILE       *f_db;                        /* database file pointer          */
-   /*---(statistics)-----------*/
+   char        n_home      [LEN_PATH];      /* directory launched in          */
+   /*---(statistics)---------------------*/
    int         projs;
    int         units;
    int         scrps;
    int         conds;
    int         steps;
-   /*---(results)--------------*/
+   /*---(results)------------------------*/
    int         ready;
    int         pass;
    int         fail;
    int         badd;
    int         othr;
-   /*---(done)-----------------*/
+   /*---(constant links)-----------------*/
+   char        depsolo     [LEN_FULL];        /* _solo and/or _uver only     */
+   char        depunit     [LEN_FULL];        /* unit testing tools required */
+   /*---(code links)---------------------*/
+   char        depansi     [LEN_FULL];        /* ansi-c standard             */
+   char        depposix    [LEN_FULL];        /* beyond ansi-c standard      */
+   char        depcore     [LEN_FULL];        /* absolutely everywhere       */
+   char        depvikey    [LEN_FULL];        /* vikeys standard             */
+   char        depgraph    [LEN_FULL];        /* curses or opengl related    */
+   char        depother    [LEN_FULL];        /* non-core, vikey,or graphics */
+   char        depalien    [LEN_FULL];        /* third-party or proprietary  */
+   /*---(data links)---------------------*/
+   char        depinpt     [LEN_FULL];        /* pure input files, conf, etc */
+   char        depoutp     [LEN_FULL];        /* pure output files, reports  */
+   char        depfile     [LEN_FULL];        /* master files, databases     */
+   /*---(unknown link)-------------------*/
+   char        depall      [LEN_RECD];        /* every dependency            */
+   char        depwtf      [LEN_FULL];        /* unknown dependency          */
+   /*---(drawing)------------------------*/
+   char        d_ornament;
+   char        d_style;
+   char        x_cols;
+   int         x_min;
+   int         x_max;
+   int         x_end;
+   char        x_side;
+   char        x_gap;
+   char        x_wide;
+   char        y_rows;
+   int         y_min;
+   int         y_max;
+   int         y_end;
+   char        y_side;
+   char        y_gap;
+   char        y_tall;
+   /*---(done)---------------------------*/
 };
 extern      tGLOBALS    my;
 
-/*> typedef struct cPROJ  tPROJ;                                                      <* 
- *> struct cPROJ {                                                                    <* 
- *>    /+---(master)------------+/                                                    <* 
- *>    uchar       p_name      [LEN_TITLE];                                           <* 
- *>    uchar       p_path      [LEN_FULL];                                            <* 
- *>    /+---(testing)-----------+/                                                    <* 
- *>    long        p_time;                                                            <* 
- *>    uchar       p_resu;                                                            <* 
- *>    /+---(peers)-------------+/                                                    <* 
- *>    tPROJ      *p_next;                                                            <* 
- *>    tPROJ      *p_prev;                                                            <* 
- *>    /+---(units)-------------+/                                                    <* 
- *>    tUNIT      *p_head;                                                            <* 
- *>    tUNIT      *p_tail;                                                            <* 
- *>    short       p_units;                                                           <* 
- *>    /+---(sorted)------------+/                                                    <* 
- *>    tBTREE     *p_sort;                                                            <* 
- *>    /+---(done)--------------+/                                                    <* 
- *> };                                                                                <*/
 
-/*> typedef struct cUNIT  tUNIT;                                                      <* 
- *> struct cUNIT {                                                                    <* 
- *>    /+---(parent)------------+/                                                    <* 
- *>    tPROJ      *u_parent;                                                          <* 
- *>    /+---(master)------------+/                                                    <* 
- *>    uchar       u_name      [LEN_TITLE];                                           <* 
- *>    /+---(testing)-----------+/                                                    <* 
- *>    long        u_time;                                                            <* 
- *>    uchar       u_resu;                                                            <* 
- *>    /+---(peers)-------------+/                                                    <* 
- *>    tUNIT      *u_next;                                                            <* 
- *>    tUNIT      *u_prev;                                                            <* 
- *>    /+---(waves)-------------+/                                                    <* 
- *>    tWAVE      *u_head;                                                            <* 
- *>    tWAVE      *u_tail;                                                            <* 
- *>    short       u_scrps;                                                           <* 
- *>    /+---(sorted)------------+/                                                    <* 
- *>    tBTREE     *u_sort;                                                            <* 
- *>    /+---(done)--------------+/                                                    <* 
- *> };                                                                                <*/
-
-/*> typedef struct cSCRP  tSCRP;                                                      <* 
- *> struct cSCRP {                                                                    <* 
- *>    /+---(parent)------------+/                                                    <* 
- *>    tUNIT      *s_parent;                                                          <* 
- *>    /+---(master)------------+/                                                    <* 
- *>    uchar       u_name      [LEN_TITLE];                                           <* 
- *>    /+---(testing)-----------+/                                                    <* 
- *>    long        u_time;                                                            <* 
- *>    uchar       u_resu;                                                            <* 
- *>    /+---(peers)-------------+/                                                    <* 
- *>    tUNIT      *s_next;                                                            <* 
- *>    tUNIT      *s_prev;                                                            <* 
- *>    /+---(sorted)------------+/                                                    <* 
- *>    tBTREE     *s_sort;                                                            <* 
- *>    /+---(done)--------------+/                                                    <* 
- *> };                                                                                <*/
-
-
-#define     B_WAVE         'w'
+#define     B_WAVE         'W'
+#define     B_NODE         'N'
 
 
 typedef struct cWAVE  tWAVE;
 struct cWAVE {
    /*---(project)--------------*/
-   char        w_hint      [LEN_SHORT];
+   char        w_verb;
    char        w_found;
+   char        w_hint      [LEN_SHORT];
    char        w_proj      [LEN_LABEL];
    /*---(unit)-----------------*/
    char        w_unit      [LEN_TITLE];
    /*---(script)---------------*/
    char        w_scrp;
+   char        w_source;
    char        w_desc      [LEN_LONG];
    char        w_expe      [LEN_SHORT];
-   short       w_expect;
+   int         w_expect;
    char        w_terse     [LEN_LABEL];
    /*---(sequencing)-----------*/
    char        w_wave;
    char        w_stage;
+   char        w_rating;
    /*---(statistics)-----------*/
-   char        w_nunit;
-   char        w_nscrp;
-   short       w_ncond;
-   short       w_nstep;
+   int         w_nunit;
+   int         w_nscrp;
+   int         w_ncond;
+   int         w_nstep;
    /*---(results)--------------*/
    char        w_ready;
    char        w_time      [LEN_TITLE];
    long        w_last;
-   short       w_actual;
+   int         w_actual;
    char        w_result;
-   short       w_npass;
-   short       w_nfail;
-   short       w_nbadd;
-   short       w_nvoid;
+   int         w_npass;
+   int         w_nfail;
+   int         w_nbadd;
+   int         w_nvoid;
+   int         w_nmiss;
+   /*---(proj/unit only)-------*/
+   int         w_pass;
+   int         w_fail;
+   int         w_warn;
+   int         w_none;
    /*---(project links)--------*/
    char        sort        [LEN_HUND];
    tWAVE      *p_prev;
@@ -250,16 +259,100 @@ extern tWAVE     *s_head;
 extern tWAVE     *s_tail;
 
 
+#define   DEPSOLO      's'
+#define   DEPUNIT      'u'
+
+#define   DEPANSI      'a'
+#define   DEPPOSIX     'p'
+
+#define   DEPCORE      'c'
+#define   DEPVIKEY     'v'
+#define   DEPGRAPH     'g'
+#define   DEPOTHER     'o'
+
+#define   DEPALIEN     '!'
+
+#define   DEPINPT      'I'
+#define   DEPOUTP      'O'
+#define   DEPFILE      'F'
+
+#define   DEPWTF       '?'
+
+#define   DEPVISIBLE   "sucvgo!?"
+
+
+
+/*===[[ NODES ]]==============================================================*/
+#define   MAX_NODE       100
+#define   MAX_LEVEL       20
+
+typedef  struct cNODE  tNODE;
+typedef  struct cEDGE  tEDGE;
+
+struct cNODE {
+   /*---(data)--------------*/
+   char        n_name      [LEN_TITLE];
+   char        n_deps      [LEN_RECD];           /* actual dependencies       */
+   char        n_cumd      [LEN_RECD];           /* cumulative dependencies   */
+   char        n_miss      [LEN_RECD];           /* brand new dependencies    */
+   char        n_focus;
+   /*---(working)-----------*/
+   char        n_level;
+   char        n_row;
+   /*---(predecessors)------*/
+   char        n_pred;
+   tEDGE      *n_phead;
+   tEDGE      *n_ptail;
+   char        n_filled;
+   char        n_ready;
+   /*---(successors)--------*/
+   char        n_succ;
+   tEDGE      *n_shead;
+   tEDGE      *n_stail;
+   /*---(done)--------------*/
+};
+extern tNODE   g_nodes   [MAX_NODE];
+extern int     g_nnode;
+extern int     g_ready;
+
+
+
+/*===[[ EDGES ]]==============================================================*/
+#define   MAX_EDGE      2000
+struct cEDGE {
+   /*---(ends)--------------*/
+   int         e_nbeg;
+   tNODE      *e_beg;
+   char        e_filled;
+   int         e_nend;
+   tNODE      *e_end;
+   /*---(working)-----------*/
+   char        e_used;
+   /*---(beg-point list)----*/
+   tNODE      *e_pprev;
+   tNODE      *e_pnext;
+   /*---(end-point list)----*/
+   tNODE      *e_sprev;
+   tNODE      *e_snext;
+   /*---(done)--------------*/
+};
+extern tEDGE   g_edges   [MAX_EDGE];
+extern int     g_nedge;
+extern char    g_maxlvl;
+
+
 
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
 /*---(support)-----------------*/
 char*       PROG_version            (void);
+/*---(preinit)-----------------*/
+char        PROG__header            (void);
+char        PROG_urgents            (int a_argc, char *a_argv []);
 /*---(startup)-----------------*/
 char        PROG__init              (void);
 char        PROG__args              (int a_argc, char *a_argv[]);
 char        PROG__begin             (void);
 char        PROG_startup            (int a_argc, char *a_argv[]);
-char        PROG_final              (void);
 /*---(drivers)-----------------*/
 char        PROG_driver             (void);
 /*---(shutdown)----------------*/
@@ -275,8 +368,10 @@ char        PROG__unit_end          (void);
 
 /*---(support)-----------------*/
 char        WAVE__wipe              (tWAVE *a_dst, char a_new);
-char        WAVE__key               (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char a_scrp, char r_key [LEN_LONG]);
-char        WAVE__verify            (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char a_scrp, char a_desc [LEN_LONG], char a_expect [LEN_SHORT], char a_terse [LEN_LABEL], char a_wave, char a_stage, char *r_key);
+char        WAVE__key               (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char a_scrp, char r_key [LEN_LONG], char *r_verb);
+/*---(memory)------------------*/
+char        WAVE__new               (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char a_scrp, char a_gather, tWAVE **r_new);
+char        WAVE__free              (tWAVE **a_old);
 /*---(program)-----------------*/
 char        WAVE_init               (void);
 char        WAVE_purge_all          (void);
@@ -284,42 +379,19 @@ char        WAVE_purge_proj         (char a_proj [LEN_LABEL]);
 char        WAVE_purge_unit         (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE]);
 char        WAVE_purge_scrp         (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char a_scrp);
 char        WAVE_wrap               (void);
-
-char        WAVE_pull               (cchar a_file [LEN_PATH]);
-
-char        PROJ__hook              (tWAVE *a_ref, tWAVE *a_new);
-char        WAVE__hook              (tWAVE *a_ref, tWAVE *a_new);
-char        PROJ__unhook            (tWAVE *a_old);
-char        WAVE__unhook            (tWAVE *a_old);
-char        WAVE__populate          (tWAVE *a_new, uchar a_wave, uchar a_stage, char *a_unit, char a_scrp, char *a_desc, char *a_key);
-/*---(memory)------------------*/
-char        WAVE__new               (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char a_scrp, char a_force, tWAVE **r_new);
-char        WAVE_new                (tWAVE **a_new);
-char        WAVE_force              (tWAVE **a_new);
-char        WAVE__free              (tWAVE **a_old);
-char        WAVE_purge              (void);
-char        WAVE_purge_by_unit      (char *a_unit);
-char        WAVE_purge_by_path      (char *a_path);
-/*---(data)--------------------*/
-char        WAVE_populate           (tWAVE *a_new, char a_wave, char a_stage, char *a_unit, char a_scrp, char *a_desc);
-char        WAVE_results            (tWAVE *x_wave, uchar a_resu, int a_cond, int a_test, int a_pass, int a_fail, int a_badd, int a_othr);
+/*---(yparse)------------------*/
+char        WAVE_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_handler);
+char        WAVE__pull              (char a_gather, cchar a_file [LEN_PATH]);
+char        WAVE_pull_local         (cchar a_file [LEN_PATH]);
+char        WAVE_pull_central       (cchar a_file [LEN_PATH]);
 /*---(search)------------------*/
 int         WAVE_count              (void);
 char        WAVE_by_index           (int n, tWAVE **a_cur);
-char        PROJ_by_index           (tWAVE **a_cur, int n);
-char        WAVE_by_cursor          (tWAVE **a_cur, char a_move);
-char        PROJ_by_cursor          (tWAVE **a_cur, char a_move);
-char        WAVE_by_sortkey         (tWAVE **a_cur, char *a_name);
-char        PROJ_by_sortkey         (tWAVE **a_cur, char *a_name);
 /*---(import)------------------*/
-char        WAVE_parse              (char *a_recd, char a_call);
-char        WAVE_read               (char *a_name, char a_call);
-char        WAVE_inventory          (char *a_path, char a_call);
+char        WAVE_inventory          (char *a_path);
 char        WAVE_here               (void);
-/*---(sort)--------------------*/
-/*> char*       WAVE__key               (tWAVE *a_cur);                               <*/
-char*       PROJ__key               (tWAVE *a_cur);
-char        WAVE_gnome              (void);
+/*---(export)------------------*/
+char        WAVE_write              (char a_file [LEN_PATH]);
 /*---(unittest)----------------*/
 char*       WAVE__unit              (char *a_question, int n);
 
@@ -338,9 +410,88 @@ char        TEST_run                (tWAVE *a_cur);
 char*       TEST__unit              (char *a_question, int n);
 
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
-char        DB__open                (char a_mode, int *a_projs, int *a_units, int *a_scrps, int *a_conds, int *a_steps);
-char        DB__close               (void);
-char*       DB__unit                (char *a_question, int n);
+
+
+char        YJOBS_callback          (cchar a_req, cchar *a_data);
+
+
+
+
+/*===[[ ouroboros_draw.c ]]===================================================*/
+/*········· ´······················ ´·········································*/
+/*---(program)--------------*/
+char        DRAW_init               (char a_ornament, char a_style, char a_cols, char a_rows);
+char        DRAW_wrap               (void);
+/*---(elements)-------------*/
+char        DRAW_node               (short x, short y, char a);
+char        DRAW_box                (char a_col, char a_row, char a_name [LEN_TITLE], char a_npred, char a_nsucc);
+char        DRAW_box_rooted         (char a_prog [LEN_TITLE]);
+char        DRAW_box_clear          (void);
+char        DRAW_single             (char a_new, short x, short y);
+char        DRAW_hconnect           (char a_bcol, char a_brow, char a_ecol, char a_erow);
+
+char        DRAW_main               (char a_ornament, char a_style);
+
+char        DRAW_boxes              (char a_style);
+char        GRAPH_box_deps          (char a_name [LEN_TITLE], char r_deps [LEN_RECD]);
+/*---(unittest)-------------*/
+char*       DRAW__unit              (char *a_question, int n);
+/*---(done)-----------------*/
+
+
+
+/*===[[ ouroboros_graph.c ]]==================================================*/
+/*········· ´······················ ´·········································*/
+/*---(program)--------------*/
+char        GRAPH_purge             (void);
+char        GRAPH_init              (void);
+/*---(nodes)----------------*/
+int         GRAPH_by_name           (char a_name [LEN_TITLE]);
+int         GRAPH_add_node          (char a_name [LEN_TITLE]);
+char*       GRAPH_node_line         (int n);
+char        GRAPH_dump_nodes        (void);
+/*---(edges)----------------*/
+char        GRAPH_add_edge          (char a_name [LEN_TITLE], int e);
+char        GRAPH_dump_edges        (void);
+/*---(deps)-----------------*/
+char        GRAPH_deps_add          (char a_name [LEN_TITLE], char a_deps [LEN_RECD]);
+char        GRAPH_deps_merge        (char a_deps [LEN_RECD], char r_cumd [LEN_RECD]);
+char        GRAPH_deps_missing      (char a_deps [LEN_RECD], char a_cumd [LEN_RECD], char r_miss [LEN_RECD]);
+char        GRAPH_deps_solve        (void);
+/*---(focus)----------------*/
+char        GRAPH_focus_pred        (int n);
+char        GRAPH_focus_on          (char a_prog [LEN_TITLE]);
+char        GRAPH_focus_all         (void);
+/*---(sequence)-------------*/
+char        GRAPH_seq_clear         (void);
+char        GRAPH_solve_layer       (char a_mark, char a_lvl);
+char        GRAPH_solve             (char a_mark);
+char        GRAPH_dump_seq          (void);
+/*---(unittest)-------------*/
+char*       GRAPH__unit             (char *a_question, int n);
+/*---(done)-----------------*/
+
+
+
+/*===[[ ouroboros_incl.c ]]===================================================*/
+/*········· ´······················ ´·········································*/
+/*---(program)--------------*/
+char        INCL_clear              (void);
+/*---(lists)----------------*/
+char        INCL_list_clear         (void);
+char        INCL_list_add           (char a_cat, char a_header [LEN_TITLE]);
+/*---(find)-----------------*/
+int         INCL_add_by_name        (int a_end, char a_header [LEN_TITLE]);
+char        INCL_add_by_group       (int a_end, char a_type);
+/*---(gather)---------------*/
+char        INCL_gather_add         (int a_end, char a_head [LEN_TITLE]);
+char        INCL_gather_in_c        (char a_name [LEN_TITLE], cchar a_file [LEN_PATH]);
+/*---(report)---------------*/
+char        INCL_list               (void);
+char        INCL_block              (char a_proj [LEN_TITLE]);
+/*---(unittest)-------------*/
+char*       INCL__unit              (char *a_question, int n);
+/*---(done)-----------------*/
 
 
 
