@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2d"
-#define     P_VERTXT    "adapted for remake of make_program and _init to zenodotus"
+#define     P_VERNUM    "0.2e"
+#define     P_VERTXT    "box, ties, and frame drawing all exported to yASCII (for reuse)"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -424,11 +424,9 @@ char        DRAW_init               (char a_ornament, char a_style, char a_cols,
 char        DRAW_wrap               (void);
 /*---(elements)-------------*/
 char        DRAW_node               (short x, short y, char a);
-char        DRAW_box                (char a_col, char a_row, char a_name [LEN_TITLE], char a_npred, char a_nsucc);
 char        DRAW_box_rooted         (char a_prog [LEN_TITLE]);
 char        DRAW_box_clear          (void);
 char        DRAW_single             (char a_new, short x, short y);
-char        DRAW_hconnect           (char a_bcol, char a_brow, char a_ecol, char a_erow);
 
 char        DRAW_main               (char a_ornament, char a_style);
 

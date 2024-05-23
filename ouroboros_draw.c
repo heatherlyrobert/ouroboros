@@ -90,6 +90,7 @@ DRAW_init               (char a_ornament, char a_style, char a_cols, char a_rows
    }
    /*---(create)-------------------------*/
    rc = yASCII_new (my.x_end, my.y_end);
+   yASCII_grid (a_ornament, my.x_min, my.y_min);
    /*---(title block)--------------------*/
    if (strchr ("fs", a_ornament) != NULL) {
       sprintf (s, "#!%s", P_FULLPATH);
@@ -107,45 +108,6 @@ DRAW_init               (char a_ornament, char a_style, char a_cols, char a_rows
          }
          yASCII_print (x_lvl * my.x_wide, 3, s, YASCII_CLEAR);
       }
-   }
-   if (a_ornament == 'b') {
-      /*---(top)-------------------------*/
-      l = my.x_max - my.x_min + 2;
-      sprintf (s, "É%*.*sÇ", l, l, YSTR_HORZ);
-      yASCII_print (my.x_min - 2, 1, s, YASCII_CLEAR);
-      /*---(middle)----------------------*/
-      sprintf (s, "Å%*.*sÅ", l, l, YSTR_EMPTY);
-      for (i = 2; i <= my.y_end - 2; ++i)  yASCII_print (my.x_min - 2 + 0, i, s, YASCII_CLEAR);
-      /*---(bottom)----------------------*/
-      sprintf (s, "Ñ%*.*sÖ", l, l, YSTR_HORZ);
-      yASCII_print (my.x_min - 2, my.y_end - 1, s, YASCII_CLEAR);
-      /*---(title)-----------------------*/
-      sprintf (s, "ÉÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÇ");
-      yASCII_print (my.x_min + 2, 0, s, YASCII_CLEAR);
-      sprintf (s, "Ü I. FOUNDATION (14) á");
-      yASCII_print (my.x_min + 2, 1, s, YASCII_CLEAR);
-      sprintf (s, "ÑÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÖ");
-      yASCII_print (my.x_min + 2, 2, s, YASCII_CLEAR);
-      yASCII_print (my.x_min + 30, 0, "absolutely everything relies (or should rely) on this block", YASCII_CLEAR);
-      /*---(header line)-----------------*/
-      sprintf (s, "Å%*.*sÅ", l, l, YSTR_EDOTS);
-      yASCII_print (my.x_min - 2 +  0,  4, s, YASCII_CLEAR);
-      yASCII_print (my.x_min - 2 +  2,  4, "a)∑build∑base"                        , YASCII_CLEAR);
-      yASCII_print (my.x_min - 2 + 17 + my.x_wide,  4, "b)∑unit∑testing∑framework", YASCII_CLEAR);
-      yASCII_print (my.x_min - 2 + 62 + my.x_wide,  4, "c)∑execution∑logging"     , YASCII_CLEAR);
-      yASCII_print (my.x_min - 2 + 92 + my.x_wide,  4, "d)∑core"                  , YASCII_CLEAR);
-      /*---(footer line)-----------------*/
-      yASCII_print (my.x_min - 2 +   7, my.y_end - 1, "00", YASCII_CLEAR);
-      yASCII_print (my.x_min - 2 +  22, my.y_end - 1, "01", YASCII_CLEAR);
-      yASCII_print (my.x_min - 2 +  37, my.y_end - 1, "02", YASCII_CLEAR);
-      yASCII_print (my.x_min - 2 +  52, my.y_end - 1, "03", YASCII_CLEAR);
-      yASCII_print (my.x_min - 2 +  67, my.y_end - 1, "04", YASCII_CLEAR);
-      yASCII_print (my.x_min - 2 +  82, my.y_end - 1, "05", YASCII_CLEAR);
-      yASCII_print (my.x_min - 2 +  97, my.y_end - 1, "06", YASCII_CLEAR);
-      yASCII_print (my.x_min - 2 + 112, my.y_end - 1, "07", YASCII_CLEAR);
-      /*---(nodes)-----------------------*/
-      yASCII_node (0, 6, 'Ë');
-      yASCII_node (my.x_end - 5, 6, 'È');
    }
    /*---(complete)-----------------------*/
    return 0;
@@ -173,13 +135,12 @@ DRAW_wrap               (void)
       yASCII_print (my.x_min, my.y_end - 1, "## end-of-file.  done, finito, completare, whimper [œ¥∑∑∑", YASCII_CLEAR);
    }
    else if (my.d_ornament == 'b') {
-      DRAW_vertical (my.x_min - 2 + 13 + my.x_wide);
-      DRAW_vertical (my.x_min - 2 + 58 + my.x_wide);
-      DRAW_vertical (my.x_min - 2 + 88 + my.x_wide);
-      /*> yASCII_print  (my.x_min - 2 + 13 + my.x_wide,  2, "â", YASCII_CLEAR);       <*/
-      DRAW_hconnect (-1, 0, 0, 0);
-      DRAW_hconnect ( 7, 0,66, 0);
-      DRAW_hconnect ( 7, 1,66, 0);
+      yASCII_frame_full (0, 0, 7, 5, "I. FOUNDATION (14)", -1, "a)∑build∑base", 1, "b)∑unit∑testing∑framework", 4, "c)∑execution∑logging", 6, "d)∑core");
+      yASCII_node (0, 6, 'Ë');
+      yASCII_node (my.x_end - 5, 6, 'È');
+      yASCII_tie_grid (-1, 0, 0, 0);
+      yASCII_tie_grid ( 7, 0, 8, 0);
+      yASCII_tie_grid ( 7, 1, 8, 0);
    }
    rc = yASCII_write (YSTR_CLIP);
    rc = yASCII_free  ();
@@ -282,54 +243,54 @@ DRAW_boxes         (char a_style)
  *>    return 0;                                                                      <* 
  *> }                                                                                 <*/
 
-char
-DRAW_box                (char a_col, char a_row, char a_name [LEN_TITLE], char a_npred, char a_nsucc)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   int         i           =    0;
-   short       x, y;
-   char        x_line      [LEN_HUND]  = "";
-   int         l           =    0;
-   short       y_save      =    0;
-   /*---(header)-------------------------*/
-   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   DEBUG_PROG   yLOG_complex ("a_args"    , "%2dc, %2dr", a_col, a_row);
-   /*---(prepare)------------------------*/
-   x = my.x_min + (a_col * my.x_wide);
-   y = my.y_min + (a_row * my.y_tall);
-   DEBUG_PROG   yLOG_complex ("coords"    , "%4dx, %4dy", x, y);
-   y_save = y;
-   /*---(top)----------------------------*/
-   sprintf (x_line, "É%*.*sÇ", my.x_side, my.x_side, YSTR_HORZ);
-   yASCII_print (x, y, x_line, YASCII_CLEAR);
-   /*---(middle)-------------------------*/
-   sprintf (x_line, "Å%*.*sÅ", my.x_side, my.x_side, YSTR_EMPTY);
-   for (i = 1; i <= my.y_side; ++i) {
-      yASCII_print (x, y + i, x_line, YASCII_CLEAR);
-   }
-   y += my.y_side;
-   /*---(bottom)-------------------------*/
-   sprintf (x_line, "Ñ%*.*sÖ", my.x_side, my.x_side, YSTR_HORZ);
-   yASCII_print (x, ++y, x_line, YASCII_CLEAR);
-   /*---(note)---------------------------*/
-   if (strcmp (a_name, "yLOG_solo")  == 0)   yASCII_print (x + 4, y, "(uv)", YASCII_CLEAR);
-   if (strcmp (a_name, "yURG_solo")  == 0)   yASCII_print (x + 4, y, "(uv)", YASCII_CLEAR);
-   if (strcmp (a_name, "yUNIT_solo") == 0)   yASCII_print (x + 4, y, "(uv)", YASCII_CLEAR);
-   if (strcmp (a_name, "yENV_solo")  == 0)   yASCII_print (x + 4, y, "(uv)", YASCII_CLEAR);
-   /*---(title)--------------------------*/
-   ystrlcpy (x_line, a_name, my.x_side + 1);
-   l = strlen (x_line);
-   yASCII_print (x + 1, y_save + 1, x_line, YASCII_CLEAR);
-   /*---(stats)--------------------------*/
-   if (my.y_gap > 0) {
-      l = my.x_wide - my.x_gap - 2 - 6;
-      sprintf (x_line, "%-3d%*.*s%3d", a_npred, l, l, YSTR_EMPTY, a_nsucc);
-      yASCII_print (x + 1, y + 1, x_line, YASCII_CLEAR);
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
+/*> char                                                                                                    <* 
+ *> DRAW_box                (char a_col, char a_row, char a_name [LEN_TITLE], char a_npred, char a_nsucc)   <* 
+ *> {                                                                                                       <* 
+ *>    /+---(locals)-----------+-----+-----+-+/                                                             <* 
+ *>    int         i           =    0;                                                                      <* 
+ *>    short       x, y;                                                                                    <* 
+ *>    char        x_line      [LEN_HUND]  = "";                                                            <* 
+ *>    int         l           =    0;                                                                      <* 
+ *>    short       y_save      =    0;                                                                      <* 
+ *>    /+---(header)-------------------------+/                                                             <* 
+ *>    DEBUG_PROG   yLOG_enter   (__FUNCTION__);                                                            <* 
+ *>    DEBUG_PROG   yLOG_complex ("a_args"    , "%2dc, %2dr", a_col, a_row);                                <* 
+ *>    /+---(prepare)------------------------+/                                                             <* 
+ *>    x = my.x_min + (a_col * my.x_wide);                                                                  <* 
+ *>    y = my.y_min + (a_row * my.y_tall);                                                                  <* 
+ *>    DEBUG_PROG   yLOG_complex ("coords"    , "%4dx, %4dy", x, y);                                        <* 
+ *>    y_save = y;                                                                                          <* 
+ *>    /+---(top)----------------------------+/                                                             <* 
+ *>    sprintf (x_line, "É%*.*sÇ", my.x_side, my.x_side, YSTR_HORZ);                                        <* 
+ *>    yASCII_print (x, y, x_line, YASCII_CLEAR);                                                           <* 
+ *>    /+---(middle)-------------------------+/                                                             <* 
+ *>    sprintf (x_line, "Å%*.*sÅ", my.x_side, my.x_side, YSTR_EMPTY);                                       <* 
+ *>    for (i = 1; i <= my.y_side; ++i) {                                                                   <* 
+ *>       yASCII_print (x, y + i, x_line, YASCII_CLEAR);                                                    <* 
+ *>    }                                                                                                    <* 
+ *>    y += my.y_side;                                                                                      <* 
+ *>    /+---(bottom)-------------------------+/                                                             <* 
+ *>    sprintf (x_line, "Ñ%*.*sÖ", my.x_side, my.x_side, YSTR_HORZ);                                        <* 
+ *>    yASCII_print (x, ++y, x_line, YASCII_CLEAR);                                                         <* 
+ *>    /+---(note)---------------------------+/                                                             <* 
+ *>    if (strcmp (a_name, "yLOG_solo")  == 0)   yASCII_print (x + 4, y, "(uv)", YASCII_CLEAR);             <* 
+ *>    if (strcmp (a_name, "yURG_solo")  == 0)   yASCII_print (x + 4, y, "(uv)", YASCII_CLEAR);             <* 
+ *>    if (strcmp (a_name, "yUNIT_solo") == 0)   yASCII_print (x + 4, y, "(uv)", YASCII_CLEAR);             <* 
+ *>    if (strcmp (a_name, "yENV_solo")  == 0)   yASCII_print (x + 4, y, "(uv)", YASCII_CLEAR);             <* 
+ *>    /+---(title)--------------------------+/                                                             <* 
+ *>    ystrlcpy (x_line, a_name, my.x_side + 1);                                                            <* 
+ *>    l = strlen (x_line);                                                                                 <* 
+ *>    yASCII_print (x + 1, y_save + 1, x_line, YASCII_CLEAR);                                              <* 
+ *>    /+---(stats)--------------------------+/                                                             <* 
+ *>    if (my.y_gap > 0) {                                                                                  <* 
+ *>       l = my.x_wide - my.x_gap - 2 - 6;                                                                 <* 
+ *>       sprintf (x_line, "%-3d%*.*s%3d", a_npred, l, l, YSTR_EMPTY, a_nsucc);                             <* 
+ *>       yASCII_print (x + 1, y + 1, x_line, YASCII_CLEAR);                                                <* 
+ *>    }                                                                                                    <* 
+ *>    /+---(complete)-----------------------+/                                                             <* 
+ *>    DEBUG_PROG   yLOG_exit    (__FUNCTION__);                                                            <* 
+ *>    return 0;                                                                                            <* 
+ *> }                                                                                                       <*/
 
 char
 DRAW_box_layer          (int n)
@@ -365,12 +326,12 @@ DRAW_box_layer          (int n)
             if (x_node->n_row < 0) {
                x_node->n_row = s_cols [x_node->n_level];
                ++(s_cols [x_node->n_level]);
-               DRAW_box (x_node->n_level, x_node->n_row, x_node->n_name, x_node->n_pred, x_node->n_succ);
+               yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", x_node->n_pred, x_node->n_succ);
             }
             /*---(add connection)-----------*/
             if (strstr (x_miss, s) != NULL) {
                DRAW_box_layer (x_pred->e_nbeg);
-               DRAW_hconnect (x_node->n_level, x_node->n_row, x_root->n_level, x_root->n_row);
+               yASCII_tie_grid (x_node->n_level, x_node->n_row, x_root->n_level, x_root->n_row);
             }
             /*---(next)---------------------*/
             x_pred->e_used = 'y';
@@ -416,12 +377,12 @@ DRAW_box_layer_old      (int n)
       if (x_node->n_row < 0) {
          x_node->n_row = s_cols [x_node->n_level];
          ++(s_cols [x_node->n_level]);
-         DRAW_box (x_node->n_level, x_node->n_row, x_node->n_name, x_node->n_pred, x_node->n_succ);
+         yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", x_node->n_pred, x_node->n_succ);
       }
       /*---(call pred)----------------*/
       DRAW_box_layer (x_pred->e_nbeg);
       /*---(add connection)-----------*/
-      DRAW_hconnect (x_node->n_level, x_node->n_row, x_root->n_level, x_root->n_row);
+      yASCII_tie_grid (x_node->n_level, x_node->n_row, x_root->n_level, x_root->n_row);
       /*---(next)---------------------*/
       x_pred->e_used = 'y';
       ++c;
@@ -465,7 +426,7 @@ DRAW_box_rooted         (char a_prog [LEN_TITLE])
    x_node = &(g_nodes [n]);
    x_node->n_row = s_cols [x_node->n_level];
    ++(s_cols [x_node->n_level]);
-   DRAW_box (x_node->n_level, x_node->n_row, x_node->n_name, x_node->n_pred, x_node->n_succ);
+   yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", x_node->n_pred, x_node->n_succ);
    /*---(start process)------------------*/
    DRAW_box_layer (n);
    /*---(complete)-----------------------*/
@@ -685,120 +646,6 @@ DRAW_single             (char a_new, short x, short y)
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return c;
-}
-
-char
-DRAW_xconnect           (short bx, short by, short ex, short ey, char a_tall, char a_blane, char a_vlane, char a_elane)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        x_dir       =    0;
-   int         i           =    0;
-   /*---(enter)--------------------------*/
-   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   DEBUG_PROG   yLOG_complex ("a_args"    , "%3dbx, %3dby, %3dex, %3dey, %1dbl, %1dvl, %1del", bx, by, ex, ey, a_tall, a_blane, a_vlane, a_elane);
-   /*---(direction)----------------------*/
-   if      (by + a_blane == ey + a_elane)   x_dir = '÷';
-   else if (by + a_blane <  ey + a_elane)   x_dir = '’';
-   else                                     x_dir = '‘';
-   DEBUG_PROG   yLOG_char    ("x_dir"     , x_dir);
-   /*---(start)--------------------------*/
-   if      (a_blane == 0)        yASCII_print (bx, by          , "â", YASCII_CLEAR); 
-   else if (a_blane == a_tall)   yASCII_print (bx, by + a_tall , "à", YASCII_CLEAR); 
-   else                          yASCII_print (bx, by + a_blane, "á", YASCII_CLEAR); 
-   /*---(finish)-------------------------*/
-   if      (a_elane == 0)        yASCII_print (ex, ey          , "â", YASCII_CLEAR); 
-   else if (a_elane == a_tall)   yASCII_print (ex, ey + a_tall , "à", YASCII_CLEAR); 
-   else                          yASCII_print (ex, ey + a_elane, "Ü", YASCII_CLEAR); 
-   /*---(connect)------------------------*/
-   switch (x_dir) {
-   case '÷' : 
-      DEBUG_PROG   yLOG_note    ("horizontal");
-      for (i = bx + 1; i <= ex - 1; ++i)        DRAW_single ('≤', i, by + a_blane);
-      break;
-   case '‘' : 
-      DEBUG_PROG   yLOG_note    ("ascending/upward line");
-      for (i = bx + 1; i < ex - a_vlane; ++i)  DRAW_single ('≤', i, by + a_blane);
-      DRAW_single ('Ö', ex - 2, by + a_blane);
-      for (i = by + a_blane - 1; i >= ey + a_elane + 1; --i)  DRAW_single ('å', ex - a_vlane, i);
-      DRAW_single ('É', ex - 2, ey + a_elane);
-      break;
-   case '’' :
-      DEBUG_PROG   yLOG_note    ("descending/downward line");
-      DRAW_single ('Ç', bx + a_vlane, by + a_blane);
-      for (i = by + a_blane + 1; i <= ey + a_elane - 1; ++i)  DRAW_single ('å', bx + a_vlane, i);
-      DRAW_single ('Ñ', bx + 2, ey + a_elane);
-      for (i = bx + a_vlane + 1; i <= ex - 1; ++i)  DRAW_single ('≤', i, ey + a_elane);
-      break;
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
-DRAW_hconnect           (char a_bcol, char a_brow, char a_ecol, char a_erow)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   short       bx, by, ex, ey;
-   /*---(beginning)----------------------*/
-   if (a_bcol == -1)    bx = my.x_min - 4;
-   else                 bx = my.x_min + (a_bcol * my.x_wide) + my.x_wide - my.x_gap - 1;
-   by = my.y_min + (a_brow * my.y_tall);
-   /*---(ending)-------------------------*/
-   if (a_ecol == 66)    ex = my.x_max + 3;
-   else                 ex = my.x_min + (a_ecol * my.x_wide);
-   ey = my.y_min + (a_erow * my.y_tall);
-   /*---(complete)-----------------------*/
-   return DRAW_xconnect (bx, by, ex, ey, my.y_tall - my.y_gap, 1, 2, 1);
-}
-
-char
-DRAW_hconnect_OLD       (char a_bcol, char a_brow, char a_ecol, char a_erow)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        x_dir       =    0;
-   int         i           =    0;
-   int         x_beg, x_end;
-   short       bx, by, ex, ey;
-   /*---(enter)--------------------------*/
-   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   DEBUG_PROG   yLOG_complex ("a_args"    , "%2dbc, %2dbr, %2dec, %2der", a_bcol, a_brow, a_ecol, a_erow);
-   /*---(prepare)------------------------*/
-   bx = my.x_min + (a_bcol * my.x_wide) + my.x_wide - my.x_gap - 1;
-   by = my.y_min + (a_brow * my.y_tall) + 1;
-   ex = my.x_min + (a_ecol * my.x_wide);
-   ey = my.y_min + (a_erow * my.y_tall) + 1;
-   /*---(direction)----------------------*/
-   if      (by == ey)  { x_dir = '÷';  x_beg = x_end = by;  }
-   else if (by <  ey)  { x_dir = '’';  x_beg = by + 1;  x_end = ey - 1;  }
-   else                { x_dir = '‘';  x_beg = ey + 1;  x_end = by - 1;  }
-   /*---(always)-------------------------*/
-   yASCII_print (bx    , by, "á≤", YASCII_CLEAR); 
-   yASCII_print (ex - 1, ey, "≤Ü", YASCII_CLEAR); 
-   /*---(ends)---------------------------*/
-   switch (x_dir) {
-   case '÷' : 
-      DEBUG_PROG   yLOG_note    ("horizontal");
-      for (i = bx + 2; i <= ex - 2; ++i)  DRAW_single ('≤', i, by);
-      break;
-   case '‘' : 
-      DEBUG_PROG   yLOG_note    ("ascending/upward line");
-      for (i = bx + 2; i <= ex - 3; ++i)  DRAW_single ('≤', i, by);
-      DRAW_single ('Ö', ex - 2, by);
-      for (i = by - 1; i >= ey + 1; --i)  DRAW_single ('å', ex - 2, i);
-      DRAW_single ('É', ex - 2, ey);
-      break;
-   case '’' :
-      DEBUG_PROG   yLOG_note    ("descending/downward line");
-      DRAW_single ('Ç', bx + 2, by);
-      for (i = by + 1; i <= ey - 1; ++i)  DRAW_single ('å', bx + 2, i);
-      DRAW_single ('Ñ', bx + 2, ey);
-      for (i = bx + 3; i <= ex - 2; ++i)  DRAW_single ('≤', i, ey);
-      break;
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-   return 0;
 }
 
 
