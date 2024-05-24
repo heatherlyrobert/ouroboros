@@ -128,6 +128,11 @@ GRAPH_add_node          (char a_name [LEN_TITLE])
    int         n           =    0;
    --rce;  if (a_name == NULL)            return rce;
    --rce;  if (strcmp (a_name, "") == 0)  return rce;
+   /*---(filter)-------------------------*/
+   if (strcmp (a_name, "yVIHUB_solo") == 0) {
+      DEBUG_DATA  yLOG_exit    (__FUNCTION__);
+      return 0;
+   }
    n = GRAPH_by_name (a_name);
    if (n < 0) {
       ystrlcpy (g_nodes [g_nnode].n_name, a_name, LEN_TITLE);
@@ -425,12 +430,14 @@ GRAPH_deps_missing      (char a_deps [LEN_RECD], char a_cumd [LEN_RECD], char r_
    while (p != NULL) {
       /*---(check)-----------------------*/
       if (p [0] == 'y' || strcmp (p, "koios") == 0 || strcmp (p, "zenodotus") == 0) {
-         sprintf (s, ",%s,", p);
-         if (strstr (a_cumd, s) == NULL) {
-            if (strcmp (r_miss, "")  == 0)  strcpy (r_miss, ",");
-            if (strcmp (r_miss, "´") == 0)  strcpy (r_miss, ",");
-            ystrlcat (r_miss, s + 1, LEN_RECD);
-            ++c;
+         if (strcmp (p, "yVIHUB_solo") != 0) {
+            sprintf (s, ",%s,", p);
+            if (strstr (a_cumd, s) == NULL) {
+               if (strcmp (r_miss, "")  == 0)  strcpy (r_miss, ",");
+               if (strcmp (r_miss, "´") == 0)  strcpy (r_miss, ",");
+               ystrlcat (r_miss, s + 1, LEN_RECD);
+               ++c;
+            }
          }
       }
       /*---(next)------------------------*/

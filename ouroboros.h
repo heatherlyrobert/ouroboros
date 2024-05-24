@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2e"
-#define     P_VERTXT    "box, ties, and frame drawing all exported to yASCII (for reuse)"
+#define     P_VERNUM    "0.2f"
+#define     P_VERTXT    "working with yASCII to lock in blocks"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -283,11 +283,26 @@ extern tWAVE     *s_tail;
 
 
 /*===[[ NODES ]]==============================================================*/
+#define   MAX_INCL   300
 #define   MAX_NODE       100
 #define   MAX_LEVEL       20
 
+typedef  struct cINCL tINCL;
 typedef  struct cNODE  tNODE;
 typedef  struct cEDGE  tEDGE;
+
+struct cINCL {
+   char        i_cat;
+   char        i_name      [LEN_TITLE];
+   int         i_count;
+   char        i_opengl;                /* including in make_opengl.h        */
+   char        i_curses;                /* including in make_curses.h        */
+   char        i_draw;                  /* include in output drawings        */
+   char        i_block;                 /* grouped within node               */
+};
+extern tINCL g_incls [MAX_INCL];
+extern int   g_nincl;
+extern int   g_handled;
 
 struct cNODE {
    /*---(data)--------------*/
@@ -425,12 +440,11 @@ char        DRAW_wrap               (void);
 /*---(elements)-------------*/
 char        DRAW_node               (short x, short y, char a);
 char        DRAW_box_rooted         (char a_prog [LEN_TITLE]);
+char        DRAW_block              (char a_block);
 char        DRAW_box_clear          (void);
-char        DRAW_single             (char a_new, short x, short y);
 
 char        DRAW_main               (char a_ornament, char a_style);
 
-char        DRAW_boxes              (char a_style);
 char        GRAPH_box_deps          (char a_name [LEN_TITLE], char r_deps [LEN_RECD]);
 /*---(unittest)-------------*/
 char*       DRAW__unit              (char *a_question, int n);
@@ -478,6 +492,7 @@ char        INCL_clear              (void);
 /*---(lists)----------------*/
 char        INCL_list_clear         (void);
 char        INCL_list_add           (char a_cat, char a_header [LEN_TITLE]);
+int         INCL_by_name            (char a_header [LEN_TITLE], char *r_block);
 /*---(find)-----------------*/
 int         INCL_add_by_name        (int a_end, char a_header [LEN_TITLE]);
 char        INCL_add_by_group       (int a_end, char a_type);
