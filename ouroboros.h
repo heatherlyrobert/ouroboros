@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2f"
-#define     P_VERTXT    "working with yASCII to lock in blocks"
+#define     P_VERNUM    "0.2g"
+#define     P_VERTXT    "big changes, integrating back with yASCII, (testing unclean)"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -172,8 +172,9 @@ struct cGLOBALS
    char        depall      [LEN_RECD];        /* every dependency            */
    char        depwtf      [LEN_FULL];        /* unknown dependency          */
    /*---(drawing)------------------------*/
-   char        d_ornament;
-   char        d_style;
+   char        d_layout;
+   char        d_size;
+   char        d_decor;
    char        x_cols;
    int         x_min;
    int         x_max;
@@ -314,6 +315,7 @@ struct cNODE {
    /*---(working)-----------*/
    char        n_level;
    char        n_row;
+   char        n_block;
    /*---(predecessors)------*/
    char        n_pred;
    tEDGE      *n_phead;
@@ -435,15 +437,17 @@ char        YJOBS_callback          (cchar a_req, cchar *a_data);
 /*===[[ ouroboros_draw.c ]]===================================================*/
 /*········· ´······················ ´·········································*/
 /*---(program)--------------*/
-char        DRAW_init               (char a_ornament, char a_style, char a_cols, char a_rows);
+char        DRAW_init               (char a_layout, char a_size, char a_decor, char a_cols, char a_rows);
 char        DRAW_wrap               (void);
 /*---(elements)-------------*/
 char        DRAW_node               (short x, short y, char a);
-char        DRAW_box_rooted         (char a_prog [LEN_TITLE]);
-char        DRAW_block              (char a_block);
+/*---(blocks)---------------*/
+char        DRAW_block_layer        (char b, int n);
+char        DRAW_block_source       (char a_block, char a_prog [LEN_TITLE]);
+
 char        DRAW_box_clear          (void);
 
-char        DRAW_main               (char a_ornament, char a_style);
+char        DRAW_main               (char a_layout, char a_size, char a_decor);
 
 char        GRAPH_box_deps          (char a_name [LEN_TITLE], char r_deps [LEN_RECD]);
 /*---(unittest)-------------*/

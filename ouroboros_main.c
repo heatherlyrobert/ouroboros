@@ -46,7 +46,7 @@ main               (int a_argc, char *a_argv[])
    GRAPH_dump_seq   ();
    GRAPH_focus_all  ();
    /*> GRAPH_focus_on   ("yVAR");                                                     <*/
-   DRAW_main        ('b', '-');
+   DRAW_main        ('b', YASCII_DEFAULT, YASCII_MAX);
    /*> rc = PROG_driver ();                                                           <*/
    /*---(complete)-----------------------*/
    PROG_shutdown ();

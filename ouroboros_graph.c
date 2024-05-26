@@ -14,6 +14,77 @@
  *
  */
 
+struct {
+   char        o_name      [LEN_TITLE];
+   char        o_block;
+   char        o_col;
+   char        o_row;
+   char        o_run;
+} zASCII_order [LEN_HUND] = {
+   /* BLOCK é FOUNDATION ------------------*/
+   /* level 00 ···········  blk  col  row  */
+   { "zenodotus"          , 'é',  0 ,  0 , '·'  },
+   /* level 01 ···········  blk  col  row  */
+   { "ySTR_solo"          , 'é',  1 ,  0 , '·'  },
+   { "yUNIT_solo"         , 'é',  1 ,  1 , '·'  },
+   { "yCOLOR_solo"        , 'é',  1 ,  2 , '·'  },
+   { "yENV_solo"          , 'é',  1 ,  3 , '·'  },
+   { "yLOG_solo"          , 'é',  1 ,  4 , '·'  },
+   { "yDLST_solo"         , 'é',  1 ,  5 , '·'  },
+   /* level 02 ···········  blk  col  row  */
+   { "yVAR"               , 'é',  2 ,  0 , '·'  },
+   /* level 03 ···········  blk  col  row  */
+   { "yUNIT"              , 'é',  3 ,  0 , '·'  },
+   /* level 04 ···········  blk  col  row  */
+   { "koios"              , 'é',  4 ,  0 , '·'  },
+   /* level 05 ···········  blk  col  row  */
+   { "yLOG"               , 'é',  5 ,  0 , '·'  },
+   /* level 06 ···········  blk  col  row  */
+   { "yURG"               , 'é',  6 ,  0 , '·'  },
+   /* level 07 ···········  blk  col  row  */
+   { "ySTR"               , 'é',  7 ,  0 , 'Ï'  },
+   { "yENV"               , 'é',  7 ,  1 , 'Ï'  },
+   /* BLOCK ê VIKEYS ----------------------*/
+   { "yVIHUB"             , 'ê',  8 ,  0 , '·'  },
+   { "yMODE"              , 'ê',  9 ,  0 , '·'  },
+   { "yKEYS"              , 'ê', 10 ,  0 , '·'  },
+   { "yVIEW"              , 'ê', 11 ,  0 , '·'  },
+   { "yFILE"              , 'ê', 11 ,  1 , '·'  },
+   { "ySRC"               , 'ê', 11 ,  2 , '·'  },
+   { "yMAP"               , 'ê', 11 ,  3 , '·'  },
+   { "yMACRO"             , 'ê', 11 ,  4 , '·'  },
+   { "yCMD"               , 'ê', 12 ,  0 , 'Ï'  },
+   { "yMARK"              , 'ê', 12 ,  1 , 'Ï'  },
+   { "yGOD"               , 'ê', 12 ,  2 , 'Ï'  },
+   /* BLOCK ÷ PRETTY ----------------------*/
+   { "yVICURSES"          , 'ê', 13 ,  0 , '·'  },
+   { "gyges"              , 'ê', 14 ,  0 , 'Ï'  },
+   { "yVICURSES"          , 'ê', 13 ,  1 , '·'  },
+   { "gregg"              , 'ê', 14 ,  1 , 'Ï'  },
+   { "metis"              , 'ê', 14 ,  2 , 'Ï'  },
+   { "arachne"            , 'ê', 14 ,  3 , 'Ï'  },
+   { "petal"              , 'ê', 14 ,  4 , 'Ï'  },
+   { "kairos"             , 'ê', 14 ,  5 , 'Ï'  },
+   { "pacer"              , 'ê', 14 ,  6 , 'Ï'  },
+   /* BLOCK ñ KEYSTONES -------------------*/
+   { "yPARSE"             , 'ñ',  8 ,  5 , '·'  },
+   { "ySORT"              , 'ñ',  8 ,  6 , '·'  },
+   { "yREGEX"             , 'ñ',  8 ,  7 , '·'  },
+   { "yDLST"              , 'ñ',  8 ,  8 , 'Ï'  },
+   { "ySCHED"             , 'ñ',  8 ,  9 , 'Ï'  },
+   { "ySEC"               , 'ñ',  8 , 10 , 'Ï'  },
+   { "yEXEC"              , 'ñ',  9 ,  5 , '·'  },
+   { "yJOBS"              , 'ñ', 10 ,  5 , 'Ï'  },
+   /* BLOCK ë DAEMONISH -------------------*/
+   { "eos"                , 'ë', 11 ,  5 , 'Ï'  },
+   { "heracles"           , 'ë', 12 ,  5 , 'Ï'  },
+   { "kharon"             , 'ë', 11 ,  6 , 'Ï'  },
+   { "khronos"            , 'ë', 11 ,  7 , 'Ï'  },
+   { "helios"             , 'ë', 11 ,  8 , 'Ï'  },
+   { "hermes"             , 'ë', 11 ,  9 , 'Ï'  },
+   { "hestia"             , 'ë', 11 , 10 , 'Ï'  },
+   { "hearth"             , 'ë', 12 , 10 , 'Ï'  },
+};
 
 
 tNODE   g_nodes   [MAX_NODE];
@@ -63,6 +134,7 @@ GRAPH_purge             (void)
       /*---(working)-----------*/
       g_nodes [i].n_level    = -1;
       g_nodes [i].n_row      = -1;
+      g_nodes [i].n_block    = '-';
       /*---(predecessors)------*/
       g_nodes [i].n_pred     = 0;
       g_nodes [i].n_phead    = NULL;
