@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2h"
-#define     P_VERTXT    "created logic to find zenodotus use in Makefiles (unit tested)"
+#define     P_VERNUM    "0.2i"
+#define     P_VERTXT    "broke out file name filtering in gathering (unit tested)"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -518,6 +518,12 @@ char        MAKE__check             (char a_recd [LEN_RECD], int x_end);
 char        MAKE_gather             (char a_proj [LEN_TITLE], char a_file [LEN_PATH]);
 /*---(done)-----------------*/
 
+
+
+/*===[[ ouroboros_make.c ]]===================================================*/
+/*········· ´······················ ´·········································*/
+char        DATA_file_type          (char a_proj [LEN_TITLE], char a_file [LEN_HUND], char *r_type);
+/*---(done)-----------------*/
 
 
 

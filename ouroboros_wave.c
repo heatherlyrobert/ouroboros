@@ -695,15 +695,15 @@ WAVE_inventory          (char *a_path)
    int         x_end       =   -1;
    char        x_header    [LEN_TITLE] = "";
    /*---(header)-------------------------*/
-   DEBUG_ENVI   yLOG_enter   (__FUNCTION__);
+   DEBUG_DATA   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   DEBUG_ENVI   yLOG_point   ("a_path"    , a_path);
+   DEBUG_DATA   yLOG_point   ("a_path"    , a_path);
    --rce;  if (a_path == NULL) {
-      DEBUG_ENVI   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    ystrlcpy (my.path, a_path, LEN_PATH);
-   DEBUG_ENVI   yLOG_info    ("a_path"    , a_path);
+   DEBUG_DATA   yLOG_info    ("a_path"    , a_path);
    /*---(get the home)-------------------*/
    rc = ystrlproj (my.path, my.proj);
    DEBUG_DATA   yLOG_value   ("strlhere"  , rc);
@@ -717,9 +717,9 @@ WAVE_inventory          (char *a_path)
    DEBUG_DATA   yLOG_info    ("x_header"  , x_header);
    /*---(open directory)-----------------*/
    x_dir = opendir (a_path);
-   DEBUG_ENVI   yLOG_point   ("x_dir"     , x_dir);
+   DEBUG_DATA   yLOG_point   ("x_dir"     , x_dir);
    --rce;  if (x_dir == NULL) {
-      DEBUG_ENVI   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(add project record)-------------*/
@@ -740,7 +740,7 @@ WAVE_inventory          (char *a_path)
       if (x_entry == NULL)                            break;
       /*---(filter)----------------------*/
       if (x_entry->d_name   == NULL)                  continue;
-      DEBUG_ENVI   yLOG_info    ("d_name"    , x_entry->d_name);
+      DEBUG_DATA   yLOG_info    ("d_name"    , x_entry->d_name);
       l = strlen (x_entry->d_name);
       /*---(filter obvious)--------------*/
       if      (strcmp  (x_entry->d_name, "."               ) == 0)     ;
@@ -811,7 +811,7 @@ WAVE_inventory          (char *a_path)
    /*---(write includes)-----------------*/
    INCL_block (my.proj);
    /*---(complete)-----------------------*/
-   DEBUG_ENVI   yLOG_exit    (__FUNCTION__);
+   DEBUG_DATA   yLOG_exit    (__FUNCTION__);
    return c;
 }
 
@@ -838,7 +838,7 @@ WAVE_here               (void)
     *> /+---(run inventory)------------------+/                                       <* 
     *> c = WAVE_inventory (my.path, 'y');                                             <* 
     *> /+---(complete)-----------------------+/                                       <* 
-    *> DEBUG_ENVI   yLOG_exit    (__FUNCTION__);                                      <* 
+    *> DEBUG_DATA   yLOG_exit    (__FUNCTION__);                                      <* 
     *> return c;                                                                      <*/
 }
 
