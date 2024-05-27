@@ -175,8 +175,8 @@ DRAW_block_layer        (char b, int n)
    char        x_lvl       =    0;
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   DEBUG_PROG   yLOG_complex ("a_args"    , "%2db, %2dn", b, n);
    /*---(mark)------------------------*/
-   DEBUG_PROG   yLOG_value   ("n"         , n);
    x_root = &(g_nodes [n]);
    DEBUG_PROG   yLOG_info    ("name"      , g_nodes [n].n_name);
    ystrlcpy (x_miss, x_root->n_miss, LEN_RECD);
@@ -193,6 +193,7 @@ DRAW_block_layer        (char b, int n)
             sprintf  (s, ",%s,", x_node->n_name);
             DEBUG_PROG   yLOG_info    ("s"         , s);
             /*---(draw box)-----------------*/
+            DEBUG_PROG   yLOG_value   ("n_row"     , x_node->n_row);
             if (x_node->n_row < 0) {
                x_node->n_row = s_cols [x_node->n_level];
                ++(s_cols [x_node->n_level]);

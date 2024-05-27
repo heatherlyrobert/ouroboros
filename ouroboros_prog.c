@@ -371,8 +371,8 @@ PROG__unit_loud    (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
-   int         x_argc      = 3;
-   char       *x_argv [3]  = { "ouroboros_unit", "@@kitchen" , "@@yparse"  };
+   int         x_argc      = 4;
+   char       *x_argv [4]  = { "ouroboros_unit", "@@kitchen" , "@@yparse", "@@yascii" };
    /*---(run)----------------------------*/
    rc = PROG_urgents (x_argc, x_argv);
    rc = PROG_startup (x_argc, x_argv);

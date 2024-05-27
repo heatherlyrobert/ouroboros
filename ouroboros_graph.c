@@ -198,23 +198,41 @@ GRAPH_add_node          (char a_name [LEN_TITLE])
 {
    char        rce         =  -10;
    int         n           =    0;
-   --rce;  if (a_name == NULL)            return rce;
-   --rce;  if (strcmp (a_name, "") == 0)  return rce;
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_PROG   yLOG_point   ("a_name"    , a_name);
+   --rce;  if (a_name == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_PROG   yLOG_info    ("a_name"    , a_name);
+   --rce;  if (strcmp (a_name, "") == 0) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(filter)-------------------------*/
    if (strcmp (a_name, "yVIHUB_solo") == 0) {
+      DEBUG_PROG  yLOG_note    ("always ignore yVIHUB_solo");
       DEBUG_DATA  yLOG_exit    (__FUNCTION__);
       return 0;
    }
    n = GRAPH_by_name (a_name);
+   DEBUG_PROG   yLOG_value   ("n"         , n);
    if (n < 0) {
+      DEBUG_PROG  yLOG_note    ("can't find, add new node");
       ystrlcpy (g_nodes [g_nnode].n_name, a_name, LEN_TITLE);
       n = g_nnode;
       ++g_nnode;
+      DEBUG_PROG   yLOG_value   ("n"         , n);
    }
-   if (strcmp (a_name, "zenodotus") != 0) {
-      INCL_add_by_name (n, "zenodotus");
-      GRAPH_add_edge ("zenodotus", n);
-   }
+   /*> if (strcmp (a_name, "zenodotus") != 0) {                                       <* 
+    *>    DEBUG_PROG   yLOG_note    ("create a link back to zenodotus");              <* 
+    *>    INCL_add_by_name ("zenodotus", n);                                          <* 
+    *>    GRAPH_add_edge   ("zenodotus", n);                                          <* 
+    *> }                                                                              <*/
+   /*---(defense)------------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return n;
 }
 
@@ -285,37 +303,37 @@ GRAPH_dump_nodes        (void)
 static void  o___EDGES___________o () { return; }
 
 char
-GRAPH_add_edge          (char a_name [LEN_TITLE], int e)
+GRAPH_add_edge          (char a_beg [LEN_TITLE], int a_end)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
-   int         b           =    0;
+   int         x_beg       =    0;
    tEDGE      *x_pred      = NULL;
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   DEBUG_PROG   yLOG_point   ("a_name"    , a_name);
-   --rce;  if (a_name == NULL) {
+   DEBUG_PROG   yLOG_point   ("a_beg"     , a_beg);
+   --rce;  if (a_beg == NULL) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_PROG   yLOG_info    ("a_name"    , a_name);
-   --rce;  if (strcmp (a_name, "") == 0) {
+   DEBUG_PROG   yLOG_info    ("a_beg"     , a_beg);
+   --rce;  if (strcmp (a_beg, "") == 0) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   --rce;  if (e < 0) {
+   --rce;  if (a_end < 0) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   --rce;  if (e >= g_nnode) {
+   --rce;  if (a_end >= g_nnode) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(check for duplicate)------------*/
-   x_pred = g_nodes [e].n_phead;
+   x_pred = g_nodes [a_end].n_phead;
    while (x_pred != NULL) {
-      if (strcmp (x_pred->e_beg->n_name, a_name) == 0) {
+      if (strcmp (x_pred->e_beg->n_name, a_beg) == 0) {
          DEBUG_PROG   yLOG_note    ("found pre-existing, duplicate edge");
          DEBUG_PROG   yLOG_exit    (__FUNCTION__);
          return 1;
@@ -323,46 +341,46 @@ GRAPH_add_edge          (char a_name [LEN_TITLE], int e)
       x_pred = x_pred->e_pnext;
    }
    /*---(beg-point on edge)--------------*/
-   b = GRAPH_add_node (a_name);
-   --rce;  if (b < 0) {
+   x_beg = GRAPH_add_node (a_beg);
+   --rce;  if (x_beg < 0) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   --rce;  if (b == e) {
+   --rce;  if (x_beg == a_end) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(updage edge)--------------------*/
-   g_edges [g_nedge].e_nbeg = b;
-   g_edges [g_nedge].e_beg  = &(g_nodes [b]);
+   g_edges [g_nedge].e_nbeg = x_beg;
+   g_edges [g_nedge].e_beg  = &(g_nodes [x_beg]);
    /*---(beg-point on node)--------------*/
-   if (g_nodes [b].n_shead == NULL) { /* first */
-      g_nodes [b].n_shead = &(g_edges [g_nedge]);
+   if (g_nodes [x_beg].n_shead == NULL) { /* first */
+      g_nodes [x_beg].n_shead = &(g_edges [g_nedge]);
    } else {  /*                          append */
-      (g_nodes [b].n_stail)->e_snext = &(g_edges [g_nedge]);
+      (g_nodes [x_beg].n_stail)->e_snext = &(g_edges [g_nedge]);
    }
-   g_nodes [b].n_stail = &(g_edges [g_nedge]);
-   ++(g_nodes [b].n_succ);
+   g_nodes [x_beg].n_stail = &(g_edges [g_nedge]);
+   ++(g_nodes [x_beg].n_succ);
    /*---(end-point on edge)--------------*/
-   g_edges [g_nedge].e_nend = e;
-   g_edges [g_nedge].e_end  = &(g_nodes [e]);
+   g_edges [g_nedge].e_nend = a_end;
+   g_edges [g_nedge].e_end  = &(g_nodes [a_end]);
    /*---(end-point on node)--------------*/
-   if (g_nodes [e].n_phead == NULL) { /* first */
-      g_nodes [e].n_phead = &(g_edges [g_nedge]);
+   if (g_nodes [a_end].n_phead == NULL) { /* first */
+      g_nodes [a_end].n_phead = &(g_edges [g_nedge]);
    } else {  /*                          append */
-      (g_nodes [e].n_ptail)->e_pnext = &(g_edges [g_nedge]);
+      (g_nodes [a_end].n_ptail)->e_pnext = &(g_edges [g_nedge]);
    }
-   g_nodes [e].n_ptail = &(g_edges [g_nedge]);
-   ++(g_nodes [e].n_pred);
+   g_nodes [a_end].n_ptail = &(g_edges [g_nedge]);
+   ++(g_nodes [a_end].n_pred);
    /*---(counter)------------------------*/
    ++g_nedge;
    /*---(check for solo)-----------------*/
-   DEBUG_PROG   yLOG_info    ("b_name"    , g_nodes [b].n_name);
-   DEBUG_PROG   yLOG_info    ("e_name"    , g_nodes [e].n_name);
-   if (strcmp (g_nodes [b].n_name, "zenodotus") == 0) {
-      if (strstr (g_nodes [e].n_name, "_solo") != NULL) {
+   DEBUG_PROG   yLOG_info    ("b_name"    , g_nodes [x_beg].n_name);
+   DEBUG_PROG   yLOG_info    ("e_name"    , g_nodes [a_end].n_name);
+   if (strcmp (g_nodes [x_beg].n_name, "zenodotus") == 0) {
+      if (strstr (g_nodes [a_end].n_name, "_solo") != NULL) {
          DEBUG_PROG   yLOG_note    ("call to add tie to _solo");
-         INCL_add_by_name (e, "zenodotus");
+         INCL_add_by_name ("zenodotus", a_end);
       }
    }
    /*---(complete)-----------------------*/
@@ -491,20 +509,39 @@ GRAPH_deps_missing      (char a_deps [LEN_RECD], char a_cumd [LEN_RECD], char r_
    char        x_deps      [LEN_RECD]  = "";
    char        s           [LEN_TITLE] = "";
    char        c           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   --rce;  if (a_deps == NULL)             return rce;
-   --rce;  if (a_cumd == NULL)             return rce;
-   --rce;  if (r_miss == NULL)             return rce;
+   DEBUG_PROG   yLOG_point   ("a_deps"    , a_deps);
+   --rce;  if (a_deps == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_PROG   yLOG_point   ("a_cumd"    , a_cumd);
+   --rce;  if (a_cumd == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_PROG   yLOG_point   ("r_miss"    , r_miss);
+   --rce;  if (r_miss == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(prepare)------------------------*/
    strcpy (r_miss, "");
-   /*---(merge up)-----------------------*/
    ystrlcpy (x_deps, a_deps, LEN_RECD);
    p = strtok_r (x_deps, q, &r);
+   /*---(merge up)-----------------------*/
+   DEBUG_PROG   yLOG_point   ("head"      , p);
    while (p != NULL) {
+      DEBUG_PROG   yLOG_info    ("p"         , p);
       /*---(check)-----------------------*/
       if (p [0] == 'y' || strcmp (p, "koios") == 0 || strcmp (p, "zenodotus") == 0) {
          if (strcmp (p, "yVIHUB_solo") != 0) {
             sprintf (s, ",%s,", p);
+            DEBUG_PROG   yLOG_info    ("s"         , s);
             if (strstr (a_cumd, s) == NULL) {
+               DEBUG_PROG   yLOG_note    ("add as miss");
                if (strcmp (r_miss, "")  == 0)  strcpy (r_miss, ",");
                if (strcmp (r_miss, "´") == 0)  strcpy (r_miss, ",");
                ystrlcat (r_miss, s + 1, LEN_RECD);
@@ -514,9 +551,12 @@ GRAPH_deps_missing      (char a_deps [LEN_RECD], char a_cumd [LEN_RECD], char r_
       }
       /*---(next)------------------------*/
       p = strtok_r (NULL  , q, &r);
+      DEBUG_PROG   yLOG_point   ("next"      , p);
       /*---(done)------------------------*/
    }
+   DEBUG_PROG   yLOG_info    ("r_miss"    , r_miss);
    /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return c;
 }
 

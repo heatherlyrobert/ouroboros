@@ -305,10 +305,21 @@ INCL_list_add           (char a_cat, char a_header [LEN_TITLE])
    char        rce         =  -10;
    char       *x_list      = NULL;
    char        t           [LEN_HUND]  = "";
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   --rce;  if (a_header     == NULL)  return rce;
-   --rce;  if (a_header [0] == '\0')  return rce;
+   DEBUG_PROG   yLOG_point   ("a_header"  , a_header);
+   --rce;  if (a_header     == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_PROG   yLOG_info    ("a_header"  , a_header);
+   --rce;  if (a_header [0] == '\0') {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(pick list)----------------------*/
+   DEBUG_PROG   yLOG_char    ("a_cat"     , a_cat);
    --rce;  switch (a_cat) {
    case 's' :  x_list = my.depsolo;    break;
    case 'u' :  x_list = my.depunit;    break;
@@ -324,14 +335,25 @@ INCL_list_add           (char a_cat, char a_header [LEN_TITLE])
    case 'F' :  x_list = my.depfile;    break;
    default  :  x_list = my.depwtf;     break;
    }
+   DEBUG_PROG   yLOG_info    ("x_list"    , x_list);
    /*---(prepare)------------------------*/
    sprintf (t, ",%s,", a_header);
+   DEBUG_PROG   yLOG_info    ("t"         , t);
    /*---(check individual)---------------*/
-   --rce;  if (strstr (x_list, t) != NULL)     return 2;
+   --rce;  if (strstr (x_list, t) != NULL) {
+      DEBUG_PROG   yLOG_note    ("already in specific list");
+      DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+      return 2;
+   }
    if (x_list [0]    == '´')  ystrlcpy (x_list   , ",", LEN_FULL);
    ystrlcat (x_list, t + 1, LEN_FULL);
-   /*---(check all)----------------------*/
-   --rce;  if (strstr (my.depall, t) != NULL)  return 3;
+   /*---(add to all)---------------------*/
+   DEBUG_PROG   yLOG_info    ("depall"    , my.depall);
+   --rce;  if (strstr (my.depall, t) != NULL) {
+      DEBUG_PROG   yLOG_note    ("already in ALL list");
+      DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+      return 3;
+   }
    if (my.depall [0] == '´')  ystrlcpy (my.depall, ",", LEN_RECD);
    switch (a_cat) {
    case 'I' : ystrlcat (my.depall, "×", LEN_RECD);   break;
@@ -342,6 +364,7 @@ INCL_list_add           (char a_cat, char a_header [LEN_TITLE])
    /*---(full total)---------------------*/
    ++g_handled;
    /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 1;
 }
 
@@ -368,40 +391,46 @@ INCL_by_name            (char a_header [LEN_TITLE], char *r_block)
 static void  o___FIND____________o () { return; }
 
 int
-INCL_add_by_name        (int a_end, char a_header [LEN_TITLE])
+INCL_add_by_name        (char a_beg [LEN_TITLE], int a_end)
 {
+   /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
    int         i           =    0;
+   /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   --rce;  if (a_header     == NULL) {
+   /*---(defense)------------------------*/
+   DEBUG_PROG   yLOG_point   ("a_beg"     , a_beg);
+   --rce;  if (a_beg     == NULL) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   --rce;  if (a_header [0] == '\0') {
+   DEBUG_PROG   yLOG_info    ("a_beg"     , a_beg);
+   --rce;  if (a_beg [0] == '\0') {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   DEBUG_PROG   yLOG_value   ("a_end"     , a_end);
+   --rce;  if (a_end < 0) {
+      DEBUG_PROG   yLOG_note    ("negative a_end, better be unit testing");
+   }
+   /*---(walk)---------------------------*/
    for (i = 0; i < MAX_INCL; ++i) {
-      if (g_incls [i].i_cat == 0)   break;
-      if (strcmp (g_incls [i].i_name, a_header) != 0)  continue;
+      /*---(filter)----------------------*/
+      if (g_incls [i].i_cat == 0)                      break;
+      if (strcmp (g_incls [i].i_name, a_beg) != 0)  continue;
+      DEBUG_PROG   yLOG_value   ("FOUND"     , i);
       rc = INCL_list_add (g_incls [i].i_cat, g_incls [i].i_name);
       if (rc == 1) {
          ++(g_incls [i].i_count);
-         if (a_end >= 0) {
-            if (strchr (DEPVISIBLE, g_incls [i].i_cat) != NULL) {
-               if (a_header [0] == 'y') {
-                  rc = GRAPH_add_edge (a_header, a_end);
-               }
-            }
-         }
+         if (g_incls [i].i_draw == 'y') rc = GRAPH_add_edge (a_beg, a_end);
       }
-      DEBUG_PROG   yLOG_value   ("i"         , i);
       DEBUG_PROG   yLOG_exit    (__FUNCTION__);
       return i;
    }
-   INCL_list_add ('?', a_header);
-   if (a_end >= 0)   rc = GRAPH_add_edge (a_header, a_end);
+   /*---(not-standard)-------------------*/
+   rc = INCL_list_add (DEPWTF, a_beg);
+   /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exitr   (__FUNCTION__, --rce);
    return rce;
 }
@@ -417,10 +446,10 @@ INCL_add_by_group       (int a_end, char a_type)
       if (g_incls [i].i_cat == 0)   break;
       switch (a_type) {
       case 'O' :
-         if (g_incls [i].i_opengl == 'y')  INCL_add_by_name (a_end, g_incls [i].i_name);
+         if (g_incls [i].i_opengl == 'y')  INCL_add_by_name (g_incls [i].i_name, a_end);
          break;
       case 'C' :
-         if (g_incls [i].i_curses == 'y')  INCL_add_by_name (a_end, g_incls [i].i_name);
+         if (g_incls [i].i_curses == 'y')  INCL_add_by_name (g_incls [i].i_name, a_end);
          break;
       }
    }
@@ -435,7 +464,7 @@ INCL_add_by_group       (int a_end, char a_type)
 static void  o___GATHER__________o () { return; }
 
 char
-INCL_gather_add         (int a_end, char a_head [LEN_TITLE])
+INCL_gather_add         (char a_header [LEN_TITLE], int a_end)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -447,14 +476,14 @@ INCL_gather_add         (int a_end, char a_head [LEN_TITLE])
    /*---(header)-------------------------*/
    DEBUG_DATA  yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   DEBUG_DATA   yLOG_point   ("a_head"    , a_head);
-   --rce; if (a_head == NULL) {
+   DEBUG_DATA   yLOG_point   ("a_header"  , a_header);
+   --rce; if (a_header == NULL) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_DATA   yLOG_info    ("a_head"    , a_head);
+   DEBUG_DATA   yLOG_info    ("a_header"  , a_header);
    /*---(filter)-------------------------*/
-   strcpy (t, a_head);
+   strcpy (t, a_header);
    l = strlen (t);
    DEBUG_DATA   yLOG_value   ("l"         , l);
    --rce;  if (l < 3) {
@@ -486,17 +515,17 @@ INCL_gather_add         (int a_end, char a_head [LEN_TITLE])
       return 0;
    }
    /*---(add to list)--------------------*/
-   n = INCL_add_by_name (a_end, t);
+   n = INCL_add_by_name (t, a_end);
    DEBUG_DATA   yLOG_value   ("n"         , n);
    /*---(found)--------------------------*/
-   /*> if (n >= 0) {                                                                                 <* 
-    *>    DEBUG_DATA   yLOG_complex ("FOUND"     , "%-20.20s  %3d  %c", t, n, g_incls [n].i_cat);    <* 
-    *>    if (strchr (DEPVISIBLE, g_incls [n].i_cat) != NULL && g_incls [n].i_name [0] == 'y')   {   <* 
-    *>       GRAPH_add_edge (g_incls [n].i_name, a_end);                                             <* 
-    *>    }                                                                                          <* 
-    *>    DEBUG_DATA  yLOG_exit    (__FUNCTION__);                                                   <* 
-    *>    return 1;                                                                                  <* 
-    *> }                                                                                             <*/
+   if (n >= 0) {
+      DEBUG_DATA   yLOG_complex ("FOUND"     , "%-20.20s  %3d  %c", t, n, g_incls [n].i_cat);
+      if (strchr (DEPVISIBLE, g_incls [n].i_cat) != NULL && g_incls [n].i_name [0] == 'y')   {
+         GRAPH_add_edge (g_incls [n].i_name, a_end);
+      }
+      DEBUG_DATA  yLOG_exit    (__FUNCTION__);
+      return 1;
+   }
    /*---(complete)-----------------------*/
    DEBUG_DATA  yLOG_exit    (__FUNCTION__);
    return 0;
@@ -584,10 +613,10 @@ INCL_gather_in_c        (char a_proj [LEN_TITLE], cchar a_file [LEN_PATH])
             DEBUG_DATA   yLOG_info    ("p"         , p);
             if (x_delimit == '"') {
                DEBUG_DATA   yLOG_info    ("strcmp"    , p + l - 7);
-               if      (strcmp (p + l - 7, "_solo.h") == 0)  INCL_gather_add (x_end, p);
-               else if (strcmp (p + l - 7, "_uver.h") == 0)  INCL_gather_add (x_end, p);
+               if      (strcmp (p + l - 7, "_solo.h") == 0)  INCL_gather_add (p, x_end);
+               else if (strcmp (p + l - 7, "_uver.h") == 0)  INCL_gather_add (p, x_end);
             } else {
-               INCL_gather_add (x_end, p);
+               INCL_gather_add (p, x_end);
             }
          }
       }
@@ -608,136 +637,6 @@ INCL_gather_in_c        (char a_proj [LEN_TITLE], cchar a_file [LEN_PATH])
    /*---(complete)-----------------------*/
    DEBUG_DATA  yLOG_exit    (__FUNCTION__);
    return 0;
-}
-
-
-
-/*====================------------------------------------====================*/
-/*===----                      pulling from database                   ----===*/
-/*====================------------------------------------====================*/
-static void  o___PULL____________o () { return; }
-
-char
-INCL_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_handler)
-{
-   /*> /+---(locals)-----------+-----------+-+/                                                                                                                                                                                                                                                                <* 
-    *> char        rce         =  -10;                                                                                                                                                                                                                                                                         <* 
-    *> int         rc          =    0;                                                                                                                                                                                                                                                                         <* 
-    *> tWAVE      *x_new       = NULL;                                                                                                                                                                                                                                                                         <* 
-    *> char        x_time      [LEN_TITLE] = "";                                                                                                                                                                                                                                                               <* 
-    *> long        x_epoch     =    0;                                                                                                                                                                                                                                                                         <* 
-    *> char        x_proj      [LEN_LABEL] = "";                                                                                                                                                                                                                                                               <* 
-    *> char        x_unit      [LEN_TITLE] = "";                                                                                                                                                                                                                                                               <* 
-    *> short       x_scrp      =    0;                                                                                                                                                                                                                                                                         <* 
-    *> char        x_source    =  '·';                                                                                                                                                                                                                                                                         <* 
-    *> char        x_wave      =  '·';                                                                                                                                                                                                                                                                         <* 
-    *> char        x_stage     =  '·';                                                                                                                                                                                                                                                                         <* 
-    *> char        x_rating    =  '·';                                                                                                                                                                                                                                                                         <* 
-    *> char        x_desc      [LEN_LONG]  = "";                                                                                                                                                                                                                                                               <* 
-    *> char        x_terse     [LEN_LABEL] = "";                                                                                                                                                                                                                                                               <* 
-    *> int         x_nunit     =    0;                                                                                                                                                                                                                                                                         <* 
-    *> int         x_nscrp     =    0;                                                                                                                                                                                                                                                                         <* 
-    *> int         x_ncond     =    0;                                                                                                                                                                                                                                                                         <* 
-    *> int         x_nstep     =    0;                                                                                                                                                                                                                                                                         <* 
-    *> char        x_expe      [LEN_SHORT] = "";                                                                                                                                                                                                                                                               <* 
-    *> int         x_expect    =    0;                                                                                                                                                                                                                                                                         <* 
-    *> char        x_result    =  '-';                                                                                                                                                                                                                                                                         <* 
-    *> int         x_npass     =    0;                                                                                                                                                                                                                                                                         <* 
-    *> int         x_nfail     =    0;                                                                                                                                                                                                                                                                         <* 
-    *> int         x_nbadd     =    0;                                                                                                                                                                                                                                                                         <* 
-    *> int         x_nvoid     =    0;                                                                                                                                                                                                                                                                         <* 
-    *> int         x_nmiss     =    0;                                                                                                                                                                                                                                                                         <* 
-    *> int         x_actual    =    0;                                                                                                                                                                                                                                                                         <* 
-    *> int         c           =    0;                                                                                                                                                                                                                                                                         <* 
-    *> /+---(header)-------------------------+/                                                                                                                                                                                                                                                                <* 
-    *> DEBUG_CONF  yLOG_enter   (__FUNCTION__);                                                                                                                                                                                                                                                                <* 
-    *> /+---(defense)------------------------+/                                                                                                                                                                                                                                                                <* 
-    *> DEBUG_CONF  yLOG_point   ("a_verb"     , a_verb);                                                                                                                                                                                                                                                       <* 
-    *> --rce;  if (a_verb == NULL) {                                                                                                                                                                                                                                                                           <* 
-    *>    DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);                                                                                                                                                                                                                                                        <* 
-    *>    return rce;                                                                                                                                                                                                                                                                                          <* 
-    *> }                                                                                                                                                                                                                                                                                                       <* 
-    *> DEBUG_CONF  yLOG_info    ("a_verb"     , a_verb);                                                                                                                                                                                                                                                       <* 
-    *> rc = yPARSE_ready (&c);                                                                                                                                                                                                                                                                                 <* 
-    *> DEBUG_CONF  yLOG_value   ("rc"         , rc);                                                                                                                                                                                                                                                           <* 
-    *> DEBUG_CONF  yLOG_value   ("c"          , c);                                                                                                                                                                                                                                                            <* 
-    *> /+---(read details)-------------------+/                                                                                                                                                                                                                                                                <* 
-    *> --rce; if (strncmp (a_verb, "PROJ", 4) == 0) {                                                                                                                                                                                                                                                          <* 
-    *>    rc = yPARSE_scanf (a_verb, "--L-------------------"  , x_proj);                                                                                                                                                                                                                                      <* 
-    *> }                                                                                                                                                                                                                                                                                                       <* 
-    *> else if   (strncmp (a_verb, "UNIT", 4) == 0) {                                                                                                                                                                                                                                                          <* 
-    *>    rc = yPARSE_scanf (a_verb, "--L3------------------"  , x_proj, x_unit);                                                                                                                                                                                                                              <* 
-    *> }                                                                                                                                                                                                                                                                                                       <* 
-    *> else if   (strncmp (a_verb, "WAVE", 4) == 0) {                                                                                                                                                                                                                                                          <* 
-    *>    switch (c) {                                                                                                                                                                                                                                                                                         <* 
-    *>    case 23 : case 28 :                                                                                                                                                                                                                                                                                  <* 
-    *>       rc = yPARSE_scanf (a_verb, "3lL3s7LCCiiiiSiCiiiiii"  , x_time, &x_epoch, x_proj, x_unit, &x_scrp, x_desc, x_terse, &x_wave, &x_stage, &x_nunit, &x_nscrp, &x_ncond, &x_nstep, x_expe, &x_expect, &x_result, &x_npass, &x_nfail, &x_nbadd, &x_nvoid, &x_nmiss, &x_actual);                         <* 
-    *>       break;                                                                                                                                                                                                                                                                                            <* 
-    *>    case 24 : case 29 :                                                                                                                                                                                                                                                                                  <* 
-    *>       rc = yPARSE_scanf (a_verb, "3lL3s7LCCCiiiiSiCiiiiii" , x_time, &x_epoch, x_proj, x_unit, &x_scrp, x_desc, x_terse, &x_wave, &x_stage, &x_rating, &x_nunit, &x_nscrp, &x_ncond, &x_nstep, x_expe, &x_expect, &x_result, &x_npass, &x_nfail, &x_nbadd, &x_nvoid, &x_nmiss, &x_actual);              <* 
-    *>       break;                                                                                                                                                                                                                                                                                            <* 
-    *>    case 25 : case 30 :                                                                                                                                                                                                                                                                                  <* 
-    *>       rc = yPARSE_scanf (a_verb, "3lL3sC7LCCCiiiiSiCiiiiii", x_time, &x_epoch, x_proj, x_unit, &x_scrp, &x_source, x_desc, x_terse, &x_wave, &x_stage, &x_rating, &x_nunit, &x_nscrp, &x_ncond, &x_nstep, x_expe, &x_expect, &x_result, &x_npass, &x_nfail, &x_nbadd, &x_nvoid, &x_nmiss, &x_actual);   <* 
-    *>       break;                                                                                                                                                                                                                                                                                            <* 
-    *>    }                                                                                                                                                                                                                                                                                                    <* 
-    *> }                                                                                                                                                                                                                                                                                                       <* 
-    *> else {                                                                                                                                                                                                                                                                                                  <* 
-    *>    DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);                                                                                                                                                                                                                                                        <* 
-    *>    return rce;                                                                                                                                                                                                                                                                                          <* 
-    *> }                                                                                                                                                                                                                                                                                                       <* 
-    *> DEBUG_CONF  yLOG_value   ("scanf"      , rc);                                                                                                                                                                                                                                                           <* 
-    *> if (rc < 0) {                                                                                                                                                                                                                                                                                           <* 
-    *>    DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);                                                                                                                                                                                                                                                        <* 
-    *>    return rce;                                                                                                                                                                                                                                                                                          <* 
-    *> }                                                                                                                                                                                                                                                                                                       <* 
-    *> /+---(add wave)-----------------------+/                                                                                                                                                                                                                                                                <* 
-   *> DEBUG_CONF  yLOG_info    ("x_proj"     , x_proj);                                                                                                                                                                                                                                                       <* 
-      *> DEBUG_CONF  yLOG_info    ("x_unit"     , x_unit);                                                                                                                                                                                                                                                       <* 
-      *> DEBUG_CONF  yLOG_value   ("x_stage"    , x_stage);                                                                                                                                                                                                                                                      <* 
-      *> rc = WAVE__new (x_proj, x_unit, x_scrp, s_gather, &x_new);                                                                                                                                                                                                                                              <* 
-      *> DEBUG_CONF  yLOG_value   ("new"        , rc);                                                                                                                                                                                                                                                           <* 
-      *> --rce;  if (rc < 0) {                                                                                                                                                                                                                                                                                   <* 
-         *>    DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);                                                                                                                                                                                                                                                        <* 
-            *>    return rce;                                                                                                                                                                                                                                                                                          <* 
-            *> }                                                                                                                                                                                                                                                                                                       <* 
-            *> /+---(note)---------------------------+/                                                                                                                                                                                                                                                                <* 
-            *> if (rc == 0)  {                                                                                                                                                                                                                                                                                         <* 
-               *>    DEBUG_PROG  yLOG_note    ("NEW");                                                                                                                                                                                                                                                                    <* 
-                  *> } else {                                                                                                                                                                                                                                                                                                <* 
-                     *>    DEBUG_PROG  yLOG_note    ("UPDATING");                                                                                                                                                                                                                                                               <* 
-                        *> }                                                                                                                                                                                                                                                                                                       <* 
-                        *> /+---(save)---------------------------+/                                                                                                                                                                                                                                                                <* 
-                        *> x_new->w_source  = x_source;                                                                                                                                                                                                                                                                            <* 
-                        *> ystrlcpy (x_new->w_time   , x_time   , LEN_TITLE);                                                                                                                                                                                                                                                      <* 
-                        *> x_new->w_last    = x_epoch;                                                                                                                                                                                                                                                                             <* 
-                        *> x_new->w_wave    = x_wave;                                                                                                                                                                                                                                                                              <* 
-                        *> x_new->w_stage   = x_stage;                                                                                                                                                                                                                                                                             <* 
-                        *> x_new->w_rating  = x_rating;                                                                                                                                                                                                                                                                            <* 
-                        *> ystrlcpy (x_new->w_desc   , x_desc   , LEN_LONG);                                                                                                                                                                                                                                                       <* 
-                        *> ystrlcpy (x_new->w_terse  , x_terse  , LEN_LABEL);                                                                                                                                                                                                                                                      <* 
-                        *> x_new->w_nunit   = x_nunit;                                                                                                                                                                                                                                                                             <* 
-                        *> x_new->w_nscrp   = x_nscrp;                                                                                                                                                                                                                                                                             <* 
-                        *> x_new->w_ncond   = x_ncond;                                                                                                                                                                                                                                                                             <* 
-                        *> x_new->w_nstep   = x_nstep;                                                                                                                                                                                                                                                                             <* 
-                        *> ystrlcpy (x_new->w_expe   , x_expe   , LEN_SHORT);                                                                                                                                                                                                                                                      <* 
-                        *> ystrlunage (x_expe, &x_expect);                                                                                                                                                                                                                                                                         <* 
-                        *> x_new->w_expect  = x_expect;                                                                                                                                                                                                                                                                            <* 
-                        *> x_new->w_result  = x_result;                                                                                                                                                                                                                                                                            <* 
-                        *> x_new->w_npass   = x_npass;                                                                                                                                                                                                                                                                             <* 
-                        *> x_new->w_nfail   = x_nfail;                                                                                                                                                                                                                                                                             <* 
-                        *> x_new->w_nbadd   = x_nbadd;                                                                                                                                                                                                                                                                             <* 
-                        *> x_new->w_nvoid   = x_nvoid;                                                                                                                                                                                                                                                                             <* 
-                        *> x_new->w_nmiss   = x_new->w_nstep - x_new->w_npass - x_new->w_nfail - x_new->w_nbadd - x_new->w_nvoid;                                                                                                                                                                                                  <* 
-                        *> x_new->w_actual  = x_actual;                                                                                                                                                                                                                                                                            <* 
-                        *> /+---(update totals)------------------+/                                                                                                                                                                                                                                                                <* 
-                        *> if (strncmp (x_time, "··´", 3) == 0) {                                                                                                                                                                                                                                                                  <* 
-                           *>    rc = WAVE__new (x_proj, x_unit, 0, '-', NULL);                                                                                                                                                                                                                                                       <* 
-                              *> }                                                                                                                                                                                                                                                                                                       <* 
-                              *> /+---(update totals)------------------+/                                                                                                                                                                                                                                                                <* 
-                              *> ++s_read;                                                                                                                                                                                                                                                                                               <* 
-                              *> /+---(complete)-----------------------+/                                                                                                                                                                                                                                                                <* 
-                              *> DEBUG_CONF  yLOG_exit    (__FUNCTION__);                                                                                                                                                                                                                                                                <* 
-                              *> return 0;                                                                                                                                                                                                                                                                                               <*/
 }
 
 
@@ -771,11 +670,11 @@ INCL_block              (char a_proj [LEN_TITLE])
    /*---(defense)------------------------*/
    --rce;  if (a_proj == NULL)             return rce;
    if (strstr (a_proj, "_solo") != NULL) {
-      INCL_add_by_name (GRAPH_by_name (a_proj), "zenodotus");
+      INCL_add_by_name ("zenodotus", GRAPH_by_name (a_proj));
    }
    /*> if (strcmp (a_proj, "yUNIT") == 0) {                                           <* 
     *>    GRAPH_add_node  ("yENV_solo");                                              <* 
-    *>    INCL_add_by_name (GRAPH_by_name (a_proj), "yENV_solo");                     <* 
+    *>    INCL_add_by_name ("yENV_solo", GRAPH_by_name (a_proj));                     <* 
     *> }                                                                              <*/
    /*---(show result)--------------------*/
    printf ("PROJECT     : å%sæ\n", a_proj);

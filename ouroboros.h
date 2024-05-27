@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2g"
-#define     P_VERTXT    "big changes, integrating back with yASCII, (testing unclean)"
+#define     P_VERNUM    "0.2h"
+#define     P_VERTXT    "created logic to find zenodotus use in Makefiles (unit tested)"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -498,10 +498,10 @@ char        INCL_list_clear         (void);
 char        INCL_list_add           (char a_cat, char a_header [LEN_TITLE]);
 int         INCL_by_name            (char a_header [LEN_TITLE], char *r_block);
 /*---(find)-----------------*/
-int         INCL_add_by_name        (int a_end, char a_header [LEN_TITLE]);
+int         INCL_add_by_name        (char a_beg [LEN_TITLE], int a_end);
 char        INCL_add_by_group       (int a_end, char a_type);
 /*---(gather)---------------*/
-char        INCL_gather_add         (int a_end, char a_head [LEN_TITLE]);
+char        INCL_gather_add         (char a_header [LEN_TITLE], int a_end);
 char        INCL_gather_in_c        (char a_name [LEN_TITLE], cchar a_file [LEN_PATH]);
 /*---(report)---------------*/
 char        INCL_list               (void);
@@ -509,6 +509,15 @@ char        INCL_block              (char a_proj [LEN_TITLE]);
 /*---(unittest)-------------*/
 char*       INCL__unit              (char *a_question, int n);
 /*---(done)-----------------*/
+
+
+
+/*===[[ ouroboros_make.c ]]===================================================*/
+/*········· ´······················ ´·········································*/
+char        MAKE__check             (char a_recd [LEN_RECD], int x_end);
+char        MAKE_gather             (char a_proj [LEN_TITLE], char a_file [LEN_PATH]);
+/*---(done)-----------------*/
+
 
 
 
