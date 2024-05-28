@@ -187,13 +187,13 @@ WAVE__key               (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char 
    }
    /*---(make key)-----------------------*/
    if (strcmp (a_unit, "") == 0 || strcmp (a_unit, "·") == 0) {
-      x_verb = 'p';
+      x_verb = ENTRY_PROG;
       sprintf (x_key, "%-20.20s                                  "  , a_proj);
    } else if (a_scrp == 0) {
-      x_verb = 'u'; 
+      x_verb = ENTRY_UNIT; 
       sprintf (x_key, "%-20.20s %-30.30s   "  , a_proj, a_unit);
    } else {
-      x_verb = 'w';
+      x_verb = ENTRY_WAVE;
       sprintf (x_key, "%-20.20s %-30.30s %02d", a_proj, a_unit, a_scrp);
    }
    DEBUG_DATA   yLOG_delim   ("x_key"     , x_key);
@@ -747,23 +747,23 @@ WAVE_inventory          (char *a_path)
       else if (strcmp  (x_entry->d_name, ".."              ) == 0)     ;
       else if (strncmp (x_entry->d_name, "."       , 1     ) == 0)     ;
       else if (strcmp  (x_entry->d_name + l - 1, "~"       ) == 0)     ;
-      /*> else if (strcmp  (x_entry->d_name, "master.h"        ) == 0)          x_keep = 'h';   <*/
+      /*> else if (strcmp  (x_entry->d_name, "master.h"        ) == 0)          x_keep = TYPE_HEAD;   <*/
       else if (strncmp (x_entry->d_name, "master."     ,  7) == 0)     ;
       else if (strncmp (x_entry->d_name, "unit_daemon" , 11) == 0)     ;
       else if (strncmp (x_entry->d_name, "unit_badrc"  , 10) == 0)     ;
       /*---(filter extension)------------*/
-      else if (l >= 8 && strcmp  (x_entry->d_name, "Makefile"       ) == 0)  x_keep = 'M';
+      else if (l >= 8 && strcmp  (x_entry->d_name, "Makefile"       ) == 0)  x_keep = TYPE_MAKE;
       else if (l >= 8 && strcmp  (x_entry->d_name + l - 7, "_unit.c") == 0)  ;
-      else if (l >= 6 && strcmp  (x_entry->d_name + l - 5, ".wave"  ) == 0)  x_keep = 'w';
-      else if (l >= 6 && strcmp  (x_entry->d_name + l - 5, ".unit"  ) == 0)  x_keep = 'u';
-      else if (l >= 7 && strcmp  (x_entry->d_name + l - 5, ".munit" ) == 0)  x_keep = 'm';
-      else if (l >= 3 && strcmp  (x_entry->d_name        , x_header ) == 0)  x_keep = 'h';
-      else if (l >= 3 && strcmp  (x_entry->d_name + l - 7, "_priv.h") == 0)  x_keep = 'h';
-      else if (l >= 3 && strcmp  (x_entry->d_name + l - 7, "_solo.h") == 0)  x_keep = 'h';
-      else if (l >= 3 && strcmp  (x_entry->d_name + l - 7, "_uver.h") == 0)  x_keep = 'h';
+      else if (l >= 6 && strcmp  (x_entry->d_name + l - 5, ".wave"  ) == 0)  x_keep = TYPE_WAVE;
+      else if (l >= 6 && strcmp  (x_entry->d_name + l - 5, ".unit"  ) == 0)  x_keep = TYPE_UNIT;
+      else if (l >= 7 && strcmp  (x_entry->d_name + l - 5, ".munit" ) == 0)  x_keep = TYPE_MUNIT;
+      else if (l >= 3 && strcmp  (x_entry->d_name        , x_header ) == 0)  x_keep = TYPE_HEAD;
+      else if (l >= 3 && strcmp  (x_entry->d_name + l - 7, "_priv.h") == 0)  x_keep = TYPE_HEAD;
+      else if (l >= 3 && strcmp  (x_entry->d_name + l - 7, "_solo.h") == 0)  x_keep = TYPE_HEAD;
+      else if (l >= 3 && strcmp  (x_entry->d_name + l - 7, "_uver.h") == 0)  x_keep = TYPE_HEAD;
 /*> else if (l >= 8 && strncmp (x_entry->d_name, "unit_", 5       ) == 0                   <* 
-       *>                 && strcmp  (x_entry->d_name + l - 2, ".c"     ) == 0)  x_keep = 'm';   <*/
-      /*> else if (l >= 3 && strcmp  (x_entry->d_name + l - 2, ".c"     ) == 0)  x_keep = 'c';   <*/
+       *>                 && strcmp  (x_entry->d_name + l - 2, ".c"     ) == 0)  x_keep = TYPE_MUNIT;   <*/
+      /*> else if (l >= 3 && strcmp  (x_entry->d_name + l - 2, ".c"     ) == 0)  x_keep = TYPE_CODE;   <*/
       if (x_keep == '-') {
          DEBUG_DATA   yLOG_note    ("skipping");
          continue;
@@ -774,7 +774,7 @@ WAVE_inventory          (char *a_path)
       else                       sprintf (x_name, "%s/%s", a_path, x_entry->d_name);
       DEBUG_DATA   yLOG_char    ("x_keep"    , x_keep);
       switch (x_keep) {
-      case 'u' :
+      case TYPE_UNIT :
          DEBUG_DATA   yLOG_note    ("handle unit test file");
          ystrlcpy (x_name, x_entry->d_name, l - 4);
          rc = WAVE__new (my.proj, x_name, 0, 'y', NULL);
@@ -785,7 +785,7 @@ WAVE_inventory          (char *a_path)
             GRAPH_add_edge   ("koios", x_end);
          }
          break;
-      case 'm' :
+      case TYPE_MUNIT :
          DEBUG_DATA   yLOG_note    ("mini unit test file");
          if (x_end < 0) {
             x_end = GRAPH_add_node (my.proj);
@@ -794,12 +794,12 @@ WAVE_inventory          (char *a_path)
          }
          rc = INCL_gather_in_c (my.proj, x_name);
          break;
-      case 'w' :
+      case TYPE_WAVE :
          DEBUG_DATA   yLOG_note    ("handle normal wave file");
          ++c;
          rc = WAVE_pull_local (x_name);
          break;
-      case 'c' : case 'h' :
+      case TYPE_CODE : case TYPE_HEAD :
          DEBUG_DATA   yLOG_note    ("handle inclusion file processing");
          rc = INCL_gather_in_c (my.proj, x_name);
          break;
@@ -910,7 +910,7 @@ WAVE_totalize           (void)
    while (rc >= 0) {
       /*---(project)---------------------*/
       switch (x_wave->w_verb) {
-      case 'p' :
+      case ENTRY_PROG :
          ++G_nproj;
          if (x_unit != NULL)   WAVE_total_unit (x_unit);
          if (x_proj != NULL)   WAVE_total_proj (x_proj);
@@ -920,14 +920,14 @@ WAVE_totalize           (void)
          U_nunit = U_nscrp = U_ncond = U_nstep = U_npass = U_est = U_nfail = U_nbadd = U_nvoid = U_nmiss = U_act = U_PASS = U_FAIL = U_WARN = U_NONE = 0;
          break;
          /*---(unit)------------------------*/
-      case 'u' :
+      case ENTRY_UNIT :
          if (x_unit != NULL)   WAVE_total_unit (x_unit);
          x_unit = x_wave;
          G_nunit  += 1;       P_nunit  += 1;
          U_nunit = U_nscrp = U_ncond = U_nstep = U_npass = U_est = U_nfail = U_nbadd = U_nvoid = U_nmiss = U_act = U_PASS = U_FAIL = U_WARN = U_NONE = 0;
          break;
          /*---(wave)------------------------*/
-      case 'w' :
+      case ENTRY_WAVE :
          G_nscrp  += 1;                P_nscrp  += 1;                U_nscrp  += 1; 
          G_ncond  += x_wave->w_ncond;  P_ncond  += x_wave->w_ncond;  U_ncond  += x_wave->w_ncond; 
          G_nstep  += x_wave->w_nstep;  P_nstep  += x_wave->w_nstep;  U_nstep  += x_wave->w_nstep; 
@@ -986,7 +986,7 @@ WAVE_write              (char a_file [LEN_PATH])
    while (rc >= 0) {
       /*---(project)---------------------*/
       switch (x_wave->w_verb) {
-      case 'p' :
+      case ENTRY_PROG :
          ystrldur (x_wave->w_expect, '-', x_est);
          ystrldur (x_wave->w_actual, '-', x_act);
          fprintf (f, "\n\n\n");
@@ -995,7 +995,7 @@ WAVE_write              (char a_file [LEN_PATH])
                x_wave->w_proj, x_wave->w_nunit, x_wave->w_nscrp, x_wave->w_ncond, x_wave->w_nstep, x_est, x_wave->w_expect, x_wave->w_npass, x_wave->w_nfail, x_wave->w_nbadd, x_wave->w_nvoid, x_wave->w_nmiss, x_wave->w_actual, x_act, x_wave->w_pass, x_wave->w_fail, x_wave->w_warn, x_wave->w_none);
          break;
          /*---(unit)------------------------*/
-      case 'u' :
+      case ENTRY_UNIT :
          ystrldur (x_wave->w_expect, '-', x_est);
          ystrldur (x_wave->w_actual, '-', x_act);
          fprintf (f, "\n");
@@ -1003,7 +1003,7 @@ WAVE_write              (char a_file [LEN_PATH])
                x_wave->w_proj, x_wave->w_unit, x_wave->w_nunit, x_wave->w_nscrp, x_wave->w_ncond, x_wave->w_nstep, x_est, x_wave->w_expect, x_wave->w_npass, x_wave->w_nfail, x_wave->w_nbadd, x_wave->w_nvoid, x_wave->w_nmiss, x_wave->w_actual, x_act, x_wave->w_pass, x_wave->w_fail, x_wave->w_warn, x_wave->w_none);
          break;
          /*---(wave)------------------------*/
-      case 'w' :
+      case ENTRY_WAVE :
          ystrldur (x_wave->w_actual, '-', x_act);
          fprintf (f, "    WAVE  %-26.26s  %10ld  %-20.20s  %-30.30s  %02d  %c  %-70.70s  %-20.20s  %c  %c  %c  %6d  %6d  %6d  %6d  %3.3s  %6d  %c  %6d  %6d  %6d  %6d  %6d  %6d  %3s       %c       %c       %c       %c \n",
                x_wave->w_time, x_wave->w_last, x_wave->w_proj, x_wave->w_unit,

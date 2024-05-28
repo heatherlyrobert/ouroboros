@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2i"
-#define     P_VERTXT    "broke out file name filtering in gathering (unit tested)"
+#define     P_VERNUM    "0.2j"
+#define     P_VERTXT    "built better file typing and dispatch (unit tested)"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -281,7 +281,18 @@ extern tWAVE     *s_tail;
 
 #define   DEPVISIBLE   "sucvgo!?"
 
+#define   ENTRY_PROG   'p'
+#define   ENTRY_UNIT   'u'
+#define   ENTRY_WAVE   'w'
 
+#define   TYPE_NONE    '-'
+#define   TYPE_MAKE    'M'
+#define   TYPE_WAVE    'w'
+#define   TYPE_UNIT    'u'
+#define   TYPE_MUNIT   'm'
+#define   TYPE_HEAD    'h'
+#define   TYPE_CODE    'c'
+#define   TYPES_VALID  "Mwumhc"
 
 /*===[[ NODES ]]==============================================================*/
 #define   MAX_INCL   300
@@ -514,8 +525,8 @@ char*       INCL__unit              (char *a_question, int n);
 
 /*===[[ ouroboros_make.c ]]===================================================*/
 /*········· ´······················ ´·········································*/
-char        MAKE__check             (char a_recd [LEN_RECD], int x_end);
-char        MAKE_gather             (char a_proj [LEN_TITLE], char a_file [LEN_PATH]);
+char        MAKE_gather             (char a_recd [LEN_RECD], int x_end);
+/*> char        MAKE_gather             (char a_proj [LEN_TITLE], char a_file [LEN_PATH]);   <*/
 /*---(done)-----------------*/
 
 
@@ -523,6 +534,7 @@ char        MAKE_gather             (char a_proj [LEN_TITLE], char a_file [LEN_P
 /*===[[ ouroboros_make.c ]]===================================================*/
 /*········· ´······················ ´·········································*/
 char        DATA_file_type          (char a_proj [LEN_TITLE], char a_file [LEN_HUND], char *r_type);
+char        DATA_dispatch_prep      (char a_file [LEN_PATH], char a_type, char r_file [LEN_PATH]);
 /*---(done)-----------------*/
 
 
