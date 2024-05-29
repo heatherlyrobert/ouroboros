@@ -80,7 +80,7 @@ DATA_file_type          (char a_proj [LEN_TITLE], char a_file [LEN_HUND], char *
 }
 
 char
-DATA_dispatch_prep      (char a_file [LEN_PATH], char a_type, char r_file [LEN_PATH])
+DATA_gather_prep        (char a_file [LEN_PATH], char a_type, char r_file [LEN_PATH])
 {
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
@@ -156,52 +156,29 @@ DATA_dispatch_prep      (char a_file [LEN_PATH], char a_type, char r_file [LEN_P
 }
 
 char
-DATA_dispatch           (char a_proj [LEN_TITLE], char a_file [LEN_PATH], char a_type)
+DATA_gather_file        (char a_proj [LEN_TITLE], char a_file [LEN_PATH], char a_type)
 {
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
    int         rc          =    0;
-   char        x_temp      [LEN_LABEL] = "/tmp/ouroboros.txt";
-   char        x_cmd       [LEN_RECD]  = "";
    char        x_file      [LEN_PATH]  = "";
    int         c           =    0;
    int         x_end       =    0;
    FILE       *f           =    0;
    char       *rcp         = NULL;
    char        x_recd      [LEN_RECD]  = "";
+   int         l           =    0;
+   char        x_temp      [LEN_LABEL] = "/tmp/ouroboros.txt";
    /*---(header)-------------------------*/
    DEBUG_ENVI   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   DEBUG_DATA   yLOG_point   ("a_file"    , a_file);
-   --rce;  if (a_file == NULL) {
+   rc = DATA_gather_prep (a_file, a_type, x_file);
+   DEBUG_DATA   yLOG_value   ("prep"      , rc);
+   --rce;  if (rc < 0) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_DATA   yLOG_info    ("a_file"    , a_file);
-   /*---(prepare)------------------------*/
-   switch (a_type) {
-   case TYPE_MAKE :
-      sprintf (x_cmd, "grep \"^include \" %s > %s 2> /dev/null", a_file, x_temp);
-      ystrlcpy (x_file, x_temp, LEN_PATH);
-      break;
-   case TYPE_WAVE :
-      ystrlcpy (x_file, a_file, LEN_PATH);
-   default  :
-      sprintf (x_cmd, "grep \"^#include\" %s > %s 2> /dev/null", a_file, x_temp);
-      ystrlcpy (x_file, x_temp, LEN_PATH);
-   }
-   if (x_cmd [0] != '\0') {
-      rc = system (x_cmd);
-      DEBUG_DATA   yLOG_value   ("grep"      , rc);
-      --rce; if (rc < 0) {
-         DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-         return rce;
-      }
-   }
-   /*---(check lines)--------------------*/
-   c = yENV_lines (x_file);
-   DEBUG_DATA   yLOG_value   ("c"         , c);
-   --rce; if (c == 0) {
+   if (rc == 0) {
       DEBUG_DATA   yLOG_exit    (__FUNCTION__);
       return 0;
    }
@@ -229,6 +206,10 @@ DATA_dispatch           (char a_proj [LEN_TITLE], char a_file [LEN_PATH], char a
          DEBUG_DATA   yLOG_note    ("end-of-file");
          break;
       }
+      l = strlen (x_recd);
+      /*---(trim)------------------------*/
+      if (l > 0 && x_recd [l - 1] == '\n')  x_recd [--l] = '\0';
+      DEBUG_DATA   yLOG_info    ("x_recd"    , x_recd);
       /*---(handle)----------------------*/
       switch (a_type) {
       case TYPE_MAKE :
@@ -261,7 +242,7 @@ DATA_dispatch           (char a_proj [LEN_TITLE], char a_file [LEN_PATH], char a
 }
 
 char
-DATA_gather_all         (char a_proj [LEN_TITLE], char a_path [LEN_PATH])
+DATA_gather_project     (char a_proj [LEN_TITLE], char a_path [LEN_PATH])
 {
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
@@ -315,7 +296,7 @@ DATA_gather_all         (char a_proj [LEN_TITLE], char a_path [LEN_PATH])
       if (a_path [l - 1] == '/') sprintf (x_name, "%s%s" , a_path, x_entry->d_name);
       else                       sprintf (x_name, "%s/%s", a_path, x_entry->d_name);
       DEBUG_DATA   yLOG_info    ("x_name"    , x_name);
-      rc = DATA_dispatch (a_proj, x_name, x_type);
+      rc = DATA_gather_file (a_proj, x_name, x_type);
       DEBUG_DATA   yLOG_value   ("dispatch"  , rc);
       if (rc < 0) {
          DEBUG_DATA   yLOG_note    ("file was not handled successfully, continue");

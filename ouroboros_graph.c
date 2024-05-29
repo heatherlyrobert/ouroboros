@@ -114,6 +114,7 @@ GRAPH_purge             (void)
       g_edges [i].e_nend     = 0;
       g_edges [i].e_end      = NULL;
       /*---(working)-----------*/
+      g_edges [i].e_type     = '-';
       g_edges [i].e_used     = '-';
       /*---(beg-point list)----*/
       g_edges [i].e_pprev    = NULL;
@@ -166,7 +167,7 @@ GRAPH_init              (void)
    /*---(set up drawing)-----------------*/
    yASCII_displayer (yASCII_print);
    /*---(prepare)------------------------*/
-   GRAPH_add_node ("zenodotus");
+   /*> GRAPH_add_node ("zenodotus");                                                  <*/
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -229,7 +230,7 @@ GRAPH_add_node          (char a_name [LEN_TITLE])
    /*> if (strcmp (a_name, "zenodotus") != 0) {                                       <* 
     *>    DEBUG_PROG   yLOG_note    ("create a link back to zenodotus");              <* 
     *>    INCL_add_by_name ("zenodotus", n);                                          <* 
-    *>    GRAPH_add_edge   ("zenodotus", n);                                          <* 
+    *>    GRAPH_edge_add   ("zenodotus", n);                                          <* 
     *> }                                                                              <*/
    /*---(defense)------------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
@@ -303,7 +304,7 @@ GRAPH_dump_nodes        (void)
 static void  o___EDGES___________o () { return; }
 
 char
-GRAPH_add_edge          (char a_beg [LEN_TITLE], int a_end)
+GRAPH_edge_add          (char a_type, char a_beg [LEN_TITLE], int a_end)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -350,7 +351,9 @@ GRAPH_add_edge          (char a_beg [LEN_TITLE], int a_end)
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   /*---(updage edge)--------------------*/
+   /*---(set type)-----------------------*/
+   g_edges [g_nedge].e_type = a_type;
+   /*---(beg-point on edge)--------------*/
    g_edges [g_nedge].e_nbeg = x_beg;
    g_edges [g_nedge].e_beg  = &(g_nodes [x_beg]);
    /*---(beg-point on node)--------------*/
@@ -387,6 +390,9 @@ GRAPH_add_edge          (char a_beg [LEN_TITLE], int a_end)
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }
+
+char GRAPH_edge_real   (char a_beg [LEN_TITLE], int a_end) { return GRAPH_edge_add ('r', a_beg, a_end); }
+char GRAPH_edge_virt   (char a_beg [LEN_TITLE], int a_end) { return GRAPH_edge_add ('v', a_beg, a_end); }
 
 char
 GRAPH_dump_edges        (void)

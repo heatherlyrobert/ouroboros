@@ -782,14 +782,14 @@ WAVE_inventory          (char *a_path)
          if (x_end < 0) {
             x_end = GRAPH_add_node (my.proj);
             INCL_add_by_name ("koios", x_end);
-            GRAPH_add_edge   ("koios", x_end);
+            GRAPH_edge_virt  ("koios", x_end);
          }
          break;
       case TYPE_MUNIT :
          DEBUG_DATA   yLOG_note    ("mini unit test file");
          if (x_end < 0) {
             x_end = GRAPH_add_node (my.proj);
-            GRAPH_add_edge ("yUNIT_solo", x_end);
+            GRAPH_edge_virt ("yUNIT_solo", x_end);
             INCL_list_add  ('u', "yUNIT_solo");
          }
          rc = INCL_gather_in_c (my.proj, x_name);

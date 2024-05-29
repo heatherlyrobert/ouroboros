@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2j"
-#define     P_VERTXT    "built better file typing and dispatch (unit tested)"
+#define     P_VERNUM    "0.2k"
+#define     P_VERTXT    "working through _incl logic, cleaned find and add (unit tested)"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -355,6 +355,7 @@ struct cEDGE {
    int         e_nend;
    tNODE      *e_end;
    /*---(working)-----------*/
+   char        e_type;        /* real/clear vs created/assumed    */
    char        e_used;
    /*---(beg-point list)----*/
    tNODE      *e_pprev;
@@ -478,7 +479,9 @@ int         GRAPH_add_node          (char a_name [LEN_TITLE]);
 char*       GRAPH_node_line         (int n);
 char        GRAPH_dump_nodes        (void);
 /*---(edges)----------------*/
-char        GRAPH_add_edge          (char a_name [LEN_TITLE], int e);
+char        GRAPH_edge_add          (char a_type, char a_beg [LEN_TITLE], int a_end);
+char        GRAPH_edge_real         (char a_beg [LEN_TITLE], int a_end);
+char        GRAPH_edge_virt         (char a_beg [LEN_TITLE], int a_end);
 char        GRAPH_dump_edges        (void);
 /*---(deps)-----------------*/
 char        GRAPH_deps_add          (char a_name [LEN_TITLE], char a_deps [LEN_RECD]);
@@ -512,7 +515,8 @@ int         INCL_by_name            (char a_header [LEN_TITLE], char *r_block);
 int         INCL_add_by_name        (char a_beg [LEN_TITLE], int a_end);
 char        INCL_add_by_group       (int a_end, char a_type);
 /*---(gather)---------------*/
-char        INCL_gather_add         (char a_header [LEN_TITLE], int a_end);
+char        INCL_gather_detail      (char a_header [LEN_TITLE], int a_end);
+char        INCL_gather             (char a_recd [LEN_RECD], int a_end);
 char        INCL_gather_in_c        (char a_name [LEN_TITLE], cchar a_file [LEN_PATH]);
 /*---(report)---------------*/
 char        INCL_list               (void);
@@ -534,7 +538,7 @@ char        MAKE_gather             (char a_recd [LEN_RECD], int x_end);
 /*===[[ ouroboros_make.c ]]===================================================*/
 /*········· ´······················ ´·········································*/
 char        DATA_file_type          (char a_proj [LEN_TITLE], char a_file [LEN_HUND], char *r_type);
-char        DATA_dispatch_prep      (char a_file [LEN_PATH], char a_type, char r_file [LEN_PATH]);
+char        DATA_gather_prep        (char a_file [LEN_PATH], char a_type, char r_file [LEN_PATH]);
 /*---(done)-----------------*/
 
 

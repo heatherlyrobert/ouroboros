@@ -37,7 +37,7 @@ main               (int a_argc, char *a_argv[])
    GRAPH_deps_add  ("yUNIT_solo" , ",zenodotus,");
    GRAPH_deps_add  ("yCOLOR_solo", ",zenodotus,");
    GRAPH_deps_add  ("yDLST_solo" , ",zenodotus,");
-   GRAPH_add_edge  ("yENV_solo"  , GRAPH_by_name ("yUNIT"));
+   GRAPH_edge_virt  ("yENV_solo"  , GRAPH_by_name ("yUNIT"));
    INCL_list ();
    GRAPH_dump_nodes ();
    GRAPH_dump_edges ();

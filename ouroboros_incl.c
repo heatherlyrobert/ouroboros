@@ -217,15 +217,15 @@ tINCL g_incls [MAX_INCL] = {
 
    /*---(heatherly solo)-----------------*/
    /* just taking in for definitions in header file */
-   { 's', "yLOG_solo"                , 0, '-', '-', 'y', '-' },
-   { 's', "yLOG_uver"                , 0, '-', '-', 'y', '-' },
-   { 's', "yURG_solo"                , 0, '-', '-', 'y', '-' },
-   { 's', "ySTR_solo"                , 0, '-', '-', 'y', '-' },
-   { 's', "ySTR_uver"                , 0, '-', '-', 'y', '-' },
-   { 's', "yENV_solo"                , 0, '-', '-', 'y', '-' },
-   { 's', "yENV_uver"                , 0, '-', '-', 'y', '-' },
-   { 's', "yDLST_solo"               , 0, '-', '-', 'y', '-' },
-   { 's', "yCOLOR_solo"              , 0, '-', '-', 'y', '-' },
+   { 's', "yLOG_solo"                , 0, '-', '-', 'y', 'é' },
+   { 's', "yLOG_uver"                , 0, '-', '-', 'y', 'é' },
+   { 's', "yURG_solo"                , 0, '-', '-', 'y', 'é' },
+   { 's', "ySTR_solo"                , 0, '-', '-', 'y', 'é' },
+   { 's', "ySTR_uver"                , 0, '-', '-', 'y', 'é' },
+   { 's', "yENV_solo"                , 0, '-', '-', 'y', 'é' },
+   { 's', "yENV_uver"                , 0, '-', '-', 'y', 'é' },
+   { 's', "yDLST_solo"               , 0, '-', '-', 'y', 'é' },
+   { 's', "yCOLOR_solo"              , 0, '-', '-', 'y', 'é' },
    { 's', "yVIHUB_solo"              , 0, 'y', 'y', '-', '-' },
 
    /*---(heatherly unit testing)---------*/
@@ -302,6 +302,7 @@ INCL_list_clear         (void)
 char
 INCL_list_add           (char a_cat, char a_header [LEN_TITLE])
 {
+   /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char       *x_list      = NULL;
    char        t           [LEN_HUND]  = "";
@@ -321,19 +322,22 @@ INCL_list_add           (char a_cat, char a_header [LEN_TITLE])
    /*---(pick list)----------------------*/
    DEBUG_PROG   yLOG_char    ("a_cat"     , a_cat);
    --rce;  switch (a_cat) {
-   case 's' :  x_list = my.depsolo;    break;
-   case 'u' :  x_list = my.depunit;    break;
-   case 'a' :  x_list = my.depansi;    break;
-   case 'p' :  x_list = my.depposix;   break;
-   case 'c' :  x_list = my.depcore;    break;
-   case 'v' :  x_list = my.depvikey;   break;
-   case 'g' :  x_list = my.depgraph;   break;
-   case 'o' :  x_list = my.depother;   break;
-   case '!' :  x_list = my.depalien;   break;
-   case 'I' :  x_list = my.depinpt;    break;
-   case 'O' :  x_list = my.depoutp;    break;
-   case 'F' :  x_list = my.depfile;    break;
-   default  :  x_list = my.depwtf;     break;
+   case DEPSOLO  :  x_list = my.depsolo;    break;
+   case DEPUNIT  :  x_list = my.depunit;    break;
+   case DEPANSI  :  x_list = my.depansi;    break;
+   case DEPPOSIX :  x_list = my.depposix;   break;
+   case DEPCORE  :  x_list = my.depcore;    break;
+   case DEPVIKEY :  x_list = my.depvikey;   break;
+   case DEPGRAPH :  x_list = my.depgraph;   break;
+   case DEPOTHER :  x_list = my.depother;   break;
+   case DEPALIEN :  x_list = my.depalien;   break;
+   case DEPINPT  :  x_list = my.depinpt;    break;
+   case DEPOUTP  :  x_list = my.depoutp;    break;
+   case DEPFILE  :  x_list = my.depfile;    break;
+   case DEPWTF   :  x_list = my.depwtf;     break;
+   default       :
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
    }
    DEBUG_PROG   yLOG_info    ("x_list"    , x_list);
    /*---(prepare)------------------------*/
@@ -373,7 +377,9 @@ INCL_by_name            (char a_header [LEN_TITLE], char *r_block)
 {
    char        rce         =  -10;
    int         i           =    0;
-   if (r_block != NULL)  *r_block = '-';
+   if (r_block  != NULL)  *r_block = '·';
+   --rce;  if (a_header == NULL)       return rce;
+   --rce;  if (a_header [0] == '\0')   return rce;
    for (i = 0; i < MAX_INCL; ++i) {
       if (g_incls [i].i_cat == 0)   break;
       if (strcmp (g_incls [i].i_name, a_header) != 0)  continue;
@@ -396,7 +402,7 @@ INCL_add_by_name        (char a_beg [LEN_TITLE], int a_end)
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
-   int         i           =    0;
+   int         n           =    0;
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -414,25 +420,32 @@ INCL_add_by_name        (char a_beg [LEN_TITLE], int a_end)
    --rce;  if (a_end < 0) {
       DEBUG_PROG   yLOG_note    ("negative a_end, better be unit testing");
    }
-   /*---(walk)---------------------------*/
-   for (i = 0; i < MAX_INCL; ++i) {
-      /*---(filter)----------------------*/
-      if (g_incls [i].i_cat == 0)                      break;
-      if (strcmp (g_incls [i].i_name, a_beg) != 0)  continue;
-      DEBUG_PROG   yLOG_value   ("FOUND"     , i);
-      rc = INCL_list_add (g_incls [i].i_cat, g_incls [i].i_name);
-      if (rc == 1) {
-         ++(g_incls [i].i_count);
-         if (g_incls [i].i_draw == 'y') rc = GRAPH_add_edge (a_beg, a_end);
-      }
-      DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-      return i;
-   }
+   /*---(find)---------------------------*/
+   n  = INCL_by_name (a_beg, NULL);
+   DEBUG_PROG   yLOG_value   ("by_name"   , n);
    /*---(not-standard)-------------------*/
-   rc = INCL_list_add (DEPWTF, a_beg);
+   --rce;  if (n < 0) {
+      DEBUG_PROG   yLOG_note    ("not found, so add to WTF");
+      rc = INCL_list_add (DEPWTF, a_beg);
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(add)----------------------------*/
+   rc = INCL_list_add (g_incls [n].i_cat, g_incls [n].i_name);
+   DEBUG_PROG   yLOG_value   ("list"      , rc);
+   if (rc == 1) {
+      DEBUG_PROG   yLOG_note    ("add to include counts");
+      ++(g_incls [n].i_count);
+      DEBUG_PROG   yLOG_char    ("i_draw"    , g_incls [n].i_draw);
+      if (g_incls [n].i_draw == 'y') {
+         DEBUG_PROG   yLOG_note    ("add a graph edge");
+         rc = GRAPH_edge_real (a_beg, a_end);
+         DEBUG_PROG   yLOG_value   ("edge"      , rc);
+      }
+   }
    /*---(complete)-----------------------*/
-   DEBUG_PROG   yLOG_exitr   (__FUNCTION__, --rce);
-   return rce;
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return n;
 }
 
 char
@@ -464,7 +477,7 @@ INCL_add_by_group       (int a_end, char a_type)
 static void  o___GATHER__________o () { return; }
 
 char
-INCL_gather_add         (char a_header [LEN_TITLE], int a_end)
+INCL_gather_detail      (char a_header [LEN_TITLE], int a_end)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -502,7 +515,7 @@ INCL_gather_add         (char a_header [LEN_TITLE], int a_end)
       DEBUG_DATA   yLOG_note    ("found meta-opengl header");
       INCL_add_by_group (a_end, 'O');
       DEBUG_DATA  yLOG_exit    (__FUNCTION__);
-      return 1;
+      return 2;
    } else if (strcmp (t, "make_curses") == 0) {
       DEBUG_DATA   yLOG_note    ("found meta-curses header");
       INCL_add_by_group (a_end, 'C');
@@ -516,15 +529,69 @@ INCL_gather_add         (char a_header [LEN_TITLE], int a_end)
    }
    /*---(add to list)--------------------*/
    n = INCL_add_by_name (t, a_end);
-   DEBUG_DATA   yLOG_value   ("n"         , n);
-   /*---(found)--------------------------*/
-   if (n >= 0) {
-      DEBUG_DATA   yLOG_complex ("FOUND"     , "%-20.20s  %3d  %c", t, n, g_incls [n].i_cat);
-      if (strchr (DEPVISIBLE, g_incls [n].i_cat) != NULL && g_incls [n].i_name [0] == 'y')   {
-         GRAPH_add_edge (g_incls [n].i_name, a_end);
-      }
+   DEBUG_DATA   yLOG_complex ("FOUND"     , "%-20.20s  %3d", t, n);
+   if (n < 0) {
       DEBUG_DATA  yLOG_exit    (__FUNCTION__);
-      return 1;
+      return 0;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_DATA  yLOG_exit    (__FUNCTION__);
+   return 1;
+}
+
+char
+INCL_gather             (char a_recd [LEN_RECD], int a_end)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char       *p           =    0;
+   char        x_delimit   =  '>';
+   char       *q           =  " ";
+   char        l           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_DATA  yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_DATA   yLOG_point   ("a_recd"    , a_recd);
+   --rce; if (a_recd == NULL) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_DATA   yLOG_info    ("a_recd"    , a_recd);
+   /*---(work out delimiters)---------*/
+   p = strchr (a_recd, '<');
+   if (p != NULL) {
+      x_delimit = '>';
+   } else  {
+      p = strchr (a_recd, '"');
+      x_delimit = '"';
+   }
+   DEBUG_DATA   yLOG_point   ("p"         , p);
+   DEBUG_DATA   yLOG_char    ("x_delimit" , x_delimit);
+   /*---(handle)----------------------*/
+   if (p != NULL) {
+      p [0] = '\0';
+      ++p;
+      DEBUG_DATA   yLOG_info    ("p"         , p);
+      q = strchr (p, x_delimit);
+      DEBUG_DATA   yLOG_point   ("q"         , q);
+      if (q != NULL) {
+         q [0] = '\0';
+         l = strlen (p);
+         DEBUG_DATA   yLOG_info    ("p"         , p);
+         if (x_delimit == '"') {
+            DEBUG_DATA   yLOG_info    ("strcmp"    , p + l - 7);
+            if      (strcmp (p + l - 7, "_solo.h") == 0)  rc = INCL_gather_detail (p, a_end);
+            else if (strcmp (p + l - 7, "_uver.h") == 0)  rc = INCL_gather_detail (p, a_end);
+            else {
+               DEBUG_DATA  yLOG_note    ("ignore local headers except _solo and _uver");
+               DEBUG_DATA  yLOG_exit    (__FUNCTION__);
+               return 0;
+            }
+         } else {
+            rc = INCL_gather_detail (p, a_end);
+         }
+      }
    }
    /*---(complete)-----------------------*/
    DEBUG_DATA  yLOG_exit    (__FUNCTION__);
@@ -613,10 +680,10 @@ INCL_gather_in_c        (char a_proj [LEN_TITLE], cchar a_file [LEN_PATH])
             DEBUG_DATA   yLOG_info    ("p"         , p);
             if (x_delimit == '"') {
                DEBUG_DATA   yLOG_info    ("strcmp"    , p + l - 7);
-               if      (strcmp (p + l - 7, "_solo.h") == 0)  INCL_gather_add (p, x_end);
-               else if (strcmp (p + l - 7, "_uver.h") == 0)  INCL_gather_add (p, x_end);
+               if      (strcmp (p + l - 7, "_solo.h") == 0)  INCL_gather_detail (p, x_end);
+               else if (strcmp (p + l - 7, "_uver.h") == 0)  INCL_gather_detail (p, x_end);
             } else {
-               INCL_gather_add (p, x_end);
+               INCL_gather_detail (p, x_end);
             }
          }
       }
