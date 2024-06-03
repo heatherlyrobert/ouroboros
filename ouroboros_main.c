@@ -30,14 +30,14 @@ main               (int a_argc, char *a_argv[])
       ystrlcat (g_nodes [n].n_deps, "yENV_solo,", LEN_RECD);
       ystrlcat (g_nodes [n].n_miss, "yENV_solo,", LEN_RECD);
    }
-   GRAPH_deps_add  ("yENV_solo"  , ",zenodotus,");
-   GRAPH_deps_add  ("ySTR_solo"  , ",zenodotus,");
-   GRAPH_deps_add  ("yLOG_solo"  , ",zenodotus,");
-   GRAPH_deps_add  ("yURG_solo"  , ",zenodotus,");
-   GRAPH_deps_add  ("yUNIT_solo" , ",zenodotus,");
-   GRAPH_deps_add  ("yCOLOR_solo", ",zenodotus,");
-   GRAPH_deps_add  ("yDLST_solo" , ",zenodotus,");
-   GRAPH_edge_virt  ("yENV_solo"  , GRAPH_by_name ("yUNIT"));
+   /*> GRAPH_deps_add  ("yENV_solo"  , ",zenodotus,");                                <*/
+   /*> GRAPH_deps_add  ("ySTR_solo"  , ",zenodotus,");                                <*/
+   /*> GRAPH_deps_add  ("yLOG_solo"  , ",zenodotus,");                                <*/
+   /*> GRAPH_deps_add  ("yURG_solo"  , ",zenodotus,");                                <*/
+   /*> GRAPH_deps_add  ("yUNIT_solo" , ",zenodotus,");                                <*/
+   /*> GRAPH_deps_add  ("yCOLOR_solo", ",zenodotus,");                                <*/
+   /*> GRAPH_deps_add  ("yDLST_solo" , ",zenodotus,");                                <*/
+   /*> GRAPH_edge_virt  ("yENV_solo"  , GRAPH_by_name ("yUNIT"));                     <*/
    INCL_list ();
    GRAPH_dump_nodes ();
    GRAPH_dump_edges ();

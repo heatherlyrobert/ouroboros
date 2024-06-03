@@ -132,6 +132,8 @@ WAVE__wipe              (tWAVE *a_dst, char a_new)
       a_dst->w_unique[0] = '\0';
       a_dst->w_ysort     = NULL;
    }
+   /*---(deps)-----------------*/
+   if (a_new == 'y') strcpy (a_dst->w_depall, "´");
    /*---(done)-----------------*/
    return 1;
 }
@@ -583,7 +585,7 @@ WAVE_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_
 }
 
 char
-WAVE__pull              (char a_gather, cchar a_file [LEN_PATH])
+WAVE__pull              (char a_gather, cchar a_full [LEN_PATH])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -606,14 +608,14 @@ WAVE__pull              (char a_gather, cchar a_file [LEN_PATH])
       return rce;
    }
    /*---(defense)------------------------*/
-   DEBUG_DATA  yLOG_point   ("a_file"     , a_file);
-   --rce;  if (a_file == NULL) {
+   DEBUG_DATA  yLOG_point   ("a_full"     , a_full);
+   --rce;  if (a_full == NULL) {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_DATA  yLOG_info    ("a_file"     , a_file);
+   DEBUG_DATA  yLOG_info    ("a_full"     , a_full);
    /*---(read all lines)-----------------*/
-   rc = yPARSE_autoread (a_file, NULL, WAVE_handler);
+   rc = yPARSE_autoread (a_full, NULL, WAVE_handler);
    DEBUG_PROG  yLOG_value   ("read"      , rc);
    /*---(close)--------------------------*/
    rc = yPARSE_close ();
@@ -662,6 +664,77 @@ WAVE_pull_central       (cchar a_file [LEN_PATH])
    return rc;
 }
 
+char
+WAVE_gather             (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char a_full [LEN_PATH], char a_type)
+{
+   /*---(local variables)--+-----+-----+-*/
+   char        rce         =  -10;
+   int         rc          =    0;
+   int         c, x_before, x_after;
+   char        x_name      [LEN_TITLE] = "";
+   int         l           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_DATA   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_DATA   yLOG_point   ("a_proj"    , a_proj);
+   --rce; if (a_proj == NULL  || a_proj [0]  == '\0') {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_DATA   yLOG_info    ("a_proj"    , a_proj);
+   DEBUG_DATA   yLOG_point   ("a_entry"   , a_entry);
+   --rce; if (a_entry == NULL || a_entry [0] == '\0') {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_DATA   yLOG_info    ("a_entry"   , a_entry);
+   DEBUG_DATA   yLOG_point   ("a_full"    , a_full);
+   --rce; if (a_full == NULL  || a_full [0]  == '\0') {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_DATA   yLOG_info    ("a_full"    , a_full);
+   DEBUG_DATA   yLOG_char    ("a_type"    , a_type);
+   --rce; if (a_type != TYPE_WAVE) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(prepare)------------------------*/
+   x_before = WAVE_count ();
+   DEBUG_DATA   yLOG_value   ("x_before"  , x_before);
+   /*---(verify/add project entry)-------*/
+   rc = WAVE__new (a_proj, "" , 0, 'y', NULL);
+   DEBUG_DATA   yLOG_value   ("project"   , rc);
+   --rce;  if (rc < 0)  {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(verify/add unit entry)----------*/
+   l = strlen (a_entry);
+   ystrlcpy (x_name, a_entry, l - 4);
+   rc = WAVE__new (a_proj, x_name, 0, 'y', NULL);
+   DEBUG_DATA   yLOG_value   ("unit"      , rc);
+   --rce;  if (rc < 0)  {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(add records)--------------------*/
+   rc = WAVE_pull_local (a_full);
+   DEBUG_DATA   yLOG_value   ("pull"      , rc);
+   --rce;  if (rc < 0)  {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(wrap)---------------------------*/
+   x_after  = WAVE_count ();
+   DEBUG_DATA   yLOG_value   ("x_after"   , x_after);
+   c = x_after - x_before;
+   DEBUG_DATA   yLOG_value   ("c"         , c);
+   /*---(complete)-----------------------*/
+   DEBUG_DATA   yLOG_exit    (__FUNCTION__);
+   return c;
+}
+
 
 
 /*====================------------------------------------====================*/
@@ -672,6 +745,14 @@ static void  o___SEARCH__________o () { return; }
 int  WAVE_count     (void)                       { return  ySORT_count     (B_WAVE); }
 char WAVE_by_index  (int n, tWAVE **a_cur)       { return  ySORT_by_index  (B_WAVE, n, a_cur); }
 char WAVE_by_cursor (char a_dir, tWAVE **a_cur)  { return  ySORT_by_cursor (B_WAVE, a_dir, a_cur); }
+
+char
+WAVE_by_proj            (char a_proj [LEN_TITLE], tWAVE **a_cur)
+{
+   char        x_key       [LEN_LONG]  = "";
+   WAVE__key (a_proj, "",  0, x_key, NULL);
+   return  ySORT_by_name (B_WAVE, x_key, a_cur);
+}
 
 
 
@@ -792,7 +873,7 @@ WAVE_inventory          (char *a_path)
             GRAPH_edge_virt ("yUNIT_solo", x_end);
             INCL_list_add  ('u', "yUNIT_solo");
          }
-         rc = INCL_gather_in_c (my.proj, x_name);
+         /*> rc = INCL_gather_in_c (my.proj, x_name);                                 <*/
          break;
       case TYPE_WAVE :
          DEBUG_DATA   yLOG_note    ("handle normal wave file");
@@ -801,7 +882,7 @@ WAVE_inventory          (char *a_path)
          break;
       case TYPE_CODE : case TYPE_HEAD :
          DEBUG_DATA   yLOG_note    ("handle inclusion file processing");
-         rc = INCL_gather_in_c (my.proj, x_name);
+         /*> rc = INCL_gather_in_c (my.proj, x_name);                                 <*/
          break;
       }
       /*---(done)------------------------*/

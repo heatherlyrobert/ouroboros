@@ -12,40 +12,40 @@ DATA_file_type          (char a_proj [LEN_TITLE], char a_file [LEN_HUND], char *
    char        x_keep      =  'y';
    char        x_type      = TYPE_NONE;
    /*---(header)-------------------------*/
-   DEBUG_ENVI   yLOG_enter   (__FUNCTION__);
+   DEBUG_DATA   yLOG_enter   (__FUNCTION__);
    /*---(default)------------------------*/
    if (r_type != NULL)  *r_type = TYPE_NONE;
    /*---(defense)------------------------*/
-   DEBUG_CONF  yLOG_point   ("a_proj"     , a_proj);
+   DEBUG_DATA  yLOG_point   ("a_proj"     , a_proj);
    --rce;  if (a_proj == NULL) {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_CONF  yLOG_info    ("a_proj"     , a_proj);
+   DEBUG_DATA  yLOG_info    ("a_proj"     , a_proj);
    --rce;  if (a_proj [0] == '\0') {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_CONF  yLOG_point   ("a_file"     , a_file);
+   DEBUG_DATA  yLOG_point   ("a_file"     , a_file);
    --rce;  if (a_file == NULL) {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_CONF  yLOG_info    ("a_file"     , a_file);
+   DEBUG_DATA  yLOG_info    ("a_file"     , a_file);
    --rce;  if (a_file [0] == '\0') {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(prepare)------------------------*/
    l = strlen (a_file);
-   DEBUG_CONF  yLOG_value   ("l"          , l);
+   DEBUG_DATA  yLOG_value   ("l"          , l);
    x_keep == 'y';
    /*---(simple)-------------------------*/
    if      (strcmp  (a_file, "."               ) == 0)   x_keep = '-';
    else if (strcmp  (a_file, ".."              ) == 0)   x_keep = '-';
    else if (strncmp (a_file, "."       , 1     ) == 0)   x_keep = '-';
    else if (strcmp  (a_file + l - 1, "~"       ) == 0)   x_keep = '-';
-   DEBUG_CONF  yLOG_char    ("simple"     , x_keep);
+   DEBUG_DATA  yLOG_char    ("simple"     , x_keep);
    if (x_keep == '-') {
       DEBUG_PROG  yLOG_exit    (__FUNCTION__);
       return 0;
@@ -66,7 +66,7 @@ DATA_file_type          (char a_proj [LEN_TITLE], char a_file [LEN_HUND], char *
       else if (l >= 8 && strcmp (a_file + l - 7, "_unit.c" ) == 0)  ;
       else if (l >= 3 && strcmp (a_file + l - 2, ".c"      ) == 0)  x_type = TYPE_CODE;
    }
-   DEBUG_CONF  yLOG_char    ("x_type"     , x_type);
+   DEBUG_DATA  yLOG_char    ("x_type"     , x_type);
    if (x_type == TYPE_NONE) {
       DEBUG_DATA   yLOG_note    ("not a selected type, skipping");
       DEBUG_PROG  yLOG_exit    (__FUNCTION__);
@@ -80,7 +80,7 @@ DATA_file_type          (char a_proj [LEN_TITLE], char a_file [LEN_HUND], char *
 }
 
 char
-DATA_gather_prep        (char a_file [LEN_PATH], char a_type, char r_file [LEN_PATH])
+DATA_gather_prep        (char a_full [LEN_PATH], char a_type, char r_file [LEN_PATH])
 {
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
@@ -89,22 +89,24 @@ DATA_gather_prep        (char a_file [LEN_PATH], char a_type, char r_file [LEN_P
    char        x_cmd       [LEN_RECD]  = "";
    char        x_file      [LEN_PATH]  = "";
    int         c           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_DATA   yLOG_enter   (__FUNCTION__);
    /*---(default)------------------------*/
    if (r_file != NULL)  strcpy (r_file, "");
    /*---(defense)------------------------*/
-   DEBUG_DATA   yLOG_point   ("a_file"    , a_file);
-   --rce;  if (a_file == NULL || a_file [0] == '\0') {
+   DEBUG_DATA   yLOG_point   ("a_full"    , a_full);
+   --rce;  if (a_full == NULL || a_full [0] == '\0') {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_DATA   yLOG_info    ("a_file"    , a_file);
+   DEBUG_DATA   yLOG_info    ("a_full"    , a_full);
    DEBUG_DATA   yLOG_char    ("a_type"    , a_type);
    if (a_type == '\0' || strchr (TYPES_VALID, a_type) == NULL) {
       DEBUG_DATA   yLOG_exit    (__FUNCTION__);
       return 0;
    }
    /*---(check file)---------------------*/
-   rc = yENV_exists (a_file);
+   rc = yENV_exists (a_full);
    DEBUG_DATA   yLOG_char    ("exists"    , rc);
    --rce;  if (rc == YENV_NONE) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
@@ -113,16 +115,16 @@ DATA_gather_prep        (char a_file [LEN_PATH], char a_type, char r_file [LEN_P
    /*---(prepare)------------------------*/
    switch (a_type) {
    case TYPE_MAKE :
-      sprintf (x_cmd, "grep \"^include \" %s > %s 2> /dev/null", a_file, x_temp);
+      sprintf (x_cmd, "grep \"^include \" %s > %s 2> /dev/null", a_full, x_temp);
       break;
    case TYPE_UNIT :
-      sprintf (x_cmd, "grep \"^   incl \" %s > %s 2> /dev/null", a_file, x_temp);
+      sprintf (x_cmd, "grep \"^   incl \" %s > %s 2> /dev/null", a_full, x_temp);
       break;
    case TYPE_WAVE :
-      sprintf (x_cmd, "grep \"^WAVE \"    %s > %s 2> /dev/null", a_file, x_temp);
+      sprintf (x_cmd, "grep \"^WAVE \"    %s > %s 2> /dev/null", a_full, x_temp);
       break;
    case TYPE_HEAD :  case TYPE_MUNIT :  case TYPE_CODE : default  :
-      sprintf (x_cmd, "grep \"^#include\" %s > %s 2> /dev/null", a_file, x_temp);
+      sprintf (x_cmd, "grep \"^#include\" %s > %s 2> /dev/null", a_full, x_temp);
       break;
    }
    DEBUG_DATA   yLOG_info    ("x_cmd"     , x_cmd);
@@ -156,7 +158,7 @@ DATA_gather_prep        (char a_file [LEN_PATH], char a_type, char r_file [LEN_P
 }
 
 char
-DATA_gather_file        (char a_proj [LEN_TITLE], char a_file [LEN_PATH], char a_type)
+DATA_gather_file        (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char a_full [LEN_PATH], char a_type)
 {
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
@@ -170,9 +172,9 @@ DATA_gather_file        (char a_proj [LEN_TITLE], char a_file [LEN_PATH], char a
    int         l           =    0;
    char        x_temp      [LEN_LABEL] = "/tmp/ouroboros.txt";
    /*---(header)-------------------------*/
-   DEBUG_ENVI   yLOG_enter   (__FUNCTION__);
+   DEBUG_DATA   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   rc = DATA_gather_prep (a_file, a_type, x_file);
+   rc = DATA_gather_prep (a_full, a_type, x_file);
    DEBUG_DATA   yLOG_value   ("prep"      , rc);
    --rce;  if (rc < 0) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
@@ -212,12 +214,23 @@ DATA_gather_file        (char a_proj [LEN_TITLE], char a_file [LEN_PATH], char a
       DEBUG_DATA   yLOG_info    ("x_recd"    , x_recd);
       /*---(handle)----------------------*/
       switch (a_type) {
-      case TYPE_MAKE :
-         rc = MAKE_gather (x_recd, x_end);
+      case TYPE_MAKE  :  /* handle "include" lines */
+         rc = MAKE_gather   (x_recd, x_end);
          break;
-      case TYPE_WAVE :
+      case TYPE_WAVE  :  /* handle "WAVE" lines */
+         DEBUG_DATA   yLOG_note    ("WAVE files should not be handled here");
          break;
-      default  :
+      case TYPE_UNIT  :  /* handle "incl" lines */
+         rc = YUNIT_gather  (a_proj, x_recd, x_end);
+         break;
+      case TYPE_HEAD  :  /* handle "#include" lines */
+      case TYPE_CODE  :
+      case TYPE_MUNIT :
+         rc = INCL_gather   (x_recd, x_end);
+         break;
+      default        :
+         DEBUG_DATA   yLOG_note    ("file type unknown, nothing to process");
+         rc = -1;
          break;
       }
       DEBUG_DATA   yLOG_value   ("rc"        , rc);
@@ -242,7 +255,7 @@ DATA_gather_file        (char a_proj [LEN_TITLE], char a_file [LEN_PATH], char a
 }
 
 char
-DATA_gather_project     (char a_proj [LEN_TITLE], char a_path [LEN_PATH])
+DATA_gather_project     (char a_proj [LEN_TITLE], char a_full [LEN_PATH])
 {
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
@@ -251,18 +264,18 @@ DATA_gather_project     (char a_proj [LEN_TITLE], char a_path [LEN_PATH])
    tDIRENT    *x_entry     = NULL;          /* directory entry                */
    char        x_type      = TYPE_NONE;
    int         l           =    0;
-   char        x_name      [LEN_PATH]  = "";
+   char        x_full      [LEN_PATH]  = "";
    /*---(header)-------------------------*/
-   DEBUG_ENVI   yLOG_enter   (__FUNCTION__);
+   DEBUG_DATA   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   DEBUG_DATA   yLOG_point   ("a_path"    , a_path);
-   --rce;  if (a_path == NULL) {
+   DEBUG_DATA   yLOG_point   ("a_full"    , a_full);
+   --rce;  if (a_full == NULL) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_DATA   yLOG_info    ("a_path"    , a_path);
+   DEBUG_DATA   yLOG_info    ("a_full"    , a_full);
    /*---(open directory)-----------------*/
-   x_dir = opendir (a_path);
+   x_dir = opendir (a_full);
    DEBUG_DATA   yLOG_point   ("x_dir"     , x_dir);
    --rce;  if (x_dir == NULL) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
@@ -293,10 +306,14 @@ DATA_gather_project     (char a_proj [LEN_TITLE], char a_path [LEN_PATH])
       /*---(dispatch)--------------------*/
       l = strlen (x_entry->d_name);
       DEBUG_DATA   yLOG_value   ("l"         , l);
-      if (a_path [l - 1] == '/') sprintf (x_name, "%s%s" , a_path, x_entry->d_name);
-      else                       sprintf (x_name, "%s/%s", a_path, x_entry->d_name);
-      DEBUG_DATA   yLOG_info    ("x_name"    , x_name);
-      rc = DATA_gather_file (a_proj, x_name, x_type);
+      if (a_full [l - 1] == '/') sprintf (x_full, "%s%s" , a_full, x_entry->d_name);
+      else                       sprintf (x_full, "%s/%s", a_full, x_entry->d_name);
+      DEBUG_DATA   yLOG_info    ("x_full"    , x_full);
+      if (x_type == TYPE_WAVE) {
+         rc = WAVE_gather      (a_proj, x_entry->d_name, x_full, x_type);
+      } else {
+         rc = DATA_gather_file (a_proj, x_entry->d_name, x_full, x_type);
+      }
       DEBUG_DATA   yLOG_value   ("dispatch"  , rc);
       if (rc < 0) {
          DEBUG_DATA   yLOG_note    ("file was not handled successfully, continue");
@@ -331,32 +348,32 @@ INCL_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_
    char        x_deps      [LEN_RECD]  = "";
    int         c           =    0;
    /*---(header)-------------------------*/
-   DEBUG_CONF  yLOG_enter   (__FUNCTION__);
+   DEBUG_DATA  yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   DEBUG_CONF  yLOG_point   ("a_verb"     , a_verb);
+   DEBUG_DATA  yLOG_point   ("a_verb"     , a_verb);
    --rce;  if (a_verb == NULL) {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_CONF  yLOG_info    ("a_verb"     , a_verb);
+   DEBUG_DATA  yLOG_info    ("a_verb"     , a_verb);
    --rce;  if (strcmp (a_verb, "DEPEND") != 0) {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(prepare)------------------------*/
    rc = yPARSE_ready (&c);
-   DEBUG_CONF  yLOG_value   ("rc"         , rc);
-   DEBUG_CONF  yLOG_value   ("c"          , c);
+   DEBUG_DATA  yLOG_value   ("rc"         , rc);
+   DEBUG_DATA  yLOG_value   ("c"          , c);
    /*---(read details)-------------------*/
    rc = yPARSE_scanf (a_verb, "R"  , x_deps);
-   DEBUG_CONF  yLOG_value   ("scanf"      , rc);
+   DEBUG_DATA  yLOG_value   ("scanf"      , rc);
    if (rc < 0) {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(update depends)-----------------*/
    /*---(complete)-----------------------*/
-   DEBUG_CONF  yLOG_exit    (__FUNCTION__);
+   DEBUG_DATA  yLOG_exit    (__FUNCTION__);
    return 0;
 }
 

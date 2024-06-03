@@ -323,10 +323,12 @@ GRAPH_edge_add          (char a_type, char a_beg [LEN_TITLE], int a_end)
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   DEBUG_PROG   yLOG_value   ("a_end"     , a_end);
    --rce;  if (a_end < 0) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   DEBUG_PROG   yLOG_value   ("g_nnode"   , g_nnode);
    --rce;  if (a_end >= g_nnode) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
@@ -341,8 +343,10 @@ GRAPH_edge_add          (char a_type, char a_beg [LEN_TITLE], int a_end)
       }
       x_pred = x_pred->e_pnext;
    }
+   DEBUG_PROG   yLOG_note    ("not duplicate");
    /*---(beg-point on edge)--------------*/
    x_beg = GRAPH_add_node (a_beg);
+   DEBUG_PROG   yLOG_value   ("x_beg"     , x_beg);
    --rce;  if (x_beg < 0) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
@@ -378,14 +382,14 @@ GRAPH_edge_add          (char a_type, char a_beg [LEN_TITLE], int a_end)
    /*---(counter)------------------------*/
    ++g_nedge;
    /*---(check for solo)-----------------*/
-   DEBUG_PROG   yLOG_info    ("b_name"    , g_nodes [x_beg].n_name);
-   DEBUG_PROG   yLOG_info    ("e_name"    , g_nodes [a_end].n_name);
-   if (strcmp (g_nodes [x_beg].n_name, "zenodotus") == 0) {
-      if (strstr (g_nodes [a_end].n_name, "_solo") != NULL) {
-         DEBUG_PROG   yLOG_note    ("call to add tie to _solo");
-         INCL_add_by_name ("zenodotus", a_end);
-      }
-   }
+   /*> DEBUG_PROG   yLOG_info    ("b_name"    , g_nodes [x_beg].n_name);              <*/
+   /*> DEBUG_PROG   yLOG_info    ("e_name"    , g_nodes [a_end].n_name);              <*/
+   /*> if (strcmp (g_nodes [x_beg].n_name, "zenodotus") == 0) {                       <* 
+    *>    if (strstr (g_nodes [a_end].n_name, "_solo") != NULL) {                     <* 
+    *>       DEBUG_PROG   yLOG_note    ("call to add tie to _solo");                  <* 
+    *>       INCL_add_by_name ("zenodotus", a_end);                                   <* 
+    *>    }                                                                           <* 
+    *> }                                                                              <*/
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -784,6 +788,8 @@ GRAPH__unit             (char *a_question, int n)
          else                                sprintf (s, "%c", g_nodes [n].n_level + '0');
          snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : %-20.20s %c %-1.1s %-49.49s   %-44.44s   ´", n, g_nodes [n].n_name, g_nodes [n].n_focus, s, t, u);
       }
+   }
+   else if (strcmp (a_question, "edge"          )  == 0) {
    }
    else if (strcmp (a_question, "count"         )  == 0) {
       if      (g_nnode == 0)          strcpy (s, "empty");

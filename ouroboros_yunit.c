@@ -1,8 +1,10 @@
 /*===============================[[ beg-code ]]===============================*/
 #include    "ouroboros.h"
 
+
+
 char
-MAKE_gather             (char a_recd [LEN_RECD], int a_end)
+YUNIT_gather            (char a_proj [LEN_TITLE], char a_recd [LEN_RECD], int a_end)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -10,8 +12,9 @@ MAKE_gather             (char a_recd [LEN_RECD], int a_end)
    int         l           =    0;
    char        x_recd      [LEN_RECD]  = "";
    char       *p           =    0;
-   char       *q           =  " ";
+   char       *q           =  "§";
    char       *r           =    0;
+   char        t           [LEN_TITLE] = "";
    /*---(header)-------------------------*/
    DEBUG_DATA  yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -39,34 +42,50 @@ MAKE_gather             (char a_recd [LEN_RECD], int a_end)
       DEBUG_DATA   yLOG_exit    (__FUNCTION__);
       return 0;
    }
+   ystrlcpy  (t, p, LEN_TITLE);
+   ystrltrim (t, ySTR_BOTH, LEN_TITLE);
    /*---(find include)----------------*/
-   DEBUG_DATA   yLOG_info    ("p"         , p);
-   if (strcmp (p, "include") != 0) {
+   DEBUG_DATA   yLOG_info    ("t"         , t);
+   if (strcmp (t, "incl"   ) != 0) {
       DEBUG_DATA   yLOG_note    ("not an include line, continue");
       DEBUG_DATA   yLOG_exit    (__FUNCTION__);
       return 0;
    }
-   /*---(find zeno_make)--------------*/
-   p = strtok_r (NULL, q, &r);
-   DEBUG_DATA   yLOG_point   ("p"         , p);
+   /*---(find header)-----------------*/
+   p = strtok_r (NULL  , q, &r);
+   DEBUG_DATA   yLOG_info    ("p"         , p);
    if (p == NULL) {
-      DEBUG_DATA   yLOG_note    ("include without content, continue");
+      DEBUG_DATA   yLOG_note    ("nothing to do with line, continue");
       DEBUG_DATA   yLOG_exit    (__FUNCTION__);
       return 0;
    }
-   DEBUG_DATA   yLOG_info    ("p"         , p);
-   if (strcmp (p, "/usr/local/sbin/zeno_make") != 0) {
-      DEBUG_DATA   yLOG_note    ("not specifically a zeno_make include line, continue");
+   p = strtok_r (NULL  , q, &r);
+   DEBUG_DATA   yLOG_point   ("p"         , p);
+   if (p == NULL) {
+      DEBUG_DATA   yLOG_note    ("nothing to do with line, continue");
+      DEBUG_DATA   yLOG_exit    (__FUNCTION__);
+      return 0;
+   }
+   ystrlcpy  (t, p, LEN_TITLE);
+   ystrltrim (t, ySTR_BOTH, LEN_TITLE);
+   l = strlen (t);
+   if (t > 2)  t [l - 2] = '\0';
+   DEBUG_DATA   yLOG_info    ("t"         , t);
+   /*---(find zeno_make)--------------*/
+   if (strncmp (t, a_proj, strlen (a_proj)) == 0) {
+      DEBUG_DATA   yLOG_note    ("private header, not to attach");
       DEBUG_DATA   yLOG_exit    (__FUNCTION__);
       return 0;
    }
    /*---(handle)----------------------*/
-   rc = INCL_add_by_name ("zenodotus", a_end);
+   rc = INCL_add_by_name (t, a_end);
    DEBUG_DATA   yLOG_value   ("add"       , rc);
+   /*> rc = GRAPH_edge_virt ("koios", a_end);                                         <*/
+   rc = INCL_add_by_name ("koios", a_end);
+   DEBUG_DATA   yLOG_value   ("koios"     , rc);
    /*---(complete)-----------------------*/
    DEBUG_DATA  yLOG_exit    (__FUNCTION__);
    return 1;
 }
-
 
 

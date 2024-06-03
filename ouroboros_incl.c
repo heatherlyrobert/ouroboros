@@ -41,208 +41,209 @@ static s_ncat    = 0;
 tINCL g_incls [MAX_INCL] = {
    /*---(ansi c)-------------------------*/
    /* original c standard */
-   { 'a', "assert"                   , 0, '-', '-', '-', '-' },
-   { 'a', "ctype"                    , 0, '-', '-', '-', '-' },
-   { 'a', "errno"                    , 0, '-', '-', '-', '-' },
-   { 'a', "float"                    , 0, '-', '-', '-', '-' },
-   { 'a', "limits"                   , 0, '-', '-', '-', '-' },
-   { 'a', "locale"                   , 0, '-', '-', '-', '-' },
-   { 'a', "malloc"                   , 0, '-', '-', '-', '-' },
-   { 'a', "math"                     , 0, '-', '-', '-', '-' },
-   { 'a', "memory"                   , 0, '-', '-', '-', '-' },
-   { 'a', "setjmp"                   , 0, '-', '-', '-', '-' },
-   { 'a', "signal"                   , 0, '-', '-', '-', '-' },
-   { 'a', "stdarg"                   , 0, '-', '-', '-', '-' },
-   { 'a', "stddef"                   , 0, '-', '-', '-', '-' },
-   { 'a', "stdio"                    , 0, '-', '-', '-', '-' },
-   { 'a', "stdlib"                   , 0, '-', '-', '-', '-' },
-   { 'a', "string"                   , 0, '-', '-', '-', '-' },
-   { 'a', "time"                     , 0, '-', '-', '-', '-' },
+   { 'a', "assert"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "ctype"                    , 0, '-', '-', '-', '-', '-' },
+   { 'a', "errno"                    , 0, '-', '-', '-', '-', '-' },
+   { 'a', "float"                    , 0, '-', '-', '-', '-', '-' },
+   { 'a', "limits"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "locale"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "malloc"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "math"                     , 0, '-', '-', '-', '-', '-' },
+   { 'a', "memory"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "setjmp"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "signal"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "stdarg"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "stddef"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "stdio"                    , 0, '-', '-', '-', '-', '-' },
+   { 'a', "stdlib"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "string"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "time"                     , 0, '-', '-', '-', '-', '-' },
    /*---(ansi c updates)-----------------, 0*/
    /* c99, c23, ... , 0*/
-   { 'a', "complex"                  , 0, '-', '-', '-', '-' },
-   { 'a', "err"                      , 0, '-', '-', '-', '-' },
-   { 'a', "error"                    , 0, '-', '-', '-', '-' },
-   { 'a', "fenv"                     , 0, '-', '-', '-', '-' },
-   { 'a', "inttypes"                 , 0, '-', '-', '-', '-' },
-   { 'a', "iso646"                   , 0, '-', '-', '-', '-' },
-   { 'a', "stdalign"                 , 0, '-', '-', '-', '-' },
-   { 'a', "stdatomic"                , 0, '-', '-', '-', '-' },
-   { 'a', "stdbit"                   , 0, '-', '-', '-', '-' },
-   { 'a', "stdbool"                  , 0, '-', '-', '-', '-' },
-   { 'a', "stdchkdint"               , 0, '-', '-', '-', '-' },
-   { 'a', "stdint"                   , 0, '-', '-', '-', '-' },
-   { 'a', "stdnoreturn"              , 0, '-', '-', '-', '-' },
-   { 'a', "tmath"                    , 0, '-', '-', '-', '-' },
-   { 'a', "threads"                  , 0, '-', '-', '-', '-' },
-   { 'a', "uchar"                    , 0, '-', '-', '-', '-' },
-   { 'a', "wchar"                    , 0, '-', '-', '-', '-' },
-   { 'a', "wctype"                   , 0, '-', '-', '-', '-' },
+   { 'a', "complex"                  , 0, '-', '-', '-', '-', '-' },
+   { 'a', "err"                      , 0, '-', '-', '-', '-', '-' },
+   { 'a', "error"                    , 0, '-', '-', '-', '-', '-' },
+   { 'a', "fenv"                     , 0, '-', '-', '-', '-', '-' },
+   { 'a', "inttypes"                 , 0, '-', '-', '-', '-', '-' },
+   { 'a', "iso646"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "stdalign"                 , 0, '-', '-', '-', '-', '-' },
+   { 'a', "stdatomic"                , 0, '-', '-', '-', '-', '-' },
+   { 'a', "stdbit"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "stdbool"                  , 0, '-', '-', '-', '-', '-' },
+   { 'a', "stdchkdint"               , 0, '-', '-', '-', '-', '-' },
+   { 'a', "stdint"                   , 0, '-', '-', '-', '-', '-' },
+   { 'a', "stdnoreturn"              , 0, '-', '-', '-', '-', '-' },
+   { 'a', "tmath"                    , 0, '-', '-', '-', '-', '-' },
+   { 'a', "threads"                  , 0, '-', '-', '-', '-', '-' },
+   { 'a', "uchar"                    , 0, '-', '-', '-', '-', '-' },
+   { 'a', "wchar"                    , 0, '-', '-', '-', '-', '-' },
+   { 'a', "wctype"                   , 0, '-', '-', '-', '-', '-' },
    /*---(posix c standard)---------------, 0*/
    /* wider POXIX related libraries (maybe harder to port) , 0*/
-   { 'p', "aio"                      , 0, '-', '-', '-', '-' },
-   { 'p', "arpa/inet"                , 0, '-', '-', '-', '-' },
-   { 'p', "cpio"                     , 0, '-', '-', '-', '-' },
-   { 'p', "dirent"                   , 0, '-', '-', '-', '-' },
-   { 'p', "dlfcn"                    , 0, '-', '-', '-', '-' },
-   { 'p', "fcntl"                    , 0, '-', '-', '-', '-' },
-   { 'p', "fmtmsg"                   , 0, '-', '-', '-', '-' },
-   { 'p', "fnctrl"                   , 0, '-', '-', '-', '-' },
-   { 'p', "fnmatch"                  , 0, '-', '-', '-', '-' },
-   { 'p', "ftw"                      , 0, '-', '-', '-', '-' },
-   { 'p', "glob"                     , 0, '-', '-', '-', '-' },
-   { 'p', "grp"                      , 0, '-', '-', '-', '-' },
-   { 'p', "iconv"                    , 0, '-', '-', '-', '-' },
-   { 'p', "langinfo"                 , 0, '-', '-', '-', '-' },
-   { 'p', "libgen"                   , 0, '-', '-', '-', '-' },
-   { 'p', "linux/fs"                 , 0, '-', '-', '-', '-' },
-   { 'p', "linux/hdreg"              , 0, '-', '-', '-', '-' },
-   { 'p', "monetary"                 , 0, '-', '-', '-', '-' },
-   { 'p', "mqueue"                   , 0, '-', '-', '-', '-' },
-   { 'p', "ndbm"                     , 0, '-', '-', '-', '-' },
-   { 'p', "net/if"                   , 0, '-', '-', '-', '-' },
-   { 'p', "netdb"                    , 0, '-', '-', '-', '-' },
-   { 'p', "netinet/in"               , 0, '-', '-', '-', '-' },
-   { 'p', "netinet/tcp"              , 0, '-', '-', '-', '-' },
-   { 'p', "nl_types"                 , 0, '-', '-', '-', '-' },
-   { 'p', "poll"                     , 0, '-', '-', '-', '-' },
-   { 'p', "pthread"                  , 0, '-', '-', '-', '-' },
-   { 'p', "pwd"                      , 0, '-', '-', '-', '-' },
-   { 'p', "regex"                    , 0, '-', '-', '-', '-' },
-   { 'p', "sched"                    , 0, '-', '-', '-', '-' },
-   { 'p', "search"                   , 0, '-', '-', '-', '-' },
-   { 'p', "semaphore"                , 0, '-', '-', '-', '-' },
-   { 'p', "shadow"                   , 0, '-', '-', '-', '-' },
-   { 'p', "spawn"                    , 0, '-', '-', '-', '-' },
-   { 'p', "strings"                  , 0, '-', '-', '-', '-' },
-   { 'p', "stropts"                  , 0, '-', '-', '-', '-' },
-   { 'p', "sys/ioctl"                , 0, '-', '-', '-', '-' },
-   { 'p', "sys/ipc"                  , 0, '-', '-', '-', '-' },
-   { 'p', "sys/mman"                 , 0, '-', '-', '-', '-' },
-   { 'p', "sys/mount"                , 0, '-', '-', '-', '-' },
-   { 'p', "sys/reboot"               , 0, '-', '-', '-', '-' },
-   { 'p', "sys/resource"             , 0, '-', '-', '-', '-' },
-   { 'p', "sys/select"               , 0, '-', '-', '-', '-' },
-   { 'p', "sys/sem"                  , 0, '-', '-', '-', '-' },
-   { 'p', "sys/shm"                  , 0, '-', '-', '-', '-' },
-   { 'p', "sys/socket"               , 0, '-', '-', '-', '-' },
-   { 'p', "sys/stat"                 , 0, '-', '-', '-', '-' },
-   { 'p', "sys/stavfs"               , 0, '-', '-', '-', '-' },
-   { 'p', "sys/sysmacros"            , 0, '-', '-', '-', '-' },
-   { 'p', "sys/time"                 , 0, '-', '-', '-', '-' },
-   { 'p', "sys/times"                , 0, '-', '-', '-', '-' },
-   { 'p', "sys/types"                , 0, '-', '-', '-', '-' },
-   { 'p', "sys/uio"                  , 0, '-', '-', '-', '-' },
-   { 'p', "sys/un"                   , 0, '-', '-', '-', '-' },
-   { 'p', "sys/utsname"              , 0, '-', '-', '-', '-' },
-   { 'p', "sys/wait"                 , 0, '-', '-', '-', '-' },
-   { 'p', "syslog"                   , 0, '-', '-', '-', '-' },
-   { 'p', "termios"                  , 0, '-', '-', '-', '-' },
-   { 'p', "tgmath"                   , 0, '-', '-', '-', '-' },
-   { 'p', "trace"                    , 0, '-', '-', '-', '-' },
-   { 'p', "unistd"                   , 0, '-', '-', '-', '-' },
-   { 'p', "sys/unistd"               , 0, '-', '-', '-', '-' },
-   { 'p', "utime"                    , 0, '-', '-', '-', '-' },
-   { 'p', "utmp"                     , 0, '-', '-', '-', '-' },
-   { 'p', "utmpx"                    , 0, '-', '-', '-', '-' },
-   { 'p', "wordexp"                  , 0, '-', '-', '-', '-' },
+   { 'p', "aio"                      , 0, '-', '-', '-', '-', '-' },
+   { 'p', "arpa/inet"                , 0, '-', '-', '-', '-', '-' },
+   { 'p', "cpio"                     , 0, '-', '-', '-', '-', '-' },
+   { 'p', "dirent"                   , 0, '-', '-', '-', '-', '-' },
+   { 'p', "dlfcn"                    , 0, '-', '-', '-', '-', '-' },
+   { 'p', "fcntl"                    , 0, '-', '-', '-', '-', '-' },
+   { 'p', "fmtmsg"                   , 0, '-', '-', '-', '-', '-' },
+   { 'p', "fnctrl"                   , 0, '-', '-', '-', '-', '-' },
+   { 'p', "fnmatch"                  , 0, '-', '-', '-', '-', '-' },
+   { 'p', "ftw"                      , 0, '-', '-', '-', '-', '-' },
+   { 'p', "glob"                     , 0, '-', '-', '-', '-', '-' },
+   { 'p', "grp"                      , 0, '-', '-', '-', '-', '-' },
+   { 'p', "iconv"                    , 0, '-', '-', '-', '-', '-' },
+   { 'p', "langinfo"                 , 0, '-', '-', '-', '-', '-' },
+   { 'p', "libgen"                   , 0, '-', '-', '-', '-', '-' },
+   { 'p', "linux/fs"                 , 0, '-', '-', '-', '-', '-' },
+   { 'p', "linux/hdreg"              , 0, '-', '-', '-', '-', '-' },
+   { 'p', "monetary"                 , 0, '-', '-', '-', '-', '-' },
+   { 'p', "mqueue"                   , 0, '-', '-', '-', '-', '-' },
+   { 'p', "ndbm"                     , 0, '-', '-', '-', '-', '-' },
+   { 'p', "net/if"                   , 0, '-', '-', '-', '-', '-' },
+   { 'p', "netdb"                    , 0, '-', '-', '-', '-', '-' },
+   { 'p', "netinet/in"               , 0, '-', '-', '-', '-', '-' },
+   { 'p', "netinet/tcp"              , 0, '-', '-', '-', '-', '-' },
+   { 'p', "nl_types"                 , 0, '-', '-', '-', '-', '-' },
+   { 'p', "poll"                     , 0, '-', '-', '-', '-', '-' },
+   { 'p', "pthread"                  , 0, '-', '-', '-', '-', '-' },
+   { 'p', "pwd"                      , 0, '-', '-', '-', '-', '-' },
+   { 'p', "regex"                    , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sched"                    , 0, '-', '-', '-', '-', '-' },
+   { 'p', "search"                   , 0, '-', '-', '-', '-', '-' },
+   { 'p', "semaphore"                , 0, '-', '-', '-', '-', '-' },
+   { 'p', "shadow"                   , 0, '-', '-', '-', '-', '-' },
+   { 'p', "spawn"                    , 0, '-', '-', '-', '-', '-' },
+   { 'p', "strings"                  , 0, '-', '-', '-', '-', '-' },
+   { 'p', "stropts"                  , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/ioctl"                , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/ipc"                  , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/mman"                 , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/mount"                , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/reboot"               , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/resource"             , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/select"               , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/sem"                  , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/shm"                  , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/socket"               , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/stat"                 , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/stavfs"               , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/sysmacros"            , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/time"                 , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/times"                , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/types"                , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/uio"                  , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/un"                   , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/utsname"              , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/wait"                 , 0, '-', '-', '-', '-', '-' },
+   { 'p', "syslog"                   , 0, '-', '-', '-', '-', '-' },
+   { 'p', "termios"                  , 0, '-', '-', '-', '-', '-' },
+   { 'p', "tgmath"                   , 0, '-', '-', '-', '-', '-' },
+   { 'p', "trace"                    , 0, '-', '-', '-', '-', '-' },
+   { 'p', "unistd"                   , 0, '-', '-', '-', '-', '-' },
+   { 'p', "sys/unistd"               , 0, '-', '-', '-', '-', '-' },
+   { 'p', "utime"                    , 0, '-', '-', '-', '-', '-' },
+   { 'p', "utmp"                     , 0, '-', '-', '-', '-', '-' },
+   { 'p', "utmpx"                    , 0, '-', '-', '-', '-', '-' },
+   { 'p', "wordexp"                  , 0, '-', '-', '-', '-', '-' },
 
    /*---(heatherly core)-----------------*/
    /* core, nearly every program uses these libraries */
-   { 'c', "zenodotus"                , 0, '-', '-', 'y', 'é' },
-   { 'c', "yLOG"                     , 0, 'y', 'y', 'y', 'é' },
-   { 'c', "yURG"                     , 0, 'y', 'y', 'y', 'é' },
-   { 'c', "yVAR"                     , 0, '-', '-', 'y', 'é' },
-   { 'c', "ySTR"                     , 0, 'y', 'y', 'y', 'é' },
-   { 'c', "yENV"                     , 0, '-', '-', 'y', 'é' },
+   { 'c', "zenodotus"                , 0, '-', '-', 'y', 'é', '-' },
+   { 'c', "yLOG"                     , 0, 'y', 'y', 'y', 'é', '-' },
+   { 'c', "yURG"                     , 0, 'y', 'y', 'y', 'é', '-' },
+   { 'c', "yVAR"                     , 0, '-', '-', 'y', 'é', '-' },
+   { 'c', "ySTR"                     , 0, 'y', 'y', 'y', 'é', '-' },
+   { 'c', "yENV"                     , 0, '-', '-', 'y', 'é', '-' },
 
    /*---(heatherly vikeys)---------------*/
    /* vikeys components supporting full vi-keys environment */
-   { 'v', "yVIHUB"                   , 0, '-', '-', 'y', 'ê' },
-   { 'v', "yMODE"                    , 0, 'y', 'y', 'y', 'ê' },
-   { 'v', "yKEYS"                    , 0, 'y', 'y', 'y', 'ê' },
-   { 'v', "yFILE"                    , 0, 'y', 'y', 'y', 'ê' },
-   { 'v', "yVIEW"                    , 0, 'y', 'y', 'y', 'ê' },
+   { 'v', "yVIHUB"                   , 0, '-', '-', 'y', 'ê', '-' },
+   { 'v', "yMODE"                    , 0, 'y', 'y', 'y', 'ê', '-' },
+   { 'v', "yKEYS"                    , 0, 'y', 'y', 'y', 'ê', '-' },
+   { 'v', "yFILE"                    , 0, 'y', 'y', 'y', 'ê', '-' },
+   { 'v', "yVIEW"                    , 0, 'y', 'y', 'y', 'ê', '-' },
 
-   { 'v', "yMAP"                     , 0, 'y', 'y', 'y', 'ê' },
-   { 'v', "yCMD"                     , 0, 'y', 'y', 'y', 'ê' },
-   { 'v', "yMACRO"                   , 0, 'y', 'y', 'y', 'ê' },
-   { 'v', "ySRC"                     , 0, 'y', 'y', 'y', 'ê' },
-   { 'v', "yMARK"                    , 0, 'y', 'y', 'y', 'ê' },
+   { 'v', "yMAP"                     , 0, 'y', 'y', 'y', 'ê', '-' },
+   { 'v', "yCMD"                     , 0, 'y', 'y', 'y', 'ê', '-' },
+   { 'v', "yMACRO"                   , 0, 'y', 'y', 'y', 'ê', '-' },
+   { 'v', "ySRC"                     , 0, 'y', 'y', 'y', 'ê', '-' },
+   { 'v', "yMARK"                    , 0, 'y', 'y', 'y', 'ê', '-' },
 
-   { 'v', "yGOD"                     , 0, '-', '-', 'y', '-' },
+   { 'v', "yGOD"                     , 0, '-', '-', 'y', '-', '-' },
 
    /*---(heatherly vikeys)---------------*/
    /* graphics specific libraries */
    /* -    -------------------------  */
-   { 'g', "ncurses"                  , 0, '-', 'y', '-', '-' },
-   { 'g', "tinfo"                    , 0, '-', 'y', '-', '-' },
-   { 'g', "X11"                      , 0, '-', '-', '-', '-' },
-   { 'g', "X11/X"                    , 0, 'y', '-', '-', '-' },
-   { 'g', "X11/Xlib"                 , 0, 'y', '-', '-', '-' },
-   { 'g', "X11/extensions/shape"     , 0, '-', '-', '-', '-' },
-   { 'g', "X11/Xutil"                , 0, '-', '-', '-', '-' },
-   { 'g', "X11/keysym"               , 0, '-', '-', '-', '-' },
-   { 'g', "X11/Xatom"                , 0, '-', '-', '-', '-' },
-   { 'g', "GL"                       , 0, '-', '-', '-', '-' },
-   { 'g', "GL/gl"                    , 0, 'y', '-', '-', '-' },
-   { 'g', "GL/glx"                   , 0, 'y', '-', '-', '-' },
-   { 'g', "GL/glu"                   , 0, '-', '-', '-', '-' },
-   { 'g', "yX11"                     , 0, 'y', '-', 'y', 'ë' },
-   { 'g', "yGLTEX"                   , 0, 'y', '-', 'y', 'ë' },
-   { 'g', "yCOLOR"                   , 0, 'y', '-', 'y', 'ë' },
-   { 'g', "yFONT"                    , 0, 'y', '-', 'y', 'ë' },
-   { 'g', "yVIOPENGL"                , 0, 'y', '-', 'y', '-' },
-   { 'g', "yVICURSES"                , 0, '-', 'y', 'y', '-' },
+   { 'g', "ncurses"                  , 0, '-', 'y', '-', '-', '-' },
+   { 'g', "tinfo"                    , 0, '-', 'y', '-', '-', '-' },
+   { 'g', "X11"                      , 0, '-', '-', '-', '-', '-' },
+   { 'g', "X11/X"                    , 0, 'y', '-', '-', '-', '-' },
+   { 'g', "X11/Xlib"                 , 0, 'y', '-', '-', '-', '-' },
+   { 'g', "X11/extensions/shape"     , 0, '-', '-', '-', '-', '-' },
+   { 'g', "X11/Xutil"                , 0, '-', '-', '-', '-', '-' },
+   { 'g', "X11/keysym"               , 0, '-', '-', '-', '-', '-' },
+   { 'g', "X11/Xatom"                , 0, '-', '-', '-', '-', '-' },
+   { 'g', "GL"                       , 0, '-', '-', '-', '-', '-' },
+   { 'g', "GL/gl"                    , 0, 'y', '-', '-', '-', '-' },
+   { 'g', "GL/glx"                   , 0, 'y', '-', '-', '-', '-' },
+   { 'g', "GL/glu"                   , 0, '-', '-', '-', '-', '-' },
+   { 'g', "yX11"                     , 0, 'y', '-', 'y', 'ë', '-' },
+   { 'g', "yGLTEX"                   , 0, 'y', '-', 'y', 'ë', '-' },
+   { 'g', "yCOLOR"                   , 0, 'y', '-', 'y', 'ë', '-' },
+   { 'g', "yFONT"                    , 0, 'y', '-', 'y', 'ë', '-' },
+   { 'g', "yVIOPENGL"                , 0, 'y', '-', 'y', '-', '-' },
+   { 'g', "yVICURSES"                , 0, '-', 'y', 'y', '-', '-' },
 
    /*---(heatherly other)----------------*/
    /* mine, but not core, vikey, or graphics libraries */
-   { 'o', "yDLST"                    , 0, '-', '-', 'y', 'ì' },
-   { 'o', "ySORT"                    , 0, '-', '-', 'y', 'ì' },
-   { 'o', "yPARSE"                   , 0, '-', '-', 'y', 'ì' },
-   { 'o', "yJOBS"                    , 0, '-', '-', 'y', 'ì' },
-   { 'o', "yEXEC"                    , 0, '-', '-', 'y', 'ì' },
-   { 'o', "yREGEX"                   , 0, '-', '-', 'y', 'ì' },
-   { 'o', "ySCHED"                   , 0, '-', '-', 'y', 'ì' },
+   { 'o', "yDLST"                    , 0, '-', '-', 'y', 'ì', '-' },
+   { 'o', "ySORT"                    , 0, '-', '-', 'y', 'ì', '-' },
+   { 'o', "yPARSE"                   , 0, '-', '-', 'y', 'ì', '-' },
+   { 'o', "yJOBS"                    , 0, '-', '-', 'y', 'ì', '-' },
+   { 'o', "yEXEC"                    , 0, '-', '-', 'y', 'ì', '-' },
+   { 'o', "yREGEX"                   , 0, '-', '-', 'y', 'ì', '-' },
+   { 'o', "ySCHED"                   , 0, '-', '-', 'y', 'ì', '-' },
 
-   { 'o', "yRPN"                     , 0, '-', '-', 'y', 'ó' },
-   { 'o', "yCALC"                    , 0, '-', '-', 'y', 'ó' },
+   { 'o', "yRPN"                     , 0, '-', '-', 'y', 'ó', '-' },
+   { 'o', "yCALC"                    , 0, '-', '-', 'y', 'ó', '-' },
 
-   { 'o', "ySEC"                     , 0, '-', '-', 'y', '-' },
-   { 'o', "yASCII"                   , 0, '-', '-', 'y', '-' },
-   { 'o', "ySHELL"                   , 0, '-', '-', 'y', '-' },
-   { 'o', "yHUBLIN"                  , 0, '-', '-', 'y', '-' },
-   { 'o', "yGOLEM"                   , 0, '-', '-', 'y', '-' },
-   { 'o', "yKINE"                    , 0, '-', '-', 'y', '-' },
+   { 'o', "ySEC"                     , 0, '-', '-', 'y', '-', '-' },
+   { 'o', "yASCII"                   , 0, '-', '-', 'y', '-', '-' },
+   { 'o', "ySHELL"                   , 0, '-', '-', 'y', '-', '-' },
+   { 'o', "yHUBLIN"                  , 0, '-', '-', 'y', '-', '-' },
+   { 'o', "yGOLEM"                   , 0, '-', '-', 'y', '-', '-' },
+   { 'o', "yKINE"                    , 0, '-', '-', 'y', '-', '-' },
 
    /*---(heatherly solo)-----------------*/
    /* just taking in for definitions in header file */
-   { 's', "yLOG_solo"                , 0, '-', '-', 'y', 'é' },
-   { 's', "yLOG_uver"                , 0, '-', '-', 'y', 'é' },
-   { 's', "yURG_solo"                , 0, '-', '-', 'y', 'é' },
-   { 's', "ySTR_solo"                , 0, '-', '-', 'y', 'é' },
-   { 's', "ySTR_uver"                , 0, '-', '-', 'y', 'é' },
-   { 's', "yENV_solo"                , 0, '-', '-', 'y', 'é' },
-   { 's', "yENV_uver"                , 0, '-', '-', 'y', 'é' },
-   { 's', "yDLST_solo"               , 0, '-', '-', 'y', 'é' },
-   { 's', "yCOLOR_solo"              , 0, '-', '-', 'y', 'é' },
-   { 's', "yVIHUB_solo"              , 0, 'y', 'y', '-', '-' },
+   { 's', "yLOG_solo"                , 0, '-', '-', 'y', 'é', 'y' },
+   { 's', "yLOG_uver"                , 0, '-', '-', 'y', 'é', 'y' },
+   { 's', "yURG_solo"                , 0, '-', '-', 'y', 'é', 'y' },
+   { 's', "ySTR_solo"                , 0, '-', '-', 'y', 'é', 'y' },
+   { 's', "ySTR_uver"                , 0, '-', '-', 'y', 'é', 'y' },
+   { 's', "yENV_solo"                , 0, '-', '-', 'y', 'é', 'y' },
+   { 's', "yENV_uver"                , 0, '-', '-', 'y', 'é', 'y' },
+   { 's', "yDLST_solo"               , 0, '-', '-', 'y', 'é', 'y' },
+   { 's', "yCOLOR_solo"              , 0, '-', '-', 'y', 'é', 'y' },
+   { 's', "yVIHUB_solo"              , 0, 'y', 'y', '-', '-', 'y' },
 
    /*---(heatherly unit testing)---------*/
-   { 'u', "yUNIT_solo"               , 0, '-', '-', 'y', '-' },
-   { 'u', "yUNIT"                    , 0, '-', '-', 'y', '-' },
+   { 'u', "yUNIT_solo"               , 0, '-', '-', 'y', '-', '-' },
+   { 'u', "yUNIT"                    , 0, '-', '-', 'y', '-', '-' },
+   { 'u', "koios"                    , 0, '-', '-', 'v', '-', '-' },
 
    /*---(heatherly DEPRECATED)-----------*/
    /* just taking in for definitions in header file */
-   { 'X', "yVIKEYS"                  , 0, '-', '-', '-', '-' },
-   { 'X', "yXINIT"                   , 0, '-', '-', '-', '-' },
+   { 'X', "yVIKEYS"                  , 0, '-', '-', '-', '-', '-' },
+   { 'X', "yXINIT"                   , 0, '-', '-', '-', '-', '-' },
 
    /*---(alien)--------------------------*/
    /* just taking in for definitions in header file */
-   { '!', "png"                      , 0, '-', '-', '-', '-' },
-   { '!', "jpeglib"                  , 0, '-', '-', '-', '-' },
-   { '!', "openssl/sha"              , 0, '-', '-', '-', '-' },
-   { '!', "ft2build"                 , 0, '-', '-', '-', '-' },
+   { '!', "png"                      , 0, '-', '-', '-', '-', '-' },
+   { '!', "jpeglib"                  , 0, '-', '-', '-', '-', '-' },
+   { '!', "openssl/sha"              , 0, '-', '-', '-', '-', '-' },
+   { '!', "ft2build"                 , 0, '-', '-', '-', '-', '-' },
 
    /*---(end)----------------------------*/
    {  0 , "end-of-list"              , 0, '-', '-', '-' },
@@ -336,8 +337,8 @@ INCL_list_add           (char a_cat, char a_header [LEN_TITLE])
    case DEPFILE  :  x_list = my.depfile;    break;
    case DEPWTF   :  x_list = my.depwtf;     break;
    default       :
-      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
+                    DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+                    return rce;
    }
    DEBUG_PROG   yLOG_info    ("x_list"    , x_list);
    /*---(prepare)------------------------*/
@@ -438,8 +439,12 @@ INCL_add_by_name        (char a_beg [LEN_TITLE], int a_end)
       ++(g_incls [n].i_count);
       DEBUG_PROG   yLOG_char    ("i_draw"    , g_incls [n].i_draw);
       if (g_incls [n].i_draw == 'y') {
-         DEBUG_PROG   yLOG_note    ("add a graph edge");
+         DEBUG_PROG   yLOG_note    ("add real graph edge");
          rc = GRAPH_edge_real (a_beg, a_end);
+         DEBUG_PROG   yLOG_value   ("edge"      , rc);
+      } else if (g_incls [n].i_draw == 'v') {
+         DEBUG_PROG   yLOG_note    ("add virtual/koios graph edge");
+         rc = GRAPH_edge_virt (a_beg, a_end);
          DEBUG_PROG   yLOG_value   ("edge"      , rc);
       }
    }
@@ -534,6 +539,16 @@ INCL_gather_detail      (char a_header [LEN_TITLE], int a_end)
       DEBUG_DATA  yLOG_exit    (__FUNCTION__);
       return 0;
    }
+   DEBUG_DATA   yLOG_info    ("found"     , g_incls [n].i_name);
+   /*---(check for solos)----------------*/
+   DEBUG_DATA   yLOG_char    ("zenodotus" , g_incls [n].i_zenodotus);
+   if (g_incls [n].i_zenodotus == 'y') {
+      DEBUG_PROG   yLOG_note    ("add a graph edge from zenodotus to _solo/_uver");
+      n  = GRAPH_by_name (t);
+      DEBUG_PROG   yLOG_value   ("new node"  , n);
+      rc = GRAPH_edge_virt ("zenodotus", n);
+      DEBUG_PROG   yLOG_value   ("edge"      , rc);
+   }
    /*---(complete)-----------------------*/
    DEBUG_DATA  yLOG_exit    (__FUNCTION__);
    return 1;
@@ -598,114 +613,6 @@ INCL_gather             (char a_recd [LEN_RECD], int a_end)
    return 0;
 }
 
-char
-INCL_gather_in_c        (char a_proj [LEN_TITLE], cchar a_file [LEN_PATH])
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   char       *rcp         = NULL;
-   char        x_temp      [LEN_LABEL] = "/tmp/ouroboros.txt";
-   char        x_cmd       [LEN_RECD]  = "";
-   char        x_recd      [LEN_RECD]  = "";
-   FILE       *f           =    0;
-   char       *p           =    0;
-   char       *q           =  " ";
-   char        t           [LEN_TITLE] = "";
-   int         l           =    0;
-   int         c           =    0;
-   int         n           =    0;
-   int         x_end       =    0;
-   char        x_delimit   =  '>';
-   /*---(header)-------------------------*/
-   DEBUG_DATA  yLOG_enter   (__FUNCTION__);
-   /*---(defense)------------------------*/
-   DEBUG_DATA   yLOG_point   ("a_file"    , a_file);
-   --rce; if (a_file == NULL) {
-      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_DATA   yLOG_info    ("a_file"    , a_file);
-   /*---(add project)--------------------*/
-   x_end = GRAPH_add_node (a_proj);
-   DEBUG_DATA   yLOG_value   ("x_end"     , x_end);
-   /*---(prepare)------------------------*/
-   sprintf (x_cmd, "grep \"^#include\" %s > %s 2> /dev/null", a_file, x_temp);
-   rc = system (x_cmd);
-   DEBUG_DATA   yLOG_value   ("grep"      , rc);
-   --rce; if (rc < 0) {
-      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   c = yENV_lines (x_temp);
-   DEBUG_DATA   yLOG_value   ("c"         , c);
-   /*---(open)---------------------------*/
-   f = fopen (x_temp, "rt");
-   DEBUG_DATA   yLOG_point   ("f"         , f);
-   --rce; if (f == NULL) {
-      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(pull)---------------------------*/
-   rcp = fgets (x_recd, LEN_RECD, f);
-   DEBUG_DATA   yLOG_point   ("fgets"     , rcp);
-   while (rcp != NULL) {
-      if (feof (f)) {
-         DEBUG_DATA   yLOG_note    ("end-of-file");
-         break;
-      }
-      l = strlen (x_recd);
-      if (l > 0 && x_recd [l - 1] == '\n')  x_recd [--l] = '\0';
-      DEBUG_DATA   yLOG_info    ("x_recd"    , x_recd);
-      /*---(work out delimiters)---------*/
-      p = strchr (x_recd, '<');
-      if (p != NULL) {
-         x_delimit = '>';
-      } else  {
-         p = strchr (x_recd, '"');
-         x_delimit = '"';
-      }
-      DEBUG_DATA   yLOG_point   ("p"         , p);
-      /*---(handle)----------------------*/
-      if (p != NULL) {
-         DEBUG_DATA   yLOG_char    ("x_delimit" , x_delimit);
-         p [0] = '\0';
-         ++p;
-         DEBUG_DATA   yLOG_info    ("p"         , p);
-         q = strchr (p, x_delimit);
-         DEBUG_DATA   yLOG_point   ("q"         , q);
-         if (q != NULL) {
-            q [0] = '\0';
-            l = strlen (p);
-            DEBUG_DATA   yLOG_info    ("p"         , p);
-            if (x_delimit == '"') {
-               DEBUG_DATA   yLOG_info    ("strcmp"    , p + l - 7);
-               if      (strcmp (p + l - 7, "_solo.h") == 0)  INCL_gather_detail (p, x_end);
-               else if (strcmp (p + l - 7, "_uver.h") == 0)  INCL_gather_detail (p, x_end);
-            } else {
-               INCL_gather_detail (p, x_end);
-            }
-         }
-      }
-      /*---(next)------------------------*/
-      rcp  = fgets (x_recd, LEN_RECD, f);
-      DEBUG_DATA   yLOG_point   ("fgets"     , rcp);
-      /*---(done)------------------------*/
-   }
-   /*---(close)--------------------------*/
-   rc = fclose (f);
-   DEBUG_DATA   yLOG_value   ("close"     , rc);
-   --rce; if (rc < 0) {
-      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(clean-up)-----------------------*/
-   yENV_rm (x_temp);
-   /*---(complete)-----------------------*/
-   DEBUG_DATA  yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
 
 
 /*====================------------------------------------====================*/
@@ -736,29 +643,29 @@ INCL_block              (char a_proj [LEN_TITLE])
    char        n           =   -1;
    /*---(defense)------------------------*/
    --rce;  if (a_proj == NULL)             return rce;
-   if (strstr (a_proj, "_solo") != NULL) {
-      INCL_add_by_name ("zenodotus", GRAPH_by_name (a_proj));
-   }
+   /*> if (strstr (a_proj, "_solo") != NULL) {                                        <* 
+    *>    INCL_add_by_name ("zenodotus", GRAPH_by_name (a_proj));                     <* 
+    *> }                                                                              <*/
    /*> if (strcmp (a_proj, "yUNIT") == 0) {                                           <* 
     *>    GRAPH_add_node  ("yENV_solo");                                              <* 
     *>    INCL_add_by_name ("yENV_solo", GRAPH_by_name (a_proj));                     <* 
     *> }                                                                              <*/
    /*---(show result)--------------------*/
-   printf ("PROJECT     : å%sæ\n", a_proj);
-   printf ("  depsolo   : %4då%sæ\n", strlen (my.depsolo ), my.depsolo );
-   printf ("  depunit   : %4då%sæ\n", strlen (my.depunit ), my.depunit );
-   printf ("  depansi   : %4då%sæ\n", strlen (my.depansi ), my.depansi );
-   printf ("  depposix  : %4då%sæ\n", strlen (my.depposix), my.depposix);
-   printf ("  depcore   : %4då%sæ\n", strlen (my.depcore ), my.depcore );
-   printf ("  depvikey  : %4då%sæ\n", strlen (my.depvikey), my.depvikey);
-   printf ("  depgraph  : %4då%sæ\n", strlen (my.depgraph), my.depgraph);
-   printf ("  depother  : %4då%sæ\n", strlen (my.depother), my.depother);
-   printf ("  depalien  : %4då%sæ\n", strlen (my.depalien), my.depalien);
-   printf ("  depinpt   : %4då%sæ\n", strlen (my.depinpt ), my.depinpt );
-   printf ("  depoutp   : %4då%sæ\n", strlen (my.depoutp ), my.depoutp );
-   printf ("  depfile   : %4då%sæ\n", strlen (my.depfile ), my.depfile );
-   printf ("  depwtf    : %4då%sæ\n", strlen (my.depwtf  ), my.depwtf  );
-   printf ("  depall    : %4då%sæ\n", strlen (my.depall  ), my.depall  );
+   /*> printf ("PROJECT     : å%sæ\n", a_proj);                                       <* 
+    *> printf ("  depsolo   : %4då%sæ\n", strlen (my.depsolo ), my.depsolo );         <* 
+    *> printf ("  depunit   : %4då%sæ\n", strlen (my.depunit ), my.depunit );         <* 
+    *> printf ("  depansi   : %4då%sæ\n", strlen (my.depansi ), my.depansi );         <* 
+    *> printf ("  depposix  : %4då%sæ\n", strlen (my.depposix), my.depposix);         <* 
+    *> printf ("  depcore   : %4då%sæ\n", strlen (my.depcore ), my.depcore );         <* 
+    *> printf ("  depvikey  : %4då%sæ\n", strlen (my.depvikey), my.depvikey);         <* 
+    *> printf ("  depgraph  : %4då%sæ\n", strlen (my.depgraph), my.depgraph);         <* 
+    *> printf ("  depother  : %4då%sæ\n", strlen (my.depother), my.depother);         <* 
+    *> printf ("  depalien  : %4då%sæ\n", strlen (my.depalien), my.depalien);         <* 
+    *> printf ("  depinpt   : %4då%sæ\n", strlen (my.depinpt ), my.depinpt );         <* 
+    *> printf ("  depoutp   : %4då%sæ\n", strlen (my.depoutp ), my.depoutp );         <* 
+    *> printf ("  depfile   : %4då%sæ\n", strlen (my.depfile ), my.depfile );         <* 
+    *> printf ("  depwtf    : %4då%sæ\n", strlen (my.depwtf  ), my.depwtf  );         <* 
+    *> printf ("  depall    : %4då%sæ\n", strlen (my.depall  ), my.depall  );         <*/
    /*---(show filen entry)---------------*/
    if (my.depall [0] == '´')  strcpy (my.depall, "");
    x_len = strlen (my.depall);

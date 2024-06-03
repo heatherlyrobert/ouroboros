@@ -35,17 +35,37 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2k"
-#define     P_VERTXT    "working through _incl logic, cleaned find and add (unit tested)"
+#define     P_VERNUM    "0.2l"
+#define     P_VERTXT    "built and unit tested WAVE_gather and wave searches"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
 #define     P_REMINDER  "there are many better options, but i *own* every byte of this one"
+#define     P_TOPGOAL   "fast and methodical tracing, debugging, and fixing under pressure"
 /*········· ··········· ´·····························´········································*/
 #define     P_HEADERS   P_FOCUS, P_NICHE, P_SUBJECT, P_PURPOSE, P_NAMESAKE, P_PRONOUNCE, P_HERITAGE, P_BRIEFLY, P_IMAGERY, P_REASON, P_ONELINE, P_HOMEDIR, P_BASENAME, P_FULLPATH, P_SUFFIX, P_CONTENT, P_SYSTEM, P_LANGUAGE, P_COMPILER, P_CODESIZE, NULL, NULL, NULL, NULL, NULL, NULL, NULL, P_AUTHOR, P_CREATED, P_VERMAJOR, P_VERMINOR, P_VERNUM, P_VERTXT
 /*········· ··········· ´·····························´········································*/
 /*--------- 12345678901 ´123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
 
+/*
+ *
+ * assess
+ * understand inputs and environment (logging keys and input helps)
+ * isolate
+ * re-create conditions
+ * trace
+ * debug
+ * fix
+ * retest
+ * certify
+ * migrate
+ * restart
+ *
+ * #define     P_TOPGOAL   "how fast, efficiently, and sugically can you fix it in production"
+ * #define     P_TOPGOAL   "fast and methodical tracing, isolate, debug, and fixing under pressure"
+ *
+ *
+ */
 
 /*
  *  GRAND PLAN
@@ -250,6 +270,8 @@ struct cWAVE {
    /*---(sorting)--------------*/
    char        w_unique    [LEN_HUND];
    tSORT      *w_ysort;
+   /*---(deps)-----------------*/
+   char        w_depall    [LEN_RECD];
    /*---(done)-----------------*/
 };
 
@@ -311,6 +333,7 @@ struct cINCL {
    char        i_curses;                /* including in make_curses.h        */
    char        i_draw;                  /* include in output drawings        */
    char        i_block;                 /* grouped within node               */
+   char        i_zenodotus;             /* add virtual link to zenodotus     */
 };
 extern tINCL g_incls [MAX_INCL];
 extern int   g_nincl;
@@ -413,9 +436,12 @@ char        WAVE_handler            (int n, uchar a_verb [LEN_TERSE], char a_exi
 char        WAVE__pull              (char a_gather, cchar a_file [LEN_PATH]);
 char        WAVE_pull_local         (cchar a_file [LEN_PATH]);
 char        WAVE_pull_central       (cchar a_file [LEN_PATH]);
+char        WAVE_gather             (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char a_full [LEN_PATH], char a_type);
 /*---(search)------------------*/
 int         WAVE_count              (void);
 char        WAVE_by_index           (int n, tWAVE **a_cur);
+char        WAVE_by_cursor          (char a_dir, tWAVE **a_cur);
+char        WAVE_by_proj            (char a_proj [LEN_TITLE], tWAVE **a_cur);
 /*---(import)------------------*/
 char        WAVE_inventory          (char *a_path);
 char        WAVE_here               (void);
@@ -517,7 +543,6 @@ char        INCL_add_by_group       (int a_end, char a_type);
 /*---(gather)---------------*/
 char        INCL_gather_detail      (char a_header [LEN_TITLE], int a_end);
 char        INCL_gather             (char a_recd [LEN_RECD], int a_end);
-char        INCL_gather_in_c        (char a_name [LEN_TITLE], cchar a_file [LEN_PATH]);
 /*---(report)---------------*/
 char        INCL_list               (void);
 char        INCL_block              (char a_proj [LEN_TITLE]);
@@ -529,8 +554,7 @@ char*       INCL__unit              (char *a_question, int n);
 
 /*===[[ ouroboros_make.c ]]===================================================*/
 /*········· ´······················ ´·········································*/
-char        MAKE_gather             (char a_recd [LEN_RECD], int x_end);
-/*> char        MAKE_gather             (char a_proj [LEN_TITLE], char a_file [LEN_PATH]);   <*/
+char        MAKE_gather             (char a_recd [LEN_RECD], int a_end);
 /*---(done)-----------------*/
 
 
@@ -539,7 +563,17 @@ char        MAKE_gather             (char a_recd [LEN_RECD], int x_end);
 /*········· ´······················ ´·········································*/
 char        DATA_file_type          (char a_proj [LEN_TITLE], char a_file [LEN_HUND], char *r_type);
 char        DATA_gather_prep        (char a_file [LEN_PATH], char a_type, char r_file [LEN_PATH]);
+char        DATA_gather_file        (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char a_full [LEN_PATH], char a_type);
 /*---(done)-----------------*/
+
+
+
+/*===[[ ouroboros_yunit.c ]]==================================================*/
+/*········· ´······················ ´·········································*/
+char        YUNIT_gather            (char a_proj [LEN_TITLE], char a_recd [LEN_RECD], int a_end);
+/*---(done)-----------------*/
+
+
 
 
 
