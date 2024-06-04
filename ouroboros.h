@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2l"
-#define     P_VERTXT    "built and unit tested WAVE_gather and wave searches"
+#define     P_VERNUM    "0.2m"
+#define     P_VERTXT    "very basic database write unit tested"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -445,8 +445,6 @@ char        WAVE_by_proj            (char a_proj [LEN_TITLE], tWAVE **a_cur);
 /*---(import)------------------*/
 char        WAVE_inventory          (char *a_path);
 char        WAVE_here               (void);
-/*---(export)------------------*/
-char        WAVE_write              (char a_file [LEN_PATH]);
 /*---(unittest)----------------*/
 char*       WAVE__unit              (char *a_question, int n);
 
@@ -469,6 +467,17 @@ char*       TEST__unit              (char *a_question, int n);
 
 char        YJOBS_callback          (cchar a_req, cchar *a_data);
 
+
+
+
+/*===[[ ouroboros_tdb.c ]]====================================================*/
+/*········· ´······················ ´·········································*/
+char        TDB_total_proj          (tWAVE *a_proj);
+char        TDB_total_unit          (tWAVE *a_unit);
+char        TDB_totalize            (void);
+/*---(export)------------------*/
+char        TDB_write               (char a_full [LEN_PATH]);
+/*---(done)--------------------*/
 
 
 

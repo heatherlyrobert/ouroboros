@@ -18,7 +18,7 @@ YJOBS_callback          (cchar a_req, cchar *a_data)
       break;
    case YJOBS_WRITE    :
       DEBUG_PROG    yLOG_note    ("WRITE -- central database write");
-      rc = WAVE_write (FILE_CENTRAL);
+      rc = TDB_write ( FILE_CENTRAL);
       break;
    case YJOBS_STATS    :
       break;
