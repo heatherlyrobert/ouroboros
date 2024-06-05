@@ -269,6 +269,18 @@ WAVE_purge_proj         (char a_proj [LEN_LABEL])
    /*---(header)-------------------------*/
    DEBUG_CONF  yLOG_enter   (__FUNCTION__);
    /*---(walk entries)-------------------*/
+   rc = ySORT_by_cursor (B_WAVE, YDLST_HEAD, &x_wave);
+   DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_wave);
+   while (rc >= 0 && x_wave != NULL) {
+      if (strcmp (x_wave->w_proj, a_proj) == 0) {
+         rc = WAVE__free (&x_wave);
+         if (rc < 0)  break;
+         rc = ySORT_by_cursor (B_WAVE, YDLST_HEAD, &x_wave);
+      } else {
+         rc = ySORT_by_cursor (B_WAVE, YDLST_NEXT, &x_wave);
+      }
+      DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_wave);
+   }
    /*---(complete)-----------------------*/
    DEBUG_DATA   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -284,6 +296,22 @@ WAVE_purge_unit         (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE])
    /*---(header)-------------------------*/
    DEBUG_CONF  yLOG_enter   (__FUNCTION__);
    /*---(walk entries)-------------------*/
+   rc = ySORT_by_cursor (B_WAVE, YDLST_HEAD, &x_wave);
+   DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_wave);
+   while (rc >= 0 && x_wave != NULL) {
+      if (strcmp (x_wave->w_proj, a_proj) == 0) {
+         if (strcmp (x_wave->w_unit, a_unit) == 0) {
+            rc = WAVE__free (&x_wave);
+            if (rc < 0)  break;
+            rc = ySORT_by_cursor (B_WAVE, YDLST_HEAD, &x_wave);
+         } else {
+            rc = ySORT_by_cursor (B_WAVE, YDLST_NEXT, &x_wave);
+         }
+      } else {
+         rc = ySORT_by_cursor (B_WAVE, YDLST_NEXT, &x_wave);
+      }
+      DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_wave);
+   }
    /*---(complete)-----------------------*/
    DEBUG_DATA   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -299,6 +327,26 @@ WAVE_purge_scrp         (char a_proj [LEN_LABEL], char a_unit [LEN_TITLE], char 
    /*---(header)-------------------------*/
    DEBUG_CONF  yLOG_enter   (__FUNCTION__);
    /*---(walk entries)-------------------*/
+   rc = ySORT_by_cursor (B_WAVE, YDLST_HEAD, &x_wave);
+   DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_wave);
+   while (rc >= 0 && x_wave != NULL) {
+      if (strcmp (x_wave->w_proj, a_proj) == 0) {
+         if (strcmp (x_wave->w_unit, a_unit) == 0) {
+            if (x_wave->w_scrp == a_scrp) {
+               rc = WAVE__free (&x_wave);
+               if (rc < 0)  break;
+               rc = ySORT_by_cursor (B_WAVE, YDLST_HEAD, &x_wave);
+            } else {
+               rc = ySORT_by_cursor (B_WAVE, YDLST_NEXT, &x_wave);
+            }
+         } else {
+            rc = ySORT_by_cursor (B_WAVE, YDLST_NEXT, &x_wave);
+         }
+      } else {
+         rc = ySORT_by_cursor (B_WAVE, YDLST_NEXT, &x_wave);
+      }
+      DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_wave);
+   }
    /*---(complete)-----------------------*/
    DEBUG_DATA   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -837,7 +885,7 @@ WAVE_inventory          (char *a_path)
       else if (l >= 3 && strcmp  (x_entry->d_name + l - 7, "_priv.h") == 0)  x_keep = TYPE_HEAD;
       else if (l >= 3 && strcmp  (x_entry->d_name + l - 7, "_solo.h") == 0)  x_keep = TYPE_HEAD;
       else if (l >= 3 && strcmp  (x_entry->d_name + l - 7, "_uver.h") == 0)  x_keep = TYPE_HEAD;
-/*> else if (l >= 8 && strncmp (x_entry->d_name, "unit_", 5       ) == 0                   <* 
+      /*> else if (l >= 8 && strncmp (x_entry->d_name, "unit_", 5       ) == 0                   <* 
        *>                 && strcmp  (x_entry->d_name + l - 2, ".c"     ) == 0)  x_keep = TYPE_MUNIT;   <*/
       /*> else if (l >= 3 && strcmp  (x_entry->d_name + l - 2, ".c"     ) == 0)  x_keep = TYPE_CODE;   <*/
       if (x_keep == '-') {
