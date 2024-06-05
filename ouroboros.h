@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2o"
-#define     P_VERTXT    "wave purges (all, proj, unit, scrp) all unit tested"
+#define     P_VERNUM    "0.2p"
+#define     P_VERTXT    "read/write tdb working with good unit test wave data"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -46,6 +46,23 @@
 #define     P_HEADERS   P_FOCUS, P_NICHE, P_SUBJECT, P_PURPOSE, P_NAMESAKE, P_PRONOUNCE, P_HERITAGE, P_BRIEFLY, P_IMAGERY, P_REASON, P_ONELINE, P_HOMEDIR, P_BASENAME, P_FULLPATH, P_SUFFIX, P_CONTENT, P_SYSTEM, P_LANGUAGE, P_COMPILER, P_CODESIZE, NULL, NULL, NULL, NULL, NULL, NULL, NULL, P_AUTHOR, P_CREATED, P_VERMAJOR, P_VERMINOR, P_VERNUM, P_VERTXT
 /*········· ··········· ´·····························´········································*/
 /*--------- 12345678901 ´123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
+/*········· ··········· ´·····························´········································*/
+#define     P_DEPSOLO   ""
+#define     P_DEPUNIT   ""
+#define     P_DEPUNIT   ""
+#define     P_DEPANSI   ""
+#define     P_DEPPOSIX  ""
+#define     P_DEPCORE   ""
+#define     P_DEPVIKEY  ""
+#define     P_DEPGRAPH  ""
+#define     P_DEPOTHER  ""
+#define     P_DEPALIEN  ""
+#define     P_DEPWTF    ""
+/*········· ··········· ´·····························´········································*/
+/*--------- 12345678901 ´123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
+
+
+
 
 /*
  *
@@ -61,7 +78,7 @@
  * migrate
  * restart
  *
- * #define     P_TOPGOAL   "how fast, efficiently, and sugically can you fix it in production"
+ * #define     P_TOPGOAL   "how fast, efficiently, and sugically can you fix it under pressure"
  * #define     P_TOPGOAL   "fast and methodical tracing, isolate, debug, and fixing under pressure"
  *
  *
@@ -555,6 +572,8 @@ char        INCL_gather             (char a_recd [LEN_RECD], int a_end);
 /*---(report)---------------*/
 char        INCL_list               (void);
 char        INCL_block              (char a_proj [LEN_TITLE]);
+/*---(database)-------------*/
+char        INCL_handler            (int n, uchar a_verb [LEN_TERSE]);
 /*---(unittest)-------------*/
 char*       INCL__unit              (char *a_question, int n);
 /*---(done)-----------------*/

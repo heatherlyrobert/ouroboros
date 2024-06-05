@@ -511,7 +511,7 @@ WAVE_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_
    char        rce         =  -10;
    int         rc          =    0;
    tWAVE      *x_new       = NULL;
-   char        x_time      [LEN_TITLE] = "";
+   char        x_time      [LEN_TITLE] = "·";
    long        x_epoch     =    0;
    char        x_proj      [LEN_LABEL] = "";
    char        x_unit      [LEN_TITLE] = "";
@@ -520,8 +520,8 @@ WAVE_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_
    char        x_wave      =  '·';
    char        x_stage     =  '·';
    char        x_rating    =  '·';
-   char        x_desc      [LEN_LONG]  = "";
-   char        x_terse     [LEN_LABEL] = "";
+   char        x_desc      [LEN_LONG]  = "·";
+   char        x_terse     [LEN_LABEL] = "·";
    int         x_nunit     =    0;
    int         x_nscrp     =    0;
    int         x_ncond     =    0;
@@ -548,13 +548,15 @@ WAVE_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_
    rc = yPARSE_ready (&c);
    DEBUG_CONF  yLOG_value   ("rc"         , rc);
    DEBUG_CONF  yLOG_value   ("c"          , c);
-   /*---(read details)-------------------*/
+   /*---(read project)-------------------*/
    --rce; if (strncmp (a_verb, "PROJ", 4) == 0) {
       rc = yPARSE_scanf (a_verb, "--L-------------------"  , x_proj);
    }
+   /*---(read unit test)-----------------*/
    else if   (strncmp (a_verb, "UNIT", 4) == 0) {
       rc = yPARSE_scanf (a_verb, "--L3------------------"  , x_proj, x_unit);
    }
+   /*---(read wave entry)----------------*/
    else if   (strncmp (a_verb, "WAVE", 4) == 0) {
       switch (c) {
       case 23 : case 28 :
@@ -568,6 +570,12 @@ WAVE_handler            (int n, uchar a_verb [LEN_TERSE], char a_exist, void *a_
          break;
       }
    }
+   /*---(read dependencies)--------------*/
+   else if   (strncmp (a_verb, "DEPS", 4) == 0) {
+      DEBUG_PROG  yLOG_exit    (__FUNCTION__);
+      return 0;
+   }
+   /*---(trouble)------------------------*/
    else {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
       return rce;

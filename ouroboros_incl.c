@@ -295,8 +295,8 @@ INCL_list_clear         (void)
    strcpy (my.depinpt , "´");
    strcpy (my.depoutp , "´");
    strcpy (my.depfile , "´");
-   strcpy (my.depall  , "´");
    strcpy (my.depwtf  , "´");
+   strcpy (my.depall  , "´");
    return 0;
 }
 
@@ -689,6 +689,69 @@ INCL_block              (char a_proj [LEN_TITLE])
  *>    char        n           =   -1;                                                <* 
  *> }                                                                                 <*/
 
+char
+INCL_handler            (int n, uchar a_verb [LEN_TERSE])
+{
+   /*---(locals)-----------+-----------+-*/
+   char        rce         =  -10;
+   int         rc          =    0;
+   int         c           =    0;
+   char        x_proj      [LEN_LABEL] = "";
+   char        x_depall    [LEN_RECD]  = "";
+   char       *p           = NULL;
+   char       *q           = ",";
+   char       *r           = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_CONF  yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_CONF  yLOG_point   ("a_verb"     , a_verb);
+   --rce;  if (a_verb == NULL) {
+      DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF  yLOG_info    ("a_verb"     , a_verb);
+   rc = yPARSE_ready (&c);
+   DEBUG_CONF  yLOG_value   ("rc"         , rc);
+   DEBUG_CONF  yLOG_value   ("c"          , c);
+   /*---(read project)-------------------*/
+   --rce; if (strncmp (a_verb, "WAVE", 4) != 0) {
+      DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(read unit test)-----------------*/
+   rc = yPARSE_scanf (a_verb, "LR"  , x_proj, x_depall);
+   /*---(trouble)------------------------*/
+   DEBUG_CONF  yLOG_value   ("scanf"      , rc);
+   if (rc < 0) {
+      DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(check project)------------------*/
+   DEBUG_CONF  yLOG_info    ("x_proj"     , x_proj);
+   n = GRAPH_by_name (x_proj);
+   if (n < 0)  n = GRAPH_add_node (x_proj);
+   DEBUG_CONF  yLOG_value   ("n"          , n);
+   if (n < 0) {
+      DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(check for empty)----------------*/
+   if (strcmp (x_depall, "´") == 0) {
+      DEBUG_PROG  yLOG_exit    (__FUNCTION__);
+      return 0;
+   }
+   /*---(handle)-------------------------*/
+   c = 0;
+   p = strtok_r (x_depall, q, &r);
+   while (p != NULL) {
+      rc = INCL_add_by_name (p, n);
+      ++c;
+      p = strtok_r (NULL, q, &r);
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_CONF  yLOG_exit    (__FUNCTION__);
+   return c;
+}
 
 
 
