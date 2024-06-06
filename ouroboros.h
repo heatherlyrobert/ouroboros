@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2q"
-#define     P_VERTXT    "full project gathering unit tested (except tdb deps line)"
+#define     P_VERNUM    "0.2r"
+#define     P_VERTXT    "added graph node and edge to project unit testing (success)"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
