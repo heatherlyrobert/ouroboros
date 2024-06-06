@@ -255,7 +255,7 @@ DATA_gather_file        (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char
 }
 
 char
-DATA_gather_project     (char a_proj [LEN_TITLE], char a_full [LEN_PATH])
+DATA_gather_project     (char a_full [LEN_PATH])
 {
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
@@ -265,6 +265,8 @@ DATA_gather_project     (char a_proj [LEN_TITLE], char a_full [LEN_PATH])
    char        x_type      = TYPE_NONE;
    int         l           =    0;
    char        x_full      [LEN_PATH]  = "";
+   char        x_proj      [LEN_LABEL] = "";
+   char        c           =    0;
    /*---(header)-------------------------*/
    DEBUG_DATA   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -274,6 +276,14 @@ DATA_gather_project     (char a_proj [LEN_TITLE], char a_full [LEN_PATH])
       return rce;
    }
    DEBUG_DATA   yLOG_info    ("a_full"    , a_full);
+   /*---(get the home)-------------------*/
+   rc = ystrlproj (a_full, x_proj);
+   DEBUG_DATA   yLOG_value   ("strlproj"  , rc);
+   --rce;  if (rc < 0)  {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_DATA   yLOG_info    ("x_proj"    , x_proj);
    /*---(open directory)-----------------*/
    x_dir = opendir (a_full);
    DEBUG_DATA   yLOG_point   ("x_dir"     , x_dir);
@@ -297,7 +307,7 @@ DATA_gather_project     (char a_proj [LEN_TITLE], char a_full [LEN_PATH])
       }
       DEBUG_DATA   yLOG_info    ("d_name"    , x_entry->d_name);
       /*---(filter)----------------------*/
-      rc = DATA_file_type (a_proj, x_entry->d_name, &x_type);
+      rc = DATA_file_type (x_proj, x_entry->d_name, &x_type);
       DEBUG_DATA   yLOG_value   ("file_type" , rc);
       if (x_type == TYPE_NONE) {
          DEBUG_DATA   yLOG_note    ("file type is not useful, continue");
@@ -310,9 +320,9 @@ DATA_gather_project     (char a_proj [LEN_TITLE], char a_full [LEN_PATH])
       else                       sprintf (x_full, "%s/%s", a_full, x_entry->d_name);
       DEBUG_DATA   yLOG_info    ("x_full"    , x_full);
       if (x_type == TYPE_WAVE) {
-         rc = WAVE_gather      (a_proj, x_entry->d_name, x_full, x_type);
+         rc = WAVE_gather      (x_proj, x_entry->d_name, x_full, x_type);
       } else {
-         rc = DATA_gather_file (a_proj, x_entry->d_name, x_full, x_type);
+         rc = DATA_gather_file (x_proj, x_entry->d_name, x_full, x_type);
       }
       DEBUG_DATA   yLOG_value   ("dispatch"  , rc);
       if (rc < 0) {
@@ -320,6 +330,7 @@ DATA_gather_project     (char a_proj [LEN_TITLE], char a_full [LEN_PATH])
          continue;
       }
       /*---(done)------------------------*/
+      ++c;
    }
    /*---(close)--------------------------*/
    rc = closedir (x_dir);
@@ -328,9 +339,11 @@ DATA_gather_project     (char a_proj [LEN_TITLE], char a_full [LEN_PATH])
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(write includes)-----------------*/
+   INCL_finalize (x_proj, a_full);
    /*---(complete)-----------------------*/
    DEBUG_DATA   yLOG_exit    (__FUNCTION__);
-   return 0;
+   return c;
 }
 
 

@@ -127,8 +127,6 @@ WAVE__wipe              (tWAVE *a_dst, char a_new)
       a_dst->w_unique[0] = '\0';
       a_dst->w_ysort     = NULL;
    }
-   /*---(deps)-----------------*/
-   if (a_new == 'y') strcpy (a_dst->w_depall, "´");
    /*---(done)-----------------*/
    return 1;
 }

@@ -636,6 +636,76 @@ INCL_list               (void)
 }
 
 char
+INCL_finalize           (char a_proj [LEN_LABEL], char a_full [LEN_PATH])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =    0;
+   char        rc          =    0;
+   int         l           =    0;
+   char        x_full      [LEN_PATH]  = "";
+   FILE       *f           = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_DATA  yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_DATA   yLOG_point   ("a_proj"    , a_proj);
+   --rce; if (a_proj == NULL) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_DATA   yLOG_info    ("a_proj"    , a_proj);
+   DEBUG_DATA   yLOG_point   ("a_full"    , a_full);
+   --rce; if (a_full == NULL) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_DATA   yLOG_info    ("a_full"    , a_full);
+   /*---(add to project)-----------------*/
+   if (my.depall [0] == '\0')  strcpy (my.depall, "´");
+   rc = GRAPH_deps_add  (a_proj, my.depall);
+   DEBUG_DATA   yLOG_value   ("deps_add"  , rc);
+   --rce; if (rc < 0) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(open file)----------------------*/
+   l = strlen (a_full);
+   if (a_full [l - 1] == '/') sprintf (x_full, "%s%s" , a_full, "ouroboros.deps");
+   else                       sprintf (x_full, "%s/%s", a_full, "ouroboros.deps");
+   DEBUG_DATA   yLOG_info    ("x_full"    , x_full);
+   f = fopen (x_full, "wt");
+   DEBUG_DATA   yLOG_point   ("f"         , f);
+   --rce; if (f == NULL) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(write file)---------------------*/
+   fprintf (f, "#define     P_DEPSOLO   \"%s\"\n", my.depsolo );
+   fprintf (f, "#define     P_DEPUNIT   \"%s\"\n", my.depunit );
+   fprintf (f, "#define     P_DEPANSI   \"%s\"\n", my.depansi );
+   fprintf (f, "#define     P_DEPPOSIX  \"%s\"\n", my.depposix);
+   fprintf (f, "#define     P_DEPCORE   \"%s\"\n", my.depcore );
+   fprintf (f, "#define     P_DEPVIKEY  \"%s\"\n", my.depvikey);
+   fprintf (f, "#define     P_DEPGRAPH  \"%s\"\n", my.depgraph);
+   fprintf (f, "#define     P_DEPOTHER  \"%s\"\n", my.depother);
+   fprintf (f, "#define     P_DEPALIEN  \"%s\"\n", my.depalien);
+   fprintf (f, "#define     P_DEPINPT   \"%s\"\n", my.depinpt );
+   fprintf (f, "#define     P_DEPOUTP   \"%s\"\n", my.depoutp );
+   fprintf (f, "#define     P_DEPFILE   \"%s\"\n", my.depfile );
+   fprintf (f, "#define     P_DEPWTF    \"%s\"\n", my.depwtf  );
+   fprintf (f, "#define     P_DEPALL    \"%s\"\n", my.depall  );
+   /*---(close file)---------------------*/
+   rc = fclose (f);
+   DEBUG_DATA   yLOG_value   ("fclose"    , rc);
+   --rce; if (rc < 0) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_DATA  yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
 INCL_block              (char a_proj [LEN_TITLE])
 {
    char        rce         =    0;
@@ -670,8 +740,8 @@ INCL_block              (char a_proj [LEN_TITLE])
    if (my.depall [0] == '´')  strcpy (my.depall, "");
    x_len = strlen (my.depall);
    /*> if (my.depall [x_len - 1] == ',')  my.depall [--x_len] = '\0';                 <*/
-   if (x_len == 0)     printf ("  DEPEND  ´ \n");
-   else                printf ("  DEPEND  %s \n", my.depall);
+   if (x_len == 0)     printf ("  DEPS    %-20.20s  ´ \n" , a_proj);
+   else                printf ("  DEPS    %-20.20s  %s \n", a_proj, my.depall);
    /*---(add to node)--------------------*/
    GRAPH_deps_add  (a_proj, my.depall);
    /*

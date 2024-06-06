@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2p"
-#define     P_VERTXT    "read/write tdb working with good unit test wave data"
+#define     P_VERNUM    "0.2q"
+#define     P_VERTXT    "full project gathering unit tested (except tdb deps line)"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -45,6 +45,11 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_HEADERS   P_FOCUS, P_NICHE, P_SUBJECT, P_PURPOSE, P_NAMESAKE, P_PRONOUNCE, P_HERITAGE, P_BRIEFLY, P_IMAGERY, P_REASON, P_ONELINE, P_HOMEDIR, P_BASENAME, P_FULLPATH, P_SUFFIX, P_CONTENT, P_SYSTEM, P_LANGUAGE, P_COMPILER, P_CODESIZE, NULL, NULL, NULL, NULL, NULL, NULL, NULL, P_AUTHOR, P_CREATED, P_VERMAJOR, P_VERMINOR, P_VERNUM, P_VERTXT
 /*········· ··········· ´·····························´········································*/
+/*--------- 12345678901 ´123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
+
+
+/*===[[ INFORMATIONAL ]]======================================================*/
+/*                      ´·········1·········2·········3·········4·········5·········6·········7*/
 /*--------- 12345678901 ´123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
 /*········· ··········· ´·····························´········································*/
 #define     P_DEPSOLO   ""
@@ -287,8 +292,6 @@ struct cWAVE {
    /*---(sorting)--------------*/
    char        w_unique    [LEN_HUND];
    tSORT      *w_ysort;
-   /*---(deps)-----------------*/
-   char        w_depall    [LEN_RECD];
    /*---(done)-----------------*/
 };
 
@@ -571,6 +574,7 @@ char        INCL_gather_detail      (char a_header [LEN_TITLE], int a_end);
 char        INCL_gather             (char a_recd [LEN_RECD], int a_end);
 /*---(report)---------------*/
 char        INCL_list               (void);
+char        INCL_finalize           (char a_proj [LEN_LABEL], char a_full [LEN_PATH]);
 char        INCL_block              (char a_proj [LEN_TITLE]);
 /*---(database)-------------*/
 char        INCL_handler            (int n, uchar a_verb [LEN_TERSE]);
@@ -592,6 +596,7 @@ char        MAKE_gather             (char a_recd [LEN_RECD], int a_end);
 char        DATA_file_type          (char a_proj [LEN_TITLE], char a_file [LEN_HUND], char *r_type);
 char        DATA_gather_prep        (char a_file [LEN_PATH], char a_type, char r_file [LEN_PATH]);
 char        DATA_gather_file        (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char a_full [LEN_PATH], char a_type);
+char        DATA_gather_project     (char a_full [LEN_PATH]);
 /*---(done)-----------------*/
 
 
