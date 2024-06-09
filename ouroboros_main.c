@@ -30,6 +30,7 @@ main               (int a_argc, char *a_argv[])
       ystrlcat (g_nodes [n].n_deps, "yENV_solo,", LEN_RECD);
       ystrlcat (g_nodes [n].n_miss, "yENV_solo,", LEN_RECD);
    }
+   INCL_zenodotus  ();
    /*> GRAPH_deps_add  ("yENV_solo"  , ",zenodotus,");                                <*/
    /*> GRAPH_deps_add  ("ySTR_solo"  , ",zenodotus,");                                <*/
    /*> GRAPH_deps_add  ("yLOG_solo"  , ",zenodotus,");                                <*/
@@ -41,10 +42,11 @@ main               (int a_argc, char *a_argv[])
    INCL_list ();
    GRAPH_dump_nodes ();
    GRAPH_dump_edges ();
+   GRAPH_dump_deps  ();
+   GRAPH_focus_all  ();
    GRAPH_solve      ('-');
    GRAPH_deps_solve ();
    GRAPH_dump_seq   ();
-   GRAPH_focus_all  ();
    /*> GRAPH_focus_on   ("yVAR");                                                     <*/
    DRAW_main        ('b', YASCII_DEFAULT, YASCII_MAX);
    /*> rc = PROG_driver ();                                                           <*/

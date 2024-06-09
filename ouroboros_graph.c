@@ -268,9 +268,16 @@ GRAPH_cum_deps          (void)
 char*
 GRAPH_node_line         (int n)
 {
+   /*---(locals)-----------+-----+-----+-*/
    char        s           [LEN_DESC]  = "";
    char        t           [LEN_HUND]  = "";
    char        u           [LEN_HUND]  = "";
+   /*---(empty)--------------------------*/
+   if (n < 0 || n >= g_nnode) {
+      snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : ·                    · ·  · ·                    ·                     · ·    · ·                    ·                      ´ åæ", n);
+      return my.unit_answer;
+   }
+   /*---(prepare)------------------------*/
    if (g_nodes [n].n_pred > 0)  sprintf (t, "%2d %-20.20s %-20.20s %2d %c", g_nodes [n].n_pred, ((g_nodes [n].n_phead)->e_beg)->n_name, ((g_nodes [n].n_ptail)->e_beg)->n_name, g_nodes [n].n_filled, g_nodes [n].n_ready);
    else                         strcpy  (t, " · ·                    ·                     · ·");
    if (g_nodes [n].n_succ > 0)  sprintf (u, "%2d %-20.20s %-20.20s", g_nodes [n].n_succ, ((g_nodes [n].n_shead)->e_end)->n_name, ((g_nodes [n].n_stail)->e_end)->n_name);
@@ -278,7 +285,9 @@ GRAPH_node_line         (int n)
    if      (g_nodes [n].n_level <  0)  strcpy (s, "-");
    else if (g_nodes [n].n_level >  9)  strcpy (s, "Ï");
    else                                sprintf (s, "%c", g_nodes [n].n_level + '0');
-   snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : %-20.20s %c %-1.1s %-49.49s   %-44.44s   ´", n, g_nodes [n].n_name, g_nodes [n].n_focus, s, t, u);
+   /*---(concatenate)--------------------*/
+   snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : %-20.20s %c %-1.1s %-49.49s   %-44.44s   ´ å%sæ", n, g_nodes [n].n_name, g_nodes [n].n_focus, s, t, u, g_nodes [n].n_deps);
+   /*---(complete)-----------------------*/
    return my.unit_answer;
 }
 
@@ -589,6 +598,19 @@ GRAPH_deps_solve        (void)
    return 0;
 }
 
+char
+GRAPH_dump_deps         (void)
+{
+   int         i           =    0;
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   DEBUG_PROG   yLOG_value   ("g_nnode"   , g_nnode);
+   for (i = 0; i <  g_nnode; ++i) {
+      printf ("%3d  %-25.25s  %s\n", i, g_nodes [i].n_name, g_nodes [i].n_deps);
+   }
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
 
 
 /*====================------------------------------------====================*/
@@ -776,18 +798,19 @@ GRAPH__unit             (char *a_question, int n)
    /*---(crontab name)-------------------*/
    if (strcmp (a_question, "full"          )  == 0) {
       WAVE_by_index (n, &x_cur);
-      if (n >= g_nnode) {
-         snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : ·                    · ·  · ·                    ·                     · ·    · ·                    ·                      ´", n);
-      } else {
-         if (g_nodes [n].n_pred > 0)  sprintf (t, "%2d %-20.20s %-20.20s %2d %c", g_nodes [n].n_pred, ((g_nodes [n].n_phead)->e_beg)->n_name, ((g_nodes [n].n_ptail)->e_beg)->n_name, g_nodes [n].n_filled, g_nodes [n].n_ready);
-         else                         strcpy  (t, " · ·                    ·                     · ·");
-         if (g_nodes [n].n_succ > 0)  sprintf (u, "%2d %-20.20s %-20.20s", g_nodes [n].n_succ, ((g_nodes [n].n_shead)->e_end)->n_name, ((g_nodes [n].n_stail)->e_end)->n_name);
-         else                         strcpy  (u, " · ·                    ·                     ·");
-         if      (g_nodes [n].n_level <  0)  strcpy (s, "-");
-         else if (g_nodes [n].n_level >  9)  strcpy (s, "Ï");
-         else                                sprintf (s, "%c", g_nodes [n].n_level + '0');
-         snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : %-20.20s %c %-1.1s %-49.49s   %-44.44s   ´", n, g_nodes [n].n_name, g_nodes [n].n_focus, s, t, u);
-      }
+      ystrlcpy (my.unit_answer, GRAPH_node_line (n), LEN_RECD);
+      /*> if (n >= g_nnode) {                                                                                                                                                                                                           <* 
+       *>    snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : ·                    · ·  · ·                    ·                     · ·    · ·                    ·                      ´", n);                               <* 
+       *> } else {                                                                                                                                                                                                                      <* 
+       *>    if (g_nodes [n].n_pred > 0)  sprintf (t, "%2d %-20.20s %-20.20s %2d %c", g_nodes [n].n_pred, ((g_nodes [n].n_phead)->e_beg)->n_name, ((g_nodes [n].n_ptail)->e_beg)->n_name, g_nodes [n].n_filled, g_nodes [n].n_ready);   <* 
+       *>    else                         strcpy  (t, " · ·                    ·                     · ·");                                                                                                                             <* 
+       *>    if (g_nodes [n].n_succ > 0)  sprintf (u, "%2d %-20.20s %-20.20s", g_nodes [n].n_succ, ((g_nodes [n].n_shead)->e_end)->n_name, ((g_nodes [n].n_stail)->e_end)->n_name);                                                     <* 
+       *>    else                         strcpy  (u, " · ·                    ·                     ·");                                                                                                                               <* 
+       *>    if      (g_nodes [n].n_level <  0)  strcpy (s, "-");                                                                                                                                                                       <* 
+       *>    else if (g_nodes [n].n_level >  9)  strcpy (s, "Ï");                                                                                                                                                                       <* 
+       *>    else                                sprintf (s, "%c", g_nodes [n].n_level + '0');                                                                                                                                          <* 
+       *>    snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : %-20.20s %c %-1.1s %-49.49s   %-44.44s   ´", n, g_nodes [n].n_name, g_nodes [n].n_focus, s, t, u);                                                                <* 
+       *> }                                                                                                                                                                                                                             <*/
    }
    else if (strcmp (a_question, "edge"          )  == 0) {
    }

@@ -119,6 +119,7 @@ TDB_totalize            (void)
 char
 TDB_write               (char a_full [LEN_PATH])
 {
+   /*--(locals)------------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
    long        x_now       =    0;
@@ -129,6 +130,7 @@ TDB_write               (char a_full [LEN_PATH])
    char        x_heart     [LEN_HUND]  = "";
    char        x_est       [LEN_SHORT] = "";
    char        x_act       [LEN_SHORT] = "";
+   int         n           =    0;
    /*---(defense)------------------------*/
    --rce; if (a_full == NULL)  return rce;
    /*---(open file)----------------------*/
@@ -157,6 +159,12 @@ TDB_write               (char a_full [LEN_PATH])
          fprintf (f, "##------  ---timestamp--------------  ---epoch--  ---project----------  ---unit-----------------------  sc  S  ---description--------------------------------------------------------  ---terse------------  w  s  i  #units  #scrps  #conds  #steps  est  expect  R  #pass#  #fail#  #badd#  #void#  #miss#  actual  act  -pass-  -fail-  -warn-  -none- \n");
          fprintf (f, "PROJ====  =========´=========´======  =========´  %-20.20s  ##=======´=========´=========´  ==  =  =========´=========´=========´=========´=========´=========´=========´  =========´=========´  =  =  =  %6d  %6d  %6d  %6d  %3s  %6d  =  %6d  %6d  %6d  %6d  %6d  %6d  %3s  %6d  %6d  %6d  %6d \n",
                x_wave->w_proj, x_wave->w_nunit, x_wave->w_nscrp, x_wave->w_ncond, x_wave->w_nstep, x_est, x_wave->w_expect, x_wave->w_npass, x_wave->w_nfail, x_wave->w_nbadd, x_wave->w_nvoid, x_wave->w_nmiss, x_wave->w_actual, x_act, x_wave->w_pass, x_wave->w_fail, x_wave->w_warn, x_wave->w_none);
+         n = GRAPH_by_name (x_wave->w_proj);
+         if (n >= 0 && strlen (g_nodes [n].n_deps) > 1) {
+            fprintf (f, "\n");
+            fprintf (f, "  DEPS··  ··························  ··········  %-20.20s  %s \n",
+                  g_nodes [n].n_name, g_nodes [n].n_deps);
+         }
          break;
          /*---(unit)------------------------*/
       case ENTRY_UNIT :

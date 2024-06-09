@@ -59,6 +59,16 @@ YUNIT_gather            (char a_proj [LEN_TITLE], char a_recd [LEN_RECD], int a_
       DEBUG_DATA   yLOG_exit    (__FUNCTION__);
       return 0;
    }
+   ystrlcpy  (t, p, LEN_TITLE);
+   ystrltrim (t, ySTR_BOTH, LEN_TITLE);
+   if (t [0] == 'v') {
+      p = strtok_r (NULL  , q, &r);
+      if (p == NULL) {
+         DEBUG_DATA   yLOG_note    ("nothing to do with line, continue");
+         DEBUG_DATA   yLOG_exit    (__FUNCTION__);
+         return 0;
+      }
+   }
    p = strtok_r (NULL  , q, &r);
    DEBUG_DATA   yLOG_point   ("p"         , p);
    if (p == NULL) {

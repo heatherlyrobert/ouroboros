@@ -34,9 +34,9 @@
 #define     P_CREATED   "2020-12"
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
-#define     P_VERMINOR  "0.2- adapt to new data requirements"
-#define     P_VERNUM    "0.2r"
-#define     P_VERTXT    "added graph node and edge to project unit testing (success)"
+#define     P_VERMINOR  "0.3- moving to deps on node"
+#define     P_VERNUM    "0.3a"
+#define     P_VERTXT    "built/unit-tested DEPS_add_to_node for new method of deps storage"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -70,6 +70,22 @@
 
 
 /*
+ *
+ * #define     P_SUCCESS   "how fast, efficiently, and sugically can i fix it under pressure"
+ * #define     P_SUCCESS   "how fast, efficiently, and sugically can i isolate, diagnose, and fix under pressure"
+ *
+ * #define     P_SUCCESS   "how fast, efficiently, and sugically can i isolate and fix under intense pressure"
+ *
+ * how fast and methodically can i isolate and repair under intense pressure
+ *
+ * this means i need...
+ *    -- logical boundaries and known interfaces
+ *    -- clear logging and tracing
+ *    -- ready fall-back points
+ *    -- redundancies
+ *    -- quick, clear, and proven auditing
+ *
+ * 
  *
  * assess
  * understand inputs and environment (logging keys and input helps)
@@ -543,6 +559,7 @@ char        GRAPH_deps_add          (char a_name [LEN_TITLE], char a_deps [LEN_R
 char        GRAPH_deps_merge        (char a_deps [LEN_RECD], char r_cumd [LEN_RECD]);
 char        GRAPH_deps_missing      (char a_deps [LEN_RECD], char a_cumd [LEN_RECD], char r_miss [LEN_RECD]);
 char        GRAPH_deps_solve        (void);
+char        GRAPH_dump_deps         (void);
 /*---(focus)----------------*/
 char        GRAPH_focus_pred        (int n);
 char        GRAPH_focus_on          (char a_prog [LEN_TITLE]);
@@ -562,9 +579,11 @@ char*       GRAPH__unit             (char *a_question, int n);
 /*········· ´······················ ´·········································*/
 /*---(program)--------------*/
 char        INCL_clear              (void);
+char        INCL_zenodotus          (void);
 /*---(lists)----------------*/
 char        INCL_list_clear         (void);
 char        INCL_list_add           (char a_cat, char a_header [LEN_TITLE]);
+char        DEPS_add_to_node        (char a_source [LEN_TITLE], char a_target [LEN_LABEL]);
 int         INCL_by_name            (char a_header [LEN_TITLE], char *r_block);
 /*---(find)-----------------*/
 int         INCL_add_by_name        (char a_beg [LEN_TITLE], int a_end);

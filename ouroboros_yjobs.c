@@ -14,17 +14,18 @@ YJOBS_callback          (cchar a_req, cchar *a_data)
    switch (a_req) {
    case YJOBS_READ     :
       DEBUG_PROG    yLOG_note    ("READ -- central database read");
-      rc = WAVE_pull_central (FILE_CENTRAL);
+      /*> rc = WAVE_pull_central (FILE_CENTRAL);                                      <*/
       break;
    case YJOBS_WRITE    :
       DEBUG_PROG    yLOG_note    ("WRITE -- central database write");
-      rc = TDB_write ( FILE_CENTRAL);
+      rc = TDB_write (FILE_CENTRAL);
       break;
    case YJOBS_STATS    :
       break;
    case YJOBS_PULL     :
       DEBUG_PROG    yLOG_note    ("PULL -- read a local project");
-      rc = WAVE_inventory (a_data);
+      /*> rc = WAVE_inventory (a_data);                                               <*/
+      rc = DATA_gather_project (a_data);
       break;
    case YJOBS_CLEAR    :
       DEBUG_PROG    yLOG_note    ("CLEAR -- purge all content data");

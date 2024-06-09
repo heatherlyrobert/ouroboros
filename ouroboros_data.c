@@ -173,6 +173,18 @@ DATA_gather_file        (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char
    char        x_temp      [LEN_LABEL] = "/tmp/ouroboros.txt";
    /*---(header)-------------------------*/
    DEBUG_DATA   yLOG_enter   (__FUNCTION__);
+   /*---(add project)--------------------*/
+   x_end = GRAPH_add_node (a_proj);
+   DEBUG_DATA   yLOG_value   ("x_end"     , x_end);
+   --rce; if (x_end < 0) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_DATA   yLOG_char    ("a_type"    , a_type);
+   if (a_type == TYPE_UNIT || a_type == TYPE_WAVE) {
+      rc = INCL_add_by_name ("koios", x_end);
+      DEBUG_DATA   yLOG_value   ("koios"     , rc);
+   }
    /*---(defense)------------------------*/
    rc = DATA_gather_prep (a_full, a_type, x_file);
    DEBUG_DATA   yLOG_value   ("prep"      , rc);
@@ -183,13 +195,6 @@ DATA_gather_file        (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char
    if (rc == 0) {
       DEBUG_DATA   yLOG_exit    (__FUNCTION__);
       return 0;
-   }
-   /*---(add project)--------------------*/
-   x_end = GRAPH_add_node (a_proj);
-   DEBUG_DATA   yLOG_value   ("x_end"     , x_end);
-   --rce; if (x_end < 0) {
-      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
    }
    /*---(open file)----------------------*/
    f = fopen (x_file, "rt");
@@ -277,6 +282,8 @@ DATA_gather_project     (char a_full [LEN_PATH])
    }
    DEBUG_DATA   yLOG_info    ("a_full"    , a_full);
    /*---(get the home)-------------------*/
+   INCL_list_clear  ();
+   /*---(get the home)-------------------*/
    rc = ystrlproj (a_full, x_proj);
    DEBUG_DATA   yLOG_value   ("strlproj"  , rc);
    --rce;  if (rc < 0)  {
@@ -314,7 +321,7 @@ DATA_gather_project     (char a_full [LEN_PATH])
          continue;
       }
       /*---(dispatch)--------------------*/
-      l = strlen (x_entry->d_name);
+      l = strlen (a_full);
       DEBUG_DATA   yLOG_value   ("l"         , l);
       if (a_full [l - 1] == '/') sprintf (x_full, "%s%s" , a_full, x_entry->d_name);
       else                       sprintf (x_full, "%s/%s", a_full, x_entry->d_name);
