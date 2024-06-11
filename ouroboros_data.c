@@ -182,7 +182,8 @@ DATA_gather_file        (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char
    }
    DEBUG_DATA   yLOG_char    ("a_type"    , a_type);
    if (a_type == TYPE_UNIT || a_type == TYPE_WAVE) {
-      rc = INCL_add_by_name ("koios", x_end);
+      /*> rc = INCL_add_by_name ("koios", x_end);                                     <*/
+      rc = DEPS_add ("koios", a_proj);
       DEBUG_DATA   yLOG_value   ("koios"     , rc);
    }
    /*---(defense)------------------------*/
@@ -219,16 +220,16 @@ DATA_gather_file        (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char
       DEBUG_DATA   yLOG_info    ("x_recd"    , x_recd);
       /*---(handle)----------------------*/
       switch (a_type) {
-      case TYPE_MAKE  :  /* handle "include" lines */
+      case TYPE_MAKE  :  /* handle Makefile "include" lines */
          rc = MAKE_gather   (x_recd, x_end);
          break;
-      case TYPE_WAVE  :  /* handle "WAVE" lines */
+      case TYPE_WAVE  :  /* handle koios "WAVE" lines */
          DEBUG_DATA   yLOG_note    ("WAVE files should not be handled here");
          break;
-      case TYPE_UNIT  :  /* handle "incl" lines */
+      case TYPE_UNIT  :  /* handle unit test "incl" lines */
          rc = YUNIT_gather  (a_proj, x_recd, x_end);
          break;
-      case TYPE_HEAD  :  /* handle "#include" lines */
+      case TYPE_HEAD  :  /* handle c/h "#include" lines */
       case TYPE_CODE  :
       case TYPE_MUNIT :
          rc = INCL_gather   (x_recd, x_end);

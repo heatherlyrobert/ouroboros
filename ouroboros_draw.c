@@ -80,6 +80,7 @@ DRAW_init               (char a_layout, char a_size, char a_decor, char a_cols, 
       my.y_max = my.y_min + my.y_tall * my.y_rows - my.y_gap;
       my.y_end = my.y_max + 2;
       break;
+      yASCII_grid_new_full (a_size, a_decor, a_cols, a_rows, 0, 0, 5, 2);
    case 'b'  :
       my.x_min =  8;
       my.x_max = my.x_min + my.x_wide * my.x_cols - my.x_gap;
@@ -87,6 +88,7 @@ DRAW_init               (char a_layout, char a_size, char a_decor, char a_cols, 
       my.y_min =  6;
       my.y_max = my.y_min + my.y_tall * my.y_rows - my.y_gap;
       my.y_end = my.y_max + 3;
+      yASCII_grid_new_full (a_size, a_decor, a_cols, a_rows, 8, 8, 6, 3);
       break;
    default   :
       my.x_min =  0;
@@ -95,11 +97,12 @@ DRAW_init               (char a_layout, char a_size, char a_decor, char a_cols, 
       my.y_min =  0;
       my.y_max = my.y_min + my.y_tall * my.y_rows - my.y_gap;
       my.y_end = my.y_max;
+      yASCII_grid_new_full (a_size, a_decor, a_cols, a_rows, 0, 0, 0, 0);
       break;
    }
    /*---(create)-------------------------*/
-   rc = yASCII_new (my.x_end, my.y_end);
-   yASCII_grid_set_full (a_size, a_decor, my.x_min, my.y_min);
+   /*> rc = yASCII_new (my.x_end, my.y_end);                                          <*/
+   /*> yASCII_grid_new_full (a_size, a_decor, a_cols, a_rows, my.x_min, my.y_min, my.x_end - my.x_max, my.y_end - my.y_max);   <*/
    /*---(title block)--------------------*/
    if (strchr ("fs", a_layout) != NULL) {
       sprintf (s, "#!%s", P_FULLPATH);
@@ -148,17 +151,20 @@ DRAW_wrap               (void)
 char
 DRAW_main               (char a_layout, char a_size, char a_decor)
 {
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    DRAW_init    (a_layout, a_size, a_decor, 10, 10);
    /*---(foundation)---------------------*/
+   /*> DRAW_block_source ('é', "koios");                                              <*/
    DRAW_block_source ('é', "ySTR");
    DRAW_block_source ('é', "yENV");
-   yASCII_frame_full (0, 0, 7, 5, "I. FOUNDATION (14)", -1, "a)·build·base", 1, "b)·unit·testing·framework", 4, "c)·execution·logging", 6, "d)·core");
+   yASCII_frame_full (0, 0, 7, 7, "I. FOUNDATION (14)", -1, "a)·build·base", 1, "b)·unit·testing·framework", 4, "c)·execution·logging", 6, "d)·core");
    yASCII_node_grid (-1, 0, 'è');
    yASCII_node_grid ( 8, 0, 'é');
    yASCII_tie_grid  (-1, 0, 0, 0);
    yASCII_tie_grid  ( 7, 0, 8, 0);
    yASCII_tie_grid  ( 7, 1, 8, 0);
    DRAW_wrap    ();
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -166,6 +172,7 @@ char
 DRAW_block_layer        (char b, int n)
 {
    /*---(locals)-----------+-----+-----+-*/
+   char        rc          =    0;
    tNODE      *x_root      = NULL;
    tEDGE      *x_pred      = NULL;
    tNODE      *x_node      = NULL;
@@ -173,6 +180,7 @@ DRAW_block_layer        (char b, int n)
    char        x_miss      [LEN_RECD]  = "";
    char        s           [LEN_TITLE] = "";
    char        x_lvl       =    0;
+   char        x_heavy     = YASCII_DOTTED;
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    DEBUG_PROG   yLOG_complex ("a_args"    , "%2db, %2dn", b, n);
@@ -202,7 +210,13 @@ DRAW_block_layer        (char b, int n)
             /*---(add connection)-----------*/
             if (strstr (x_miss, s) != NULL) {
                DRAW_block_layer (b, x_pred->e_nbeg);
-               yASCII_tie_grid (x_node->n_level, x_node->n_row, x_root->n_level, x_root->n_row);
+               DEBUG_PROG   yLOG_char    ("e_type"    , x_pred->e_type);
+               switch (x_pred->e_type) {
+               case 'v' : x_heavy = YASCII_WAVY;    break;
+               default  : x_heavy = YASCII_DOTTED;  break;
+               }
+               rc = yASCII_tie_grid_heavy (x_heavy, x_node->n_level, x_node->n_row, x_root->n_level, x_root->n_row);
+               DEBUG_PROG   yLOG_value   ("tie"       , rc);
             }
             /*---(next)---------------------*/
             x_pred->e_used = 'y';
@@ -387,6 +401,27 @@ GRAPH_dump_box_pretty   (int a_node)
    for (x_lvl = 1; x_lvl < MAX_LEVEL; ++x_lvl) {
    }
    /*---(complete)-----------------------*/
+   return 0;
+}
+
+char
+GRAPH_dump_placement    (void)
+{
+   int         i           =    0;
+   char        x_lvl       =    0;
+   int         c           =    0;
+   tEDGE      *x_pred      = NULL;
+   printf ("\n\nouroboros drawing placement\n\n");
+   for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {
+      for (i = 0; i <  g_nnode; ++i) {
+         if (g_nodes [i].n_level != x_lvl)  continue;
+         printf ("%3d  %3d  %3d  %-25.25s", i, g_nodes [i].n_level, g_nodes [i].n_row, g_nodes [i].n_name);
+         printf ("\n");
+         ++c;
+      }
+      printf ("\n");
+      if (c == g_nnode)  break;
+   }
    return 0;
 }
 

@@ -342,6 +342,7 @@ GRAPH_edge_add          (char a_type, char a_beg [LEN_TITLE], int a_end)
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   DEBUG_PROG   yLOG_info    ("name"      , g_nodes [a_end].n_name);
    /*---(check for duplicate)------------*/
    x_pred = g_nodes [a_end].n_phead;
    while (x_pred != NULL) {
@@ -371,8 +372,10 @@ GRAPH_edge_add          (char a_type, char a_beg [LEN_TITLE], int a_end)
    g_edges [g_nedge].e_beg  = &(g_nodes [x_beg]);
    /*---(beg-point on node)--------------*/
    if (g_nodes [x_beg].n_shead == NULL) { /* first */
+      DEBUG_PROG   yLOG_note    ("first successor");
       g_nodes [x_beg].n_shead = &(g_edges [g_nedge]);
    } else {  /*                          append */
+      DEBUG_PROG   yLOG_note    ("append successor");
       (g_nodes [x_beg].n_stail)->e_snext = &(g_edges [g_nedge]);
    }
    g_nodes [x_beg].n_stail = &(g_edges [g_nedge]);
@@ -382,14 +385,17 @@ GRAPH_edge_add          (char a_type, char a_beg [LEN_TITLE], int a_end)
    g_edges [g_nedge].e_end  = &(g_nodes [a_end]);
    /*---(end-point on node)--------------*/
    if (g_nodes [a_end].n_phead == NULL) { /* first */
+      DEBUG_PROG   yLOG_note    ("first predecessor");
       g_nodes [a_end].n_phead = &(g_edges [g_nedge]);
    } else {  /*                          append */
+      DEBUG_PROG   yLOG_note    ("append predecessor");
       (g_nodes [a_end].n_ptail)->e_pnext = &(g_edges [g_nedge]);
    }
    g_nodes [a_end].n_ptail = &(g_edges [g_nedge]);
    ++(g_nodes [a_end].n_pred);
    /*---(counter)------------------------*/
    ++g_nedge;
+   DEBUG_PROG   yLOG_value   ("g_nedge"   , g_nedge);
    /*---(check for solo)-----------------*/
    /*> DEBUG_PROG   yLOG_info    ("b_name"    , g_nodes [x_beg].n_name);              <*/
    /*> DEBUG_PROG   yLOG_info    ("e_name"    , g_nodes [a_end].n_name);              <*/
@@ -495,7 +501,7 @@ GRAPH_deps_preds        (int n)
    DEBUG_PROG   yLOG_value   ("n"         , n);
    strcpy (g_nodes [n].n_cumd, "");
    DEBUG_PROG   yLOG_info    ("n_name"    , g_nodes [n].n_name);
-   printf ("SOLVING     : %s\n", g_nodes [n].n_name);
+   /*> printf ("SOLVING     : %s\n", g_nodes [n].n_name);                             <*/
    /*---(fill successors)-------------*/
    x_pred = g_nodes [n].n_phead;
    DEBUG_PROG   yLOG_point   ("x_pred"    , x_pred);
@@ -507,12 +513,12 @@ GRAPH_deps_preds        (int n)
       DEBUG_PROG   yLOG_point   ("x_pred"    , x_pred);
    }
    DEBUG_PROG   yLOG_value   ("c"         , c);
-   printf ("  PREDS     : %4då%sæ\n", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);
-   printf ("  DEPS      : %4då%sæ\n", strlen (g_nodes [n].n_deps), g_nodes [n].n_deps);
+   /*> printf ("  PREDS     : %4då%sæ\n", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <*/
+   /*> printf ("  DEPS      : %4då%sæ\n", strlen (g_nodes [n].n_deps), g_nodes [n].n_deps);   <*/
    GRAPH_deps_missing (g_nodes [n].n_deps, g_nodes [n].n_cumd, g_nodes [n].n_miss);
-   printf ("  MISS      : %4då%sæ\n", strlen (g_nodes [n].n_miss), g_nodes [n].n_miss);
+   /*> printf ("  MISS      : %4då%sæ\n", strlen (g_nodes [n].n_miss), g_nodes [n].n_miss);   <*/
    GRAPH_deps_merge   (g_nodes [n].n_miss, g_nodes [n].n_cumd);
-   printf ("  CUMPD     : %4då%sæ\n", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);
+   /*> printf ("  CUMPD     : %4då%sæ\n", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return c;
 }
@@ -587,14 +593,18 @@ GRAPH_deps_solve        (void)
    char        x_lvl       =    0;
    int         c           =    0;
    tEDGE      *x_pred      = NULL;
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {
+      DEBUG_PROG   yLOG_value   ("x_lvl"     , x_lvl);
       c = 0;
       for (i = 0; i <  g_nnode; ++i) {
          if (g_nodes [i].n_level != x_lvl)  continue;
+         DEBUG_PROG   yLOG_complex ("node"      , "%3d, %s", i, g_nodes [i].n_name);
          GRAPH_deps_preds (i);
          ++c;
       }
    }
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -623,16 +633,21 @@ GRAPH_seq_clear         (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    int         i           =    0;
+   DEBUG_PROG   yLOG_senter  (__FUNCTION__);
+   DEBUG_PROG   yLOG_snote   ("edges");
    for (i = 0; i < g_nedge; ++i) {
       g_edges [i].e_filled  = '-';
    }
+   DEBUG_PROG   yLOG_snote   ("nodes");
    for (i = 0; i < g_nnode; ++i) {
       g_nodes [i].n_level   = -1;
       g_nodes [i].n_filled  =  0;
       g_nodes [i].n_ready   = '-';
    }
+   DEBUG_PROG   yLOG_snote   ("globals");
    g_ready  = 0;
    g_maxlvl = 0;
+   DEBUG_PROG   yLOG_sexit   (__FUNCTION__);
    return 0;
 }
 
@@ -644,18 +659,25 @@ GRAPH_solve_layer       (char a_mark, char a_lvl)
    int         i           =    0;
    int         c           =    0;
    tEDGE      *x_succ      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(prepare)------------------------*/
+   DEBUG_PROG   yLOG_value   ("prepare"   , a_lvl);
    for (i = 0; i < g_nnode; ++i) {
+      DEBUG_PROG   yLOG_complex ("... check" , "%-20.20s  %3df %3dt", g_nodes [i].n_name, g_nodes [i].n_filled, g_nodes [i].n_pred);
       if (g_nodes [i].n_filled == g_nodes [i].n_pred) {
+         DEBUG_PROG   yLOG_info    ("n_ready"   , g_nodes [i].n_name);
          g_nodes [i].n_ready = 'y';
       }
    }
    /*---(walk)---------------------------*/
+   DEBUG_PROG   yLOG_note    ("walk nodes");
    for (i = 0; i < g_nnode; ++i) {
       /*---(filter)----------------------*/
       if (g_nodes [i].n_level >= 0)                   continue;
       if (g_nodes [i].n_ready != 'y')                 continue;
       /*---(mark at level)---------------*/
+      DEBUG_PROG   yLOG_info    ("assign"    , g_nodes [i].n_name);
       g_nodes [i].n_level = a_lvl;
       ++c;
       ++g_ready;
@@ -663,11 +685,14 @@ GRAPH_solve_layer       (char a_mark, char a_lvl)
       x_succ = g_nodes [i].n_shead;
       while (x_succ != NULL) {
          x_succ->e_filled = 'y';
+         DEBUG_PROG   yLOG_complex ("... fill"  , "%s to %s", g_nodes [i].n_name, (x_succ->e_end)->n_name);
          ++((x_succ->e_end)->n_filled);
          x_succ = x_succ->e_snext;
       }
       /*---(done)------------------------*/
    }
+   /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return c;
 }
 
@@ -676,12 +701,15 @@ GRAPH_solve             (char a_mark)
 {
    char        x_lvl       =    0;
    int         c           =    0;
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    GRAPH_seq_clear ();
    for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {
+      DEBUG_PROG   yLOG_value   ("x_lvl"     , x_lvl);
       c += GRAPH_solve_layer (a_mark, x_lvl);
       if (c == g_nnode)  break;
    }
    g_maxlvl = x_lvl;
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -769,6 +797,27 @@ GRAPH_dump_seq          (void)
       }
       printf ("\n");
       if (c == g_nnode)  break;
+   }
+   return 0;
+}
+
+char
+GRAPH_dump_all          (void)
+{
+   int         i           =    0;
+   char        x_lvl       =    0;
+   tEDGE      *x_pred      = NULL;
+   printf ("\n\nouroboros predecessors\n\n");
+   for (i = 0; i <  g_nnode; ++i) {
+      printf ("%3d  %3d  %-25.25s   %3dp  ", i, g_nodes [i].n_level, g_nodes [i].n_name, g_nodes [i].n_pred);
+      if (g_nodes [i].n_pred > 0)  {
+         x_pred = g_nodes [i].n_phead;
+         while (x_pred != NULL) {
+            printf (" %-15.15s", (x_pred->e_beg)->n_name);
+            x_pred = x_pred->e_pnext;
+         }
+      }
+      printf ("\n");
    }
    return 0;
 }

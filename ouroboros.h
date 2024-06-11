@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.3- moving to deps on node"
-#define     P_VERNUM    "0.3a"
-#define     P_VERTXT    "built/unit-tested DEPS_add_to_node for new method of deps storage"
+#define     P_VERNUM    "0.3b"
+#define     P_VERTXT    "cleaned up circular ref issue in deps and drawing with yASCII"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -533,6 +533,7 @@ char        DRAW_box_clear          (void);
 char        DRAW_main               (char a_layout, char a_size, char a_decor);
 
 char        GRAPH_box_deps          (char a_name [LEN_TITLE], char r_deps [LEN_RECD]);
+char        GRAPH_dump_placement    (void);
 /*---(unittest)-------------*/
 char*       DRAW__unit              (char *a_question, int n);
 /*---(done)-----------------*/
@@ -569,6 +570,7 @@ char        GRAPH_seq_clear         (void);
 char        GRAPH_solve_layer       (char a_mark, char a_lvl);
 char        GRAPH_solve             (char a_mark);
 char        GRAPH_dump_seq          (void);
+char        GRAPH_dump_all          (void);
 /*---(unittest)-------------*/
 char*       GRAPH__unit             (char *a_question, int n);
 /*---(done)-----------------*/
@@ -583,7 +585,8 @@ char        INCL_zenodotus          (void);
 /*---(lists)----------------*/
 char        INCL_list_clear         (void);
 char        INCL_list_add           (char a_cat, char a_header [LEN_TITLE]);
-char        DEPS_add_to_node        (char a_source [LEN_TITLE], char a_target [LEN_LABEL]);
+char        DEPS_add                (char a_source [LEN_TITLE], char a_target [LEN_LABEL]);
+char        DEPS_force              (char a_source [LEN_TITLE], char a_target [LEN_LABEL]);
 int         INCL_by_name            (char a_header [LEN_TITLE], char *r_block);
 /*---(find)-----------------*/
 int         INCL_add_by_name        (char a_beg [LEN_TITLE], int a_end);
@@ -601,6 +604,9 @@ char        INCL_handler            (int n, uchar a_verb [LEN_TERSE]);
 char*       INCL__unit              (char *a_question, int n);
 /*---(done)-----------------*/
 
+
+char        DEPS_add                (char a_source [LEN_TITLE], char a_target [LEN_LABEL]);
+char        DEPS_force              (char a_source [LEN_TITLE], char a_target [LEN_LABEL]);
 
 
 /*===[[ ouroboros_make.c ]]===================================================*/

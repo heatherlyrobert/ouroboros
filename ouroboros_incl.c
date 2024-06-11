@@ -205,16 +205,17 @@ tINCL g_incls [MAX_INCL] = {
 
    /*---(heatherly solo)-----------------*/
    /* just taking in for definitions in header file */
-   { 's', "yLOG_solo"                , 0, '-', '-', '-', 'é', 'y' },
+   { 's', "yLOG_solo"                , 0, '-', '-', '-', '-', '-' },
    { 's', "yLOG_uver"                , 0, '-', '-', 'y', 'é', 'y' },
-   { 's', "yURG_solo"                , 0, '-', '-', 'y', 'é', 'y' },
+   { 's', "yURG_solo"                , 0, '-', '-', '-', '-', '-' },
+   { 's', "yURG_uver"                , 0, '-', '-', 'y', 'é', 'y' },
    { 's', "ySTR_solo"                , 0, '-', '-', 'y', 'é', 'y' },
    { 's', "ySTR_uver"                , 0, '-', '-', 'y', 'é', 'y' },
-   { 's', "yENV_solo"                , 0, '-', '-', '-', 'é', 'y' },
+   { 's', "yENV_solo"                , 0, '-', '-', '-', '-', '-' },
    { 's', "yENV_uver"                , 0, '-', '-', 'y', 'é', 'y' },
    { 's', "yDLST_solo"               , 0, '-', '-', 'y', 'é', 'y' },
    { 's', "yCOLOR_solo"              , 0, '-', '-', 'y', 'é', 'y' },
-   { 's', "yVIHUB_solo"              , 0, 'y', 'y', '-', '-', 'y' },
+   { 's', "yVIHUB_solo"              , 0, 'y', 'y', '-', '-', '-' },
 
    /*---(heatherly unit testing)---------*/
    { 'u', "yUNIT_solo"               , 0, '-', '-', 'y', '-', 'y' },
@@ -272,9 +273,10 @@ INCL_zenodotus          (void)
       if (g_incls [i].i_cat == 0)   break;
       DEBUG_PROG   yLOG_complex ("looking"   , "%3d %-20.20s %c", i, g_incls [i].i_name, g_incls [i].i_zenodotus);
       if (g_incls [i].i_zenodotus != 'y')  continue;
-      n = GRAPH_by_name (g_incls [i].i_name);
-      DEBUG_PROG   yLOG_value   ("n"         , n);
-      INCL_add_by_name ("zenodotus", n);
+      /*> n = GRAPH_by_name (g_incls [i].i_name);                                     <* 
+       *> DEBUG_PROG   yLOG_value   ("n"         , n);                                <* 
+       *> INCL_add_by_name ("zenodotus", n);                                          <*/
+      DEPS_force ("zenodotus", g_incls [i].i_name);
    }
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -314,6 +316,9 @@ INCL_list_add           (char a_cat, char a_header [LEN_TITLE])
    char        rce         =  -10;
    char       *x_list      = NULL;
    char        t           [LEN_HUND]  = "";
+
+   return 1;
+
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -398,7 +403,7 @@ INCL_by_name            (char a_header [LEN_TITLE], char *r_block)
 }
 
 char
-DEPS_add_to_node        (char a_source [LEN_TITLE], char a_target [LEN_LABEL])
+DEPS__add               (char a_source [LEN_TITLE], char a_target [LEN_LABEL], char a_force)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -407,8 +412,6 @@ DEPS_add_to_node        (char a_source [LEN_TITLE], char a_target [LEN_LABEL])
    int         x_beg       =   -1;
    int         x_end       =   -1;
    char        t           [LEN_HUND]  = "";
-   int         l           =    0;
-   char        x_zeno      =  '-';
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -424,6 +427,11 @@ DEPS_add_to_node        (char a_source [LEN_TITLE], char a_target [LEN_LABEL])
       return rce;
    }
    DEBUG_PROG   yLOG_info    ("a_target"  , a_target);
+   --rce;  if (strcmp (a_source, a_target) == 0) {
+      DEBUG_PROG   yLOG_note    ("circular dependency requested");
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(find beg-point)-----------------*/
    x_beg = INCL_by_name (a_source, NULL);
    DEBUG_PROG   yLOG_value   ("x_beg"     , x_beg);
@@ -434,8 +442,11 @@ DEPS_add_to_node        (char a_source [LEN_TITLE], char a_target [LEN_LABEL])
    x_end = GRAPH_by_name (a_target);
    DEBUG_PROG   yLOG_value   ("x_end"     , x_end);
    --rce;  if (x_end < 0) {
-      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
+      if (a_force != 'y') {
+         DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+      x_end = GRAPH_add_node (a_target);
    }
    /*---(prepare)------------------------*/
    sprintf (t, ",%s,", a_source);
@@ -474,10 +485,6 @@ DEPS_add_to_node        (char a_source [LEN_TITLE], char a_target [LEN_LABEL])
          DEBUG_PROG   yLOG_note    ("add real graph edge");
          rc = GRAPH_edge_real (a_source, x_end);
          DEBUG_PROG   yLOG_value   ("edge"      , rc);
-         /*> l = strlen (a_source);                                                   <* 
-          *> DEBUG_PROG   yLOG_value   ("l"         , l);                             <* 
-          *> if      (strcmp (a_source + l - 5, "_solo") == 0)  x_zeno = 'y';         <* 
-          *> else if (strcmp (a_source + l - 5, "_uver") == 0)  x_zeno = 'y';         <*/
       } else if (g_incls [x_beg].i_draw == 'v') {
          DEBUG_PROG   yLOG_note    ("add virtual/koios graph edge");
          rc = GRAPH_edge_virt (a_source, x_end);
@@ -488,16 +495,23 @@ DEPS_add_to_node        (char a_source [LEN_TITLE], char a_target [LEN_LABEL])
    DEBUG_PROG   yLOG_char    ("i_zeno"    , g_incls [x_beg].i_zenodotus);
    if (g_incls [x_beg].i_zenodotus == 'y') {
       if (g_incls [x_beg].i_draw == 'y') {
-         rc = DEPS_add_to_node ("zenodotus", a_source);
+         rc = DEPS_add ("zenodotus", a_source);
          DEBUG_PROG   yLOG_value   ("solo/uver" , rc);
+         x_beg = GRAPH_by_name (a_source);
+         DEBUG_PROG   yLOG_value   ("x_beg"     , x_beg);
+         rc = GRAPH_edge_virt ("zenodotus", x_beg);
+         DEBUG_PROG   yLOG_value   ("edge"      , rc);
          DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-         return 4;
+         return rc;
       }
    }
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 1;
 }
+
+char DEPS_add         (char a_source [LEN_TITLE], char a_target [LEN_LABEL]) { return DEPS__add (a_source, a_target, '-'); }
+char DEPS_force       (char a_source [LEN_TITLE], char a_target [LEN_LABEL]) { return DEPS__add (a_source, a_target, 'y'); }
 
 
 
@@ -573,10 +587,12 @@ INCL_add_by_group       (int a_end, char a_type)
       if (g_incls [i].i_cat == 0)   break;
       switch (a_type) {
       case 'O' :
-         if (g_incls [i].i_opengl == 'y')  INCL_add_by_name (g_incls [i].i_name, a_end);
+         /*> if (g_incls [i].i_opengl == 'y')  INCL_add_by_name (g_incls [i].i_name, a_end);   <*/
+         if (g_incls [i].i_opengl == 'y')  DEPS_add (g_incls [i].i_name, g_nodes [a_end].n_name);
          break;
       case 'C' :
-         if (g_incls [i].i_curses == 'y')  INCL_add_by_name (g_incls [i].i_name, a_end);
+         /*> if (g_incls [i].i_curses == 'y')  INCL_add_by_name (g_incls [i].i_name, a_end);   <*/
+         if (g_incls [i].i_curses == 'y')  DEPS_add (g_incls [i].i_name, g_nodes [a_end].n_name);
          break;
       }
    }
@@ -642,13 +658,14 @@ INCL_gather_detail      (char a_header [LEN_TITLE], int a_end)
       return 0;
    }
    /*---(add to list)--------------------*/
-   n = INCL_add_by_name (t, a_end);
-   DEBUG_DATA   yLOG_complex ("FOUND"     , "%-20.20s  %3d", t, n);
+   /*> n = INCL_add_by_name (t, a_end);                                               <*/
+   DEPS_add (t, g_nodes [a_end].n_name);
+   /*> DEBUG_DATA   yLOG_complex ("FOUND"     , "%-20.20s  %3d", t, n);               <*/
    if (n < 0) {
       DEBUG_DATA  yLOG_exit    (__FUNCTION__);
       return 0;
    }
-   DEBUG_DATA   yLOG_info    ("found"     , g_incls [n].i_name);
+   /*> DEBUG_DATA   yLOG_info    ("found"     , g_incls [n].i_name);                  <*/
    /*---(check for solos)----------------*/
    /*> DEBUG_DATA   yLOG_char    ("zenodotus" , g_incls [n].i_zenodotus);             <*/
    /*> if (g_incls [n].i_zenodotus == 'y') {                                                    <* 
@@ -770,13 +787,13 @@ INCL_finalize           (char a_proj [LEN_LABEL], char a_full [LEN_PATH])
    }
    DEBUG_DATA   yLOG_info    ("a_full"    , a_full);
    /*---(add to project)-----------------*/
-   if (my.depall [0] == '\0')  strcpy (my.depall, "´");
-   rc = GRAPH_deps_add  (a_proj, my.depall);
-   DEBUG_DATA   yLOG_value   ("deps_add"  , rc);
-   --rce; if (rc < 0) {
-      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
+   /*> if (my.depall [0] == '\0')  strcpy (my.depall, "´");                           <* 
+    *> rc = GRAPH_deps_add  (a_proj, my.depall);                                      <* 
+    *> DEBUG_DATA   yLOG_value   ("deps_add"  , rc);                                  <* 
+    *> --rce; if (rc < 0) {                                                           <* 
+    *>    DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);                              <* 
+    *>    return rce;                                                                 <* 
+    *> }                                                                              <*/
    /*---(open file)----------------------*/
    l = strlen (a_full);
    if (a_full [l - 1] == '/') sprintf (x_full, "%s%s" , a_full, "ouroboros.deps");
@@ -853,7 +870,7 @@ INCL_block              (char a_proj [LEN_TITLE])
    if (x_len == 0)     printf ("  DEPS    %-20.20s  ´ \n" , a_proj);
    else                printf ("  DEPS    %-20.20s  %s \n", a_proj, my.depall);
    /*---(add to node)--------------------*/
-   GRAPH_deps_add  (a_proj, my.depall);
+   /*> GRAPH_deps_add  (a_proj, my.depall);                                           <*/
    /*
     *  call GRAPH_deps_merge on all previous nodes
     *  call GRAPH_deps_missing  (these are the only drawn lines on box diagram)
@@ -924,7 +941,8 @@ INCL_handler            (int n, uchar a_verb [LEN_TERSE])
    c = 0;
    p = strtok_r (x_depall, q, &r);
    while (p != NULL) {
-      rc = INCL_add_by_name (p, n);
+      /*> rc = INCL_add_by_name (p, n);                                               <*/
+      rc = DEPS_add (p, x_proj);
       ++c;
       p = strtok_r (NULL, q, &r);
    }

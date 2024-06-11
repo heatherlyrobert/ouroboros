@@ -61,7 +61,8 @@ MAKE_gather             (char a_recd [LEN_RECD], int a_end)
       return 0;
    }
    /*---(handle)----------------------*/
-   rc = INCL_add_by_name ("zenodotus", a_end);
+   /*> rc = INCL_add_by_name ("zenodotus", a_end);                                    <*/
+   rc = DEPS_add ("zenodotus", g_nodes [a_end].n_name);
    DEBUG_DATA   yLOG_value   ("add"       , rc);
    /*---(complete)-----------------------*/
    DEBUG_DATA  yLOG_exit    (__FUNCTION__);
