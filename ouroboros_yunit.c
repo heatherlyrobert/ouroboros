@@ -88,10 +88,12 @@ YUNIT_gather            (char a_proj [LEN_TITLE], char a_recd [LEN_RECD], int a_
       return 0;
    }
    /*---(handle)----------------------*/
-   rc = INCL_add_by_name (t, a_end);
+   /*> rc = INCL_add_by_name (t, a_end);                                              <*/
+   rc = DEPS_add (t, a_proj);
    DEBUG_DATA   yLOG_value   ("add"       , rc);
    /*> rc = GRAPH_edge_virt ("koios", a_end);                                         <*/
-   rc = INCL_add_by_name ("koios", a_end);
+   /*> rc = INCL_add_by_name ("koios", a_end);                                        <*/
+   rc = DEPS_add ("koios", a_proj);
    DEBUG_DATA   yLOG_value   ("koios"     , rc);
    /*---(complete)-----------------------*/
    DEBUG_DATA  yLOG_exit    (__FUNCTION__);

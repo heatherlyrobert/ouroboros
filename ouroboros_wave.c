@@ -911,8 +911,9 @@ WAVE_inventory          (char *a_path)
          DEBUG_DATA   yLOG_value   ("unit"      , rc);
          if (x_end < 0) {
             x_end = GRAPH_add_node (my.proj);
-            INCL_add_by_name ("koios", x_end);
-            GRAPH_edge_virt  ("koios", x_end);
+            rc = DEPS_add ("koios", my.proj);
+            /*> INCL_add_by_name ("koios", x_end);                                    <*/
+            /*> GRAPH_edge_virt  ("koios", x_end);                                    <*/
          }
          break;
       case TYPE_MUNIT :

@@ -30,7 +30,7 @@ main               (int a_argc, char *a_argv[])
    GRAPH_dump_deps  ();
    /*> GRAPH_focus_all  ();                                                           <*/
    GRAPH_focus_on   ("ySTR");
-   /*> GRAPH_focus_on   ("yENV");                                                     <*/
+   GRAPH_focus_on   ("yENV");
    GRAPH_solve      ('-');
    GRAPH_deps_solve ();
    GRAPH_dump_seq   ();

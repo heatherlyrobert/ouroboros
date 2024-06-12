@@ -188,6 +188,7 @@ DRAW_block_layer        (char b, int n)
    x_root = &(g_nodes [n]);
    DEBUG_PROG   yLOG_info    ("name"      , g_nodes [n].n_name);
    ystrlcpy (x_miss, x_root->n_miss, LEN_RECD);
+   DEBUG_PROG   yLOG_info    ("n_deps"    , x_root->n_deps);
    DEBUG_PROG   yLOG_info    ("x_miss"    , x_miss);
    /*---(walk predessors)-------------*/
    for (x_lvl = x_root->n_level - 1; x_lvl >= 0; --x_lvl) {
