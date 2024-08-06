@@ -5,6 +5,7 @@
 
 static char s_print    [LEN_RECD]  = "";
 static char s_cols     [MAX_LEVEL] = { 0, 0, 0, 0, 0 };
+static int  s_boxes  = 0;
 
 
 static struct {
@@ -22,18 +23,17 @@ static struct {
    char        b_4name     [LEN_TITLE];
    char        b_deps      [LEN_RECD];
 } zASCII_blocks [LEN_LABEL] = {
-   /*----- --pred-- ---title-------------- ---sources--------------------------------- -a- ---label----------------- -a- ---label----------------- -a- ---label----------------- -a- ---label----------------- */
-   { 'è' , ""      , ""                   , ""                                        , -1, ""                      , -1, ""                      , -1, ""                      , -1, ""                       , ""},
-   { 'é' , ""      , "1) FOUNDATION"      , "ySTR,yENV"                               ,  1, "build·base"            ,  4, "unit·testing·framework",  6, "execution·logging"     , 99, "core"                   , ""},
-   { 'ê' , ""      , "2) VIKEYS I"        , "yKEYS"                                   , -1, ""                      , -1, ""                      , -1, ""                      , -1, ""                       , ""},
-   { 'ê' , ""      , "3) VIKEYS II"       , "yCMD,yMARK,yGOD"                         , -1, ""                      , -1, ""                      , -1, ""                      , -1, ""                       , ""},
-   { 'ì' , ""      , "4) DOERS"           , "yEXEC,ySCHED,yDLST,yASCII"               , -1, ""                      , -1, ""                      , -1, ""                      , -1, ""                       , ""},
-   { 'í' , ""      , "5) YJOBS"           , "yJOBS"                                   , -1, ""                      , -1, ""                      , -1, ""                      , -1, ""                       , ""},
-   { 'î' , ""      , "6) BRUTES"          , "eos,kharon,khronos,helios,hestia"        , -1, ""                      , -1, ""                      , -1, ""                      , -1, ""                       , ""},
-   { 'ï' , ""      , ""                   , ""                                        , -1, ""                      , -1, ""                      , -1, ""                      , -1, ""                       , ""},
-   { '\0', ""      , "end"                , ""                                        , -1, ""                      , -1, ""                      , -1, ""                      , -1, ""                       , ""},
+   /*----- --pred-- ---title-------------- ---sources--------------------------------- -1- ---label-------------------- -2- ---label-------------------- -3- ---label-------------------- -4- ---label--------------------- deps */
+   { 'è' , ""      , ""                   , ""                                        , -1, ""                         , -1, ""                         , -1, ""                         , -1, ""                          , ""},
+   { 'é' , "è"     , "I) FOUNDATION"      , "ySTR,yENV"                               , -1, "a) build·base"            ,  1, "b)·unit·testing·framework",  4, "c)·execution·logging"     ,  6, "d)·core"                   , ""},
+   { 'ê' , ""      , "II) VIKEYS I"       , "yKEYS"                                   , -1, ""                         , -1, ""                         , -1, ""                         , -1, ""                          , ""},
+   { 'ê' , ""      , "III) VIKEYS II"     , "yCMD,yMARK,yGOD"                         , -1, ""                         , -1, ""                         , -1, ""                         , -1, ""                          , ""},
+   { 'ì' , ""      , "IV) DOERS"          , "yEXEC,ySCHED,yDLST,yASCII"               , -1, ""                         , -1, ""                         , -1, ""                         , -1, ""                          , ""},
+   { 'í' , ""      , "V) YJOBS"           , "yJOBS"                                   , -1, ""                         , -1, ""                         , -1, ""                         , -1, ""                          , ""},
+   { 'î' , ""      , "VI) BRUTES"         , "eos,kharon,khronos,helios,hestia"        , -1, ""                         , -1, ""                         , -1, ""                         , -1, ""                          , ""},
+   { 'ï' , ""      , ""                   , ""                                        , -1, ""                         , -1, ""                         , -1, ""                         , -1, ""                          , ""},
+   { '\0', ""      , "end"                , ""                                        , -1, ""                         , -1, ""                         , -1, ""                         , -1, ""                          , ""},
 };
-
 
 
 
@@ -100,9 +100,10 @@ DRAW_init               (char a_layout, char a_size, char a_decor, char a_cols, 
       yASCII_grid_new_full (a_size, a_decor, a_cols, a_rows, 0, 0, 0, 0);
       break;
    }
-   /*---(create)-------------------------*/
-   /*> rc = yASCII_new (my.x_end, my.y_end);                                          <*/
-   /*> yASCII_grid_new_full (a_size, a_decor, a_cols, a_rows, my.x_min, my.y_min, my.x_end - my.x_max, my.y_end - my.y_max);   <*/
+   /*---(globals)------------------------*/
+   for (i = 0; i < LEN_LABEL; ++i) {
+      strcpy (zASCII_blocks [i].b_deps, "");
+   }
    /*---(title block)--------------------*/
    if (strchr ("fs", a_layout) != NULL) {
       sprintf (s, "#!%s", P_FULLPATH);
@@ -128,6 +129,7 @@ DRAW_init               (char a_layout, char a_size, char a_decor, char a_cols, 
 char
 DRAW_wrap               (void)
 {
+   /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
    short       a           =    0;
    int         i           =    0;
@@ -149,15 +151,44 @@ DRAW_wrap               (void)
 }
 
 char
-DRAW_main               (char a_layout, char a_size, char a_decor)
+DRAW_block_by_abbr      (char a_block)
 {
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   int         i           =   -1;
+   for (i = 0; i < LEN_LABEL; ++i) {
+      if (zASCII_blocks [i].b_abbr == '\0')    break;
+      if (zASCII_blocks [i].b_abbr != a_block) continue;
+      return i;
+      break;
+   }
+   return --rce;
+}
+
+char
+DRAW_block              (char a_block)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         i           =   1;
+   char        x_pred      [LEN_DESC]  = "";
+   char        x_title     [LEN_TITLE] = "";
+   char       *p           = NULL;
+   char       *q           =  ",";
+   char       *r           = NULL;
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   DRAW_init    (a_layout, a_size, a_decor, 10, 10);
-   /*---(foundation)---------------------*/
-   /*> DRAW_block_source ('é', "koios");                                              <*/
-   DRAW_block_source ('é', "ySTR");
-   DRAW_block_source ('é', "yENV");
-   yASCII_frame_full (0, 0, 7, 7, "I. FOUNDATION (14)", -1, "a)·build·base", 1, "b)·unit·testing·framework", 4, "c)·execution·logging", 6, "d)·core");
+   s_boxes = 0;
+   i = 1;
+   ystrlcpy (x_pred, zASCII_blocks [i].b_sources, LEN_DESC);
+   DEBUG_PROG   yLOG_info    ("x_pred"    , x_pred);
+   p = strtok_r (x_pred, q, &r);
+   while (p != NULL) {
+      DEBUG_PROG   yLOG_info    ("p"         , p);
+      DRAW_block_source ('é', p);
+      p = strtok_r (NULL, q, &r);
+   }
+   sprintf (x_title, "%s (%d)", zASCII_blocks [i].b_title, s_boxes);
+   DEBUG_PROG   yLOG_info    ("x_title"   , x_title);
+   yASCII_frame_full (0, 0, 7, 7, x_title, zASCII_blocks [i].b_1col, zASCII_blocks [i].b_1name, zASCII_blocks [i].b_2col, zASCII_blocks [i].b_2name, zASCII_blocks [i].b_3col, zASCII_blocks [i].b_3name, zASCII_blocks [i].b_4col, zASCII_blocks [i].b_4name);
    yASCII_node_grid (-1, 0, 'è');
    yASCII_node_grid ( 8, 0, 'é');
    yASCII_tie_grid  (-1, 0, 0, 0);
@@ -169,7 +200,117 @@ DRAW_main               (char a_layout, char a_size, char a_decor)
 }
 
 char
-DRAW_block_layer        (char b, int n)
+DRAW_main               (char a_layout, char a_size, char a_decor)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         i           =   1;
+   char        x_pred      [LEN_DESC]  = "";
+   char        x_title     [LEN_TITLE] = "";
+   char       *p           = NULL;
+   char       *q           =  ",";
+   char       *r           = NULL;
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   DRAW_init    (a_layout, a_size, a_decor, 15, 10);
+   s_boxes = 0;
+   i = 1;
+   ystrlcpy (x_pred, zASCII_blocks [i].b_sources, LEN_DESC);
+   DEBUG_PROG   yLOG_info    ("x_pred"    , x_pred);
+   p = strtok_r (x_pred, q, &r);
+   while (p != NULL) {
+      DEBUG_PROG   yLOG_info    ("p"         , p);
+      DRAW_block_source ('é', p);
+      p = strtok_r (NULL, q, &r);
+   }
+   sprintf (x_title, "%s (%d)", zASCII_blocks [i].b_title, s_boxes);
+   DEBUG_PROG   yLOG_info    ("x_title"   , x_title);
+   yASCII_frame_full (0, 0, 7, 7, x_title, zASCII_blocks [i].b_1col, zASCII_blocks [i].b_1name, zASCII_blocks [i].b_2col, zASCII_blocks [i].b_2name, zASCII_blocks [i].b_3col, zASCII_blocks [i].b_3name, zASCII_blocks [i].b_4col, zASCII_blocks [i].b_4name);
+   yASCII_node_grid (-1, 0, 'è');
+   yASCII_node_grid ( 8, 0, 'é');
+   yASCII_tie_grid  (-1, 0, 0, 0);
+   yASCII_tie_grid  ( 7, 0, 8, 0);
+   yASCII_tie_grid  ( 7, 1, 8, 0);
+   DRAW_wrap    ();
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DRAW_main_OLD           (char a_layout, char a_size, char a_decor)
+{
+   int         i           =   1;
+   char        x_title     [LEN_TITLE] = "";
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   DRAW_init    (a_layout, a_size, a_decor, 15, 10);
+   /*---(foundation)---------------------*/
+   /*> DRAW_block_source ('é', "koios");                                              <*/
+   s_boxes = 0;
+   DRAW_block_source ('é', "ySTR");
+   DRAW_block_source ('é', "yENV");
+   printf ("BOXES = %d\n", s_boxes);
+   /*> yASCII_frame_full (0, 0, 7, 7, "I. FOUNDATION (14)", -1, "a)·build·base", 1, "b)·unit·testing·framework", 4, "c)·execution·logging", 6, "d)·core");   <*/
+   i = 1;
+   sprintf (x_title, "%s (%d)", zASCII_blocks [i].b_title, s_boxes);
+   yASCII_frame_full (0, 0, 7, 7, x_title, zASCII_blocks [i].b_1col, zASCII_blocks [i].b_1name, zASCII_blocks [i].b_2col, zASCII_blocks [i].b_2name, zASCII_blocks [i].b_3col, zASCII_blocks [i].b_3name, zASCII_blocks [i].b_4col, zASCII_blocks [i].b_4name);
+   yASCII_node_grid (-1, 0, 'è');
+   yASCII_node_grid ( 8, 0, 'é');
+   yASCII_tie_grid  (-1, 0, 0, 0);
+   yASCII_tie_grid  ( 7, 0, 8, 0);
+   yASCII_tie_grid  ( 7, 1, 8, 0);
+   DRAW_wrap    ();
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DRAW_box                (char a_block, int n)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   tNODE      *x_node      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   DEBUG_PROG   yLOG_complex ("a_args"    , "%c %d", a_block, n);
+   /*---(defence)------------------------*/
+   DEBUG_PROG   yLOG_value   ("g_nnode"   , g_nnode);
+   --rce;  if (n < 0 || n >= g_nnode) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   x_node = &(g_nodes [n]);
+   DEBUG_PROG   yLOG_point   ("x_node"    , x_node);
+   --rce;  if (x_node == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(defence)------------------------*/
+   DEBUG_PROG   yLOG_complex ("node"      , "%2dl, %c, %s", x_node->n_level, x_node->n_block, x_node->n_name);
+   if (x_node->n_block == '-') {
+      DEBUG_PROG   yLOG_note    ("node block not assigned, set it now");
+      x_node->n_block = a_block;
+   }
+   /*---(set-row)------------------------*/
+   DEBUG_PROG   yLOG_value   ("n_row bef" , x_node->n_row);
+   if (x_node->n_row >= 0) {
+      DEBUG_PROG   yLOG_note    ("box already drawn");
+      DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+      return 1;
+   }
+   /*---(assign row)---------------------*/
+   x_node->n_row = s_cols [x_node->n_level];
+   DEBUG_PROG   yLOG_value   ("n_row aft" , x_node->n_row);
+   ++(s_cols [x_node->n_level]);
+   /*---(show box)-----------------------*/
+   yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", '-', x_node->n_pred, x_node->n_succ);
+   /*---(increment boxes)----------------*/
+   ++s_boxes;
+   DEBUG_PROG   yLOG_value   ("s_boxes"   , s_boxes);
+   /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DRAW_block_layer        (char a_block, int n)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
@@ -181,9 +322,10 @@ DRAW_block_layer        (char b, int n)
    char        s           [LEN_TITLE] = "";
    char        x_lvl       =    0;
    char        x_heavy     = YASCII_DOTTED;
+   int         i           =   -1;
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   DEBUG_PROG   yLOG_complex ("a_args"    , "%2db, %2dn", b, n);
+   DEBUG_PROG   yLOG_complex ("a_args"    , "%2db, %2dn", a_block, n);
    /*---(mark)------------------------*/
    x_root = &(g_nodes [n]);
    DEBUG_PROG   yLOG_info    ("name"      , g_nodes [n].n_name);
@@ -202,15 +344,17 @@ DRAW_block_layer        (char b, int n)
             sprintf  (s, ",%s,", x_node->n_name);
             DEBUG_PROG   yLOG_info    ("s"         , s);
             /*---(draw box)-----------------*/
-            DEBUG_PROG   yLOG_value   ("n_row"     , x_node->n_row);
-            if (x_node->n_row < 0) {
-               x_node->n_row = s_cols [x_node->n_level];
-               ++(s_cols [x_node->n_level]);
-               yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", '-', x_node->n_pred, x_node->n_succ);
-            }
+            rc = DRAW_box (a_block, x_node->n_self);
+            DEBUG_PROG   yLOG_value   ("box"       , rc);
+            /*> if (x_node->n_row < 0) {                                                                                        <* 
+             *>    x_node->n_row = s_cols [x_node->n_level];                                                                    <* 
+             *>    ++(s_cols [x_node->n_level]);                                                                                <* 
+             *>    yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", '-', x_node->n_pred, x_node->n_succ);   <* 
+             *>    ++s_boxes;                                                                                                   <* 
+             *> }                                                                                                               <*/
             /*---(add connection)-----------*/
             if (strstr (x_miss, s) != NULL) {
-               DRAW_block_layer (b, x_pred->e_nbeg);
+               DRAW_block_layer (a_block, x_pred->e_nbeg);
                DEBUG_PROG   yLOG_char    ("e_type"    , x_pred->e_type);
                switch (x_pred->e_type) {
                case 'v' : x_heavy = YASCII_WAVY;    break;
@@ -230,10 +374,13 @@ DRAW_block_layer        (char b, int n)
    }
    DEBUG_PROG   yLOG_value   ("c"         , c);
    /*---(merge into node)----------------*/
-   /*> GRAPH_deps_merge (g_nodes [n].n_cumd, zASCII_blocks [1].b_deps);                                           <* 
-    *> sprintf (s, ",%s,", g_nodes [n].n_name);                                                                   <* 
-    *> GRAPH_deps_merge (s, zASCII_blocks [1].b_deps);                                                            <* 
-    *> printf ("FOUNDATION %c  %s  å%sæ\n", zASCII_blocks [1].b_abbr, g_nodes [n].n_name, s_blocks [1].b_deps);   <*/
+   i = DRAW_block_by_abbr (a_block);
+   if (i >= 0) {
+      DEPS_merge (g_nodes [n].n_cumd, zASCII_blocks [i].b_deps);
+      sprintf (s, ",%s,", g_nodes [n].n_name);
+      DEPS_merge (s, zASCII_blocks [i].b_deps);
+      /*> printf ("%c %-20.20s  %s  å%sæ\n", zASCII_blocks [i].b_abbr, zASCII_blocks [i].b_title, g_nodes [n].n_name, zASCII_blocks [i].b_deps);   <*/
+   }
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return c;
@@ -244,6 +391,7 @@ DRAW_block_source       (char a_block, char a_prog [LEN_TITLE])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
+   char        rc          =    0;
    int         b           =   -1;
    int         n           =   -1;
    tNODE      *x_node      = NULL;
@@ -284,12 +432,15 @@ DRAW_block_source       (char a_block, char a_prog [LEN_TITLE])
       return rce;
    }
    /*---(update root)--------------------*/
-   x_node = &(g_nodes [n]);
-   x_node->n_row = s_cols [x_node->n_level];
-   ++(s_cols [x_node->n_level]);
-   yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", '-', x_node->n_pred, x_node->n_succ);
+   rc = DRAW_box (a_block, n);
+   DEBUG_PROG   yLOG_value   ("box"       , rc);
+   /*> x_node = &(g_nodes [n]);                                                                                     <* 
+    *> x_node->n_row = s_cols [x_node->n_level];                                                                    <* 
+    *> ++(s_cols [x_node->n_level]);                                                                                <* 
+    *> yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", '-', x_node->n_pred, x_node->n_succ);   <* 
+    *> ++s_boxes;                                                                                                   <*/
    /*---(start process)------------------*/
-   DRAW_block_layer (b, n);
+   DRAW_block_layer (a_block, n);
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -439,6 +590,7 @@ DRAW__unit              (char *a_question, int n)
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    int         rc          =    0;
+   int         i           =    0;
    /*---(prepare)------------------------*/
    ystrlcpy  (my.unit_answer, "DRAW             : question not understood", LEN_RECD);
    /*---(crontab name)-------------------*/
@@ -447,6 +599,11 @@ DRAW__unit              (char *a_question, int n)
             my.d_layout, my.d_size, my.d_decor,
             my.x_cols, my.x_min, my.x_max, my.x_end, my.x_side, my.x_wide, my.x_gap,
             my.y_rows, my.y_min, my.y_max, my.y_end, my.y_side, my.y_tall, my.y_gap);
+   }
+   else if (strcmp (a_question, "block_deps"    )  == 0) {
+      i = DRAW_block_by_abbr (n);
+      if (i >= 0) snprintf (my.unit_answer, LEN_RECD, "DRAW deps    (%c) : %s", n, zASCII_blocks [i].b_deps);
+      else        snprintf (my.unit_answer, LEN_RECD, "DRAW deps    (%c) : (n/a)", n);
    }
    /*---(complete)-----------------------*/
    return my.unit_answer;

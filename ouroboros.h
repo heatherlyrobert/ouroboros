@@ -34,9 +34,9 @@
 #define     P_CREATED   "2020-12"
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
-#define     P_VERMINOR  "0.3- moving to deps on node"
-#define     P_VERNUM    "0.3c"
-#define     P_VERTXT    "foundation block is now working properly again"
+#define     P_VERMINOR  "0.4- handle predictable blocks/groups"
+#define     P_VERNUM    "0.4a"
+#define     P_VERTXT    "major function update"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -383,6 +383,7 @@ struct cNODE {
    char        n_miss      [LEN_RECD];           /* brand new dependencies    */
    char        n_focus;
    /*---(working)-----------*/
+   char        n_self;
    char        n_level;
    char        n_row;
    char        n_block;
@@ -428,6 +429,7 @@ extern tEDGE   g_edges   [MAX_EDGE];
 extern int     g_nedge;
 extern char    g_maxlvl;
 
+extern char    g_deps_block  [LEN_RECD];
 
 
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
@@ -523,6 +525,7 @@ char        TDB_write               (char a_full [LEN_PATH]);
 char        DRAW_init               (char a_layout, char a_size, char a_decor, char a_cols, char a_rows);
 char        DRAW_wrap               (void);
 /*---(elements)-------------*/
+char        DRAW_block_by_abbr      (char a_block);
 char        DRAW_node               (short x, short y, char a);
 /*---(blocks)---------------*/
 char        DRAW_block_layer        (char b, int n);
@@ -531,6 +534,7 @@ char        DRAW_block_source       (char a_block, char a_prog [LEN_TITLE]);
 char        DRAW_box_clear          (void);
 
 char        DRAW_main               (char a_layout, char a_size, char a_decor);
+char        DRAW_main_OLD           (char a_layout, char a_size, char a_decor);
 
 char        GRAPH_box_deps          (char a_name [LEN_TITLE], char r_deps [LEN_RECD]);
 char        GRAPH_dump_placement    (void);
@@ -556,11 +560,10 @@ char        GRAPH_edge_real         (char a_beg [LEN_TITLE], int a_end);
 char        GRAPH_edge_virt         (char a_beg [LEN_TITLE], int a_end);
 char        GRAPH_dump_edges        (void);
 /*---(deps)-----------------*/
-char        GRAPH_deps_add          (char a_name [LEN_TITLE], char a_deps [LEN_RECD]);
-char        GRAPH_deps_merge        (char a_deps [LEN_RECD], char r_cumd [LEN_RECD]);
-char        GRAPH_deps_missing      (char a_deps [LEN_RECD], char a_cumd [LEN_RECD], char r_miss [LEN_RECD]);
-char        GRAPH_deps_solve        (void);
-char        GRAPH_dump_deps         (void);
+/*> char        GRAPH_deps_add          (char a_name [LEN_TITLE], char a_deps [LEN_RECD]);   <*/
+/*> char        GRAPH_deps_merge        (char a_deps [LEN_RECD], char r_cumd [LEN_RECD]);   <*/
+/*> char        GRAPH_deps_solve        (void);                                       <*/
+/*> char        GRAPH_dump_deps         (void);                                       <*/
 /*---(focus)----------------*/
 char        GRAPH_focus_pred        (int n);
 char        GRAPH_focus_on          (char a_prog [LEN_TITLE]);
@@ -585,8 +588,6 @@ char        INCL_zenodotus          (void);
 /*---(lists)----------------*/
 char        INCL_list_clear         (void);
 char        INCL_list_add           (char a_cat, char a_header [LEN_TITLE]);
-char        DEPS_add                (char a_source [LEN_TITLE], char a_target [LEN_LABEL]);
-char        DEPS_force              (char a_source [LEN_TITLE], char a_target [LEN_LABEL]);
 int         INCL_by_name            (char a_header [LEN_TITLE], char *r_block);
 /*---(find)-----------------*/
 int         INCL_add_by_name        (char a_beg [LEN_TITLE], int a_end);
@@ -605,8 +606,23 @@ char*       INCL__unit              (char *a_question, int n);
 /*---(done)-----------------*/
 
 
+
+/*===[[ ouroboros_deps.c ]]===================================================*/
+/*········· ´······················ ´·········································*/
+/*---(single)---------------*/
+char        DEPS__add               (char a_source [LEN_TITLE], char a_target [LEN_LABEL], char a_force);
 char        DEPS_add                (char a_source [LEN_TITLE], char a_target [LEN_LABEL]);
 char        DEPS_force              (char a_source [LEN_TITLE], char a_target [LEN_LABEL]);
+/*---(lists)----------------*/
+char        DEPS_merge              (char a_deps [LEN_RECD], char r_cumd [LEN_RECD]);
+char        DEPS_missing            (char a_deps [LEN_RECD], char a_cumd [LEN_RECD], char a_block [LEN_RECD], char r_miss [LEN_RECD]);
+/*---(solution)-------------*/
+char        DEPS__layer             (int n);
+char        DEPS_gather             (void);
+/*---(report)---------------*/
+char        DEPS_dump               (void);
+/*---(done)-----------------*/
+
 
 
 /*===[[ ouroboros_make.c ]]===================================================*/

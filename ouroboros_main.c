@@ -27,12 +27,12 @@ main               (int a_argc, char *a_argv[])
    INCL_list ();
    GRAPH_dump_nodes ();
    GRAPH_dump_edges ();
-   GRAPH_dump_deps  ();
+   DEPS_dump        ();
    /*> GRAPH_focus_all  ();                                                           <*/
    GRAPH_focus_on   ("ySTR");
    GRAPH_focus_on   ("yENV");
    GRAPH_solve      ('-');
-   GRAPH_deps_solve ();
+   DEPS_gather      ();
    GRAPH_dump_seq   ();
    GRAPH_dump_all   ();
    /*> GRAPH_focus_on   ("yVAR");                                                     <*/

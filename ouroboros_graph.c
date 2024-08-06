@@ -96,6 +96,8 @@ tEDGE   g_edges   [MAX_EDGE];
 int     g_nedge     =  0;
 char    g_maxlvl    =  0;
 
+char    g_deps_block  [LEN_RECD]  = "";
+
 
 /*====================------------------------------------====================*/
 /*===----                      program level                           ----===*/
@@ -133,6 +135,7 @@ GRAPH_purge             (void)
       g_nodes [i].n_miss [0] = '\0';
       g_nodes [i].n_focus    = '-';
       /*---(working)-----------*/
+      g_nodes [i].n_self     = -1;
       g_nodes [i].n_level    = -1;
       g_nodes [i].n_row      = -1;
       g_nodes [i].n_block    = '-';
@@ -224,8 +227,10 @@ GRAPH_add_node          (char a_name [LEN_TITLE])
       DEBUG_PROG  yLOG_note    ("can't find, add new node");
       ystrlcpy (g_nodes [g_nnode].n_name, a_name, LEN_TITLE);
       n = g_nnode;
-      ++g_nnode;
       DEBUG_PROG   yLOG_value   ("n"         , n);
+      g_nodes [n].n_self = n;
+      ++g_nnode;
+      DEBUG_PROG   yLOG_value   ("g_nnode"   , g_nnode);
    }
    /*> if (strcmp (a_name, "zenodotus") != 0) {                                       <* 
     *>    DEBUG_PROG   yLOG_note    ("create a link back to zenodotus");              <* 
@@ -237,33 +242,33 @@ GRAPH_add_node          (char a_name [LEN_TITLE])
    return n;
 }
 
-char
-GRAPH_cum_deps          (void)
-{
-   int         i           =    0;
-   char        x_lvl       =    0;
-   int         c           =    0;
-   tEDGE      *x_pred      = NULL;
-   char        x_cumd      [LEN_RECD]  = "";
-   for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {
-      for (i = 0; i <  g_nnode; ++i) {
-         if (g_nodes [i].n_level != x_lvl)  continue;
-         printf ("%3d  %3d  %-25.25s   %3dp  ", i, g_nodes [i].n_level, g_nodes [i].n_name, g_nodes [i].n_pred);
-         if (g_nodes [i].n_pred > 0)  {
-            x_pred = g_nodes [i].n_phead;
-            while (x_pred != NULL) {
-               printf (" %-15.15s", (x_pred->e_beg)->n_name);
-               x_pred = x_pred->e_pnext;
-            }
-         }
-         printf ("\n");
-         ++c;
-      }
-      printf ("\n");
-      if (c == g_nnode)  break;
-   }
-   return 0;
-}
+/*> char                                                                                                               <* 
+ *> GRAPH_cum_deps          (void)                                                                                     <* 
+ *> {                                                                                                                  <* 
+ *>    int         i           =    0;                                                                                 <* 
+ *>    char        x_lvl       =    0;                                                                                 <* 
+ *>    int         c           =    0;                                                                                 <* 
+ *>    tEDGE      *x_pred      = NULL;                                                                                 <* 
+ *>    char        x_cumd      [LEN_RECD]  = "";                                                                       <* 
+ *>    for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {                                                                   <* 
+ *>       for (i = 0; i <  g_nnode; ++i) {                                                                             <* 
+ *>          if (g_nodes [i].n_level != x_lvl)  continue;                                                              <* 
+ *>          printf ("%3d  %3d  %-25.25s   %3dp  ", i, g_nodes [i].n_level, g_nodes [i].n_name, g_nodes [i].n_pred);   <* 
+ *>          if (g_nodes [i].n_pred > 0)  {                                                                            <* 
+ *>             x_pred = g_nodes [i].n_phead;                                                                          <* 
+ *>             while (x_pred != NULL) {                                                                               <* 
+ *>                printf (" %-15.15s", (x_pred->e_beg)->n_name);                                                      <* 
+ *>                x_pred = x_pred->e_pnext;                                                                           <* 
+ *>             }                                                                                                      <* 
+ *>          }                                                                                                         <* 
+ *>          printf ("\n");                                                                                            <* 
+ *>          ++c;                                                                                                      <* 
+ *>       }                                                                                                            <* 
+ *>       printf ("\n");                                                                                               <* 
+ *>       if (c == g_nnode)  break;                                                                                    <* 
+ *>    }                                                                                                               <* 
+ *>    return 0;                                                                                                       <* 
+ *> }                                                                                                                  <*/
 
 char*
 GRAPH_node_line         (int n)
@@ -434,192 +439,94 @@ GRAPH_dump_edges        (void)
 /*====================------------------------------------====================*/
 static void  o___DEPS____________o () { return; }
 
-char
-GRAPH_deps_add          (char a_name [LEN_TITLE], char a_deps [LEN_RECD])
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   int         n           =    0;
-   /*---(defense)------------------------*/
-   --rce;  if (a_name == NULL)            return rce;
-   --rce;  if (strcmp (a_name, "") == 0)  return rce;
-   --rce;  if (a_deps == NULL)            return rce;
-   --rce;  if (strcmp (a_deps, "") == 0)  return rce;
-   /*---(add deps)-----------------------*/
-   n = GRAPH_by_name (a_name);
-   --rce;  if (n <  0)  return rce;
-   /*---(add deps)-----------------------*/
-   ystrlcpy (g_nodes [n].n_deps, a_deps, LEN_RECD);
-   /*---(complete)-----------------------*/
-   return 0;
-}
+/*> char                                                                              <* 
+ *> GRAPH_deps_add          (char a_name [LEN_TITLE], char a_deps [LEN_RECD])         <* 
+ *> {                                                                                 <* 
+ *>    /+---(locals)-----------+-----+-----+-+/                                       <* 
+ *>    char        rce         =  -10;                                                <* 
+ *>    int         n           =    0;                                                <* 
+ *>    /+---(defense)------------------------+/                                       <* 
+ *>    --rce;  if (a_name == NULL)            return rce;                             <* 
+ *>    --rce;  if (strcmp (a_name, "") == 0)  return rce;                             <* 
+ *>    --rce;  if (a_deps == NULL)            return rce;                             <* 
+ *>    --rce;  if (strcmp (a_deps, "") == 0)  return rce;                             <* 
+ *>    /+---(add deps)-----------------------+/                                       <* 
+ *>    n = GRAPH_by_name (a_name);                                                    <* 
+ *>    --rce;  if (n <  0)  return rce;                                               <* 
+ *>    /+---(add deps)-----------------------+/                                       <* 
+ *>    ystrlcpy (g_nodes [n].n_deps, a_deps, LEN_RECD);                               <* 
+ *>    /+---(complete)-----------------------+/                                       <* 
+ *>    return 0;                                                                      <* 
+ *> }                                                                                 <*/
 
-char
-GRAPH_deps_merge        (char a_deps [LEN_RECD], char r_cumd [LEN_RECD])
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char       *p           = NULL;
-   char       *q           =  ",";
-   char       *r           = NULL;
-   char        x_deps      [LEN_RECD]  = "";
-   char        s           [LEN_TITLE] = "";
-   char        c           =    0;
-   /*---(defense)------------------------*/
-   --rce;  if (a_deps == NULL)             return rce;
-   --rce;  if (r_cumd == NULL)             return rce;
-   /*---(quick out)----------------------*/
-   if (strcmp (a_deps, "")  == 0)  return 0;
-   if (strcmp (a_deps, "´") == 0)  return 0;
-   if (strcmp (r_cumd, "")  == 0)  strcpy (r_cumd, ",");
-   if (strcmp (r_cumd, "´") == 0)  strcpy (r_cumd, ",");
-   /*---(merge up)-----------------------*/
-   ystrlcpy (x_deps, a_deps, LEN_RECD);
-   p = strtok_r (x_deps, q, &r);
-   while (p != NULL) {
-      /*---(check)-----------------------*/
-      sprintf (s, ",%s,", p);
-      if (strstr (r_cumd, s) == NULL) {
-         ystrlcat (r_cumd, s + 1, LEN_RECD);
-         ++c;
-      }
-      /*---(next)------------------------*/
-      p = strtok_r (NULL  , q, &r);
-      /*---(done)------------------------*/
-   }
-   /*---(complete)-----------------------*/
-   return c;
-}
 
-char
-GRAPH_deps_preds        (int n)
-{
-   tEDGE      *x_pred      = NULL;
-   char        c           =    0;
-   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   /*---(mark)------------------------*/
-   DEBUG_PROG   yLOG_value   ("n"         , n);
-   strcpy (g_nodes [n].n_cumd, "");
-   DEBUG_PROG   yLOG_info    ("n_name"    , g_nodes [n].n_name);
-   /*> printf ("SOLVING     : %s\n", g_nodes [n].n_name);                             <*/
-   /*---(fill successors)-------------*/
-   x_pred = g_nodes [n].n_phead;
-   DEBUG_PROG   yLOG_point   ("x_pred"    , x_pred);
-   while (x_pred != NULL) {
-      DEBUG_PROG   yLOG_info    ("n_pred"    , x_pred->e_beg->n_name);
-      GRAPH_deps_merge (x_pred->e_beg->n_cumd, g_nodes [n].n_cumd);
-      ++c;
-      x_pred = x_pred->e_pnext;
-      DEBUG_PROG   yLOG_point   ("x_pred"    , x_pred);
-   }
-   DEBUG_PROG   yLOG_value   ("c"         , c);
-   /*> printf ("  PREDS     : %4då%sæ\n", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <*/
-   /*> printf ("  DEPS      : %4då%sæ\n", strlen (g_nodes [n].n_deps), g_nodes [n].n_deps);   <*/
-   GRAPH_deps_missing (g_nodes [n].n_deps, g_nodes [n].n_cumd, g_nodes [n].n_miss);
-   /*> printf ("  MISS      : %4då%sæ\n", strlen (g_nodes [n].n_miss), g_nodes [n].n_miss);   <*/
-   GRAPH_deps_merge   (g_nodes [n].n_miss, g_nodes [n].n_cumd);
-   /*> printf ("  CUMPD     : %4då%sæ\n", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <*/
-   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-   return c;
-}
+/*> char                                                                                                <* 
+ *> GRAPH_deps_preds        (int n)                                                                     <* 
+ *> {                                                                                                   <* 
+ *>    tEDGE      *x_pred      = NULL;                                                                  <* 
+ *>    char        c           =    0;                                                                  <* 
+ *>    DEBUG_PROG   yLOG_enter   (__FUNCTION__);                                                        <* 
+ *>    /+---(mark)------------------------+/                                                            <* 
+ *>    DEBUG_PROG   yLOG_value   ("n"         , n);                                                     <* 
+ *>    strcpy (g_nodes [n].n_cumd, "");                                                                 <* 
+ *>    DEBUG_PROG   yLOG_info    ("n_name"    , g_nodes [n].n_name);                                    <* 
+ *>    /+> printf ("SOLVING     : %s\n", g_nodes [n].n_name);                             <+/           <* 
+ *>    /+---(fill successors)-------------+/                                                            <* 
+ *>    x_pred = g_nodes [n].n_phead;                                                                    <* 
+ *>    DEBUG_PROG   yLOG_point   ("x_pred"    , x_pred);                                                <* 
+ *>    while (x_pred != NULL) {                                                                         <* 
+ *>       DEBUG_PROG   yLOG_info    ("n_pred"    , x_pred->e_beg->n_name);                              <* 
+ *>       DEPS_merge (x_pred->e_beg->n_cumd, g_nodes [n].n_cumd);                                       <* 
+ *>       ++c;                                                                                          <* 
+ *>       x_pred = x_pred->e_pnext;                                                                     <* 
+ *>       DEBUG_PROG   yLOG_point   ("x_pred"    , x_pred);                                             <* 
+ *>    }                                                                                                <* 
+ *>    DEBUG_PROG   yLOG_value   ("c"         , c);                                                     <* 
+ *>    /+> printf ("  PREDS     : %4då%sæ\n", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <+/   <* 
+ *>    /+> printf ("  DEPS      : %4då%sæ\n", strlen (g_nodes [n].n_deps), g_nodes [n].n_deps);   <+/   <* 
+ *>    DEPS_missing (g_nodes [n].n_deps, g_nodes [n].n_cumd, g_deps_block, g_nodes [n].n_miss);         <* 
+ *>    /+> printf ("  MISS      : %4då%sæ\n", strlen (g_nodes [n].n_miss), g_nodes [n].n_miss);   <+/   <* 
+ *>    DEPS_merge   (g_nodes [n].n_miss, g_nodes [n].n_cumd);                                           <* 
+ *>    /+> printf ("  CUMPD     : %4då%sæ\n", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <+/   <* 
+ *>    DEBUG_PROG   yLOG_exit    (__FUNCTION__);                                                        <* 
+ *>    return c;                                                                                        <* 
+ *> }                                                                                                   <*/
 
-char
-GRAPH_deps_missing      (char a_deps [LEN_RECD], char a_cumd [LEN_RECD], char r_miss [LEN_RECD])
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char       *p           = NULL;
-   char       *q           =  ",";
-   char       *r           = NULL;
-   char        x_deps      [LEN_RECD]  = "";
-   char        s           [LEN_TITLE] = "";
-   char        c           =    0;
-   /*---(header)-------------------------*/
-   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   /*---(defense)------------------------*/
-   DEBUG_PROG   yLOG_point   ("a_deps"    , a_deps);
-   --rce;  if (a_deps == NULL) {
-      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_PROG   yLOG_point   ("a_cumd"    , a_cumd);
-   --rce;  if (a_cumd == NULL) {
-      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_PROG   yLOG_point   ("r_miss"    , r_miss);
-   --rce;  if (r_miss == NULL) {
-      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(prepare)------------------------*/
-   strcpy (r_miss, "");
-   ystrlcpy (x_deps, a_deps, LEN_RECD);
-   p = strtok_r (x_deps, q, &r);
-   /*---(merge up)-----------------------*/
-   DEBUG_PROG   yLOG_point   ("head"      , p);
-   while (p != NULL) {
-      DEBUG_PROG   yLOG_info    ("p"         , p);
-      /*---(check)-----------------------*/
-      if (p [0] == 'y' || strcmp (p, "koios") == 0 || strcmp (p, "zenodotus") == 0) {
-         if (strcmp (p, "yVIHUB_solo") != 0) {
-            sprintf (s, ",%s,", p);
-            DEBUG_PROG   yLOG_info    ("s"         , s);
-            if (strstr (a_cumd, s) == NULL) {
-               DEBUG_PROG   yLOG_note    ("add as miss");
-               if (strcmp (r_miss, "")  == 0)  strcpy (r_miss, ",");
-               if (strcmp (r_miss, "´") == 0)  strcpy (r_miss, ",");
-               ystrlcat (r_miss, s + 1, LEN_RECD);
-               ++c;
-            }
-         }
-      }
-      /*---(next)------------------------*/
-      p = strtok_r (NULL  , q, &r);
-      DEBUG_PROG   yLOG_point   ("next"      , p);
-      /*---(done)------------------------*/
-   }
-   DEBUG_PROG   yLOG_info    ("r_miss"    , r_miss);
-   /*---(complete)-----------------------*/
-   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-   return c;
-}
+/*> char                                                                                   <* 
+ *> GRAPH_deps_solve        (void)                                                         <* 
+ *> {                                                                                      <* 
+ *>    char        rc          =    0;                                                     <* 
+ *>    int         i           =    0;                                                     <* 
+ *>    char        x_lvl       =    0;                                                     <* 
+ *>    int         c           =    0;                                                     <* 
+ *>    tEDGE      *x_pred      = NULL;                                                     <* 
+ *>    DEBUG_PROG   yLOG_enter   (__FUNCTION__);                                           <* 
+ *>    for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {                                       <* 
+ *>       DEBUG_PROG   yLOG_value   ("x_lvl"     , x_lvl);                                 <* 
+ *>       c = 0;                                                                           <* 
+ *>       for (i = 0; i <  g_nnode; ++i) {                                                 <* 
+ *>          if (g_nodes [i].n_level != x_lvl)  continue;                                  <* 
+ *>          DEBUG_PROG   yLOG_complex ("node"      , "%3d, %s", i, g_nodes [i].n_name);   <* 
+ *>          GRAPH_deps_preds (i);                                                         <* 
+ *>          ++c;                                                                          <* 
+ *>       }                                                                                <* 
+ *>    }                                                                                   <* 
+ *>    DEBUG_PROG   yLOG_exit    (__FUNCTION__);                                           <* 
+ *>    return 0;                                                                           <* 
+ *> }                                                                                      <*/
 
-char
-GRAPH_deps_solve        (void)
-{
-   char        rc          =    0;
-   int         i           =    0;
-   char        x_lvl       =    0;
-   int         c           =    0;
-   tEDGE      *x_pred      = NULL;
-   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {
-      DEBUG_PROG   yLOG_value   ("x_lvl"     , x_lvl);
-      c = 0;
-      for (i = 0; i <  g_nnode; ++i) {
-         if (g_nodes [i].n_level != x_lvl)  continue;
-         DEBUG_PROG   yLOG_complex ("node"      , "%3d, %s", i, g_nodes [i].n_name);
-         GRAPH_deps_preds (i);
-         ++c;
-      }
-   }
-   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
-GRAPH_dump_deps         (void)
-{
-   int         i           =    0;
-   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   DEBUG_PROG   yLOG_value   ("g_nnode"   , g_nnode);
-   for (i = 0; i <  g_nnode; ++i) {
-      printf ("%3d  %-25.25s  %s\n", i, g_nodes [i].n_name, g_nodes [i].n_deps);
-   }
-   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
+/*> char                                                                               <* 
+ *> GRAPH_dump_deps         (void)                                                     <* 
+ *> {                                                                                  <* 
+ *>    int         i           =    0;                                                 <* 
+ *>    DEBUG_PROG   yLOG_enter   (__FUNCTION__);                                       <* 
+ *>    DEBUG_PROG   yLOG_value   ("g_nnode"   , g_nnode);                              <* 
+ *>    for (i = 0; i <  g_nnode; ++i) {                                                <* 
+ *>       printf ("%3d  %-25.25s  %s\n", i, g_nodes [i].n_name, g_nodes [i].n_deps);   <* 
+ *>    }                                                                               <* 
+ *>    DEBUG_PROG   yLOG_exit    (__FUNCTION__);                                       <* 
+ *>    return 0;                                                                       <* 
+ *> }                                                                                  <*/
 
 
 
