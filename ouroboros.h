@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.4- handle predictable blocks/groups"
-#define     P_VERNUM    "0.4a"
-#define     P_VERTXT    "major function update"
+#define     P_VERNUM    "0.4b"
+#define     P_VERTXT    "fixed first unit script in make, fixing global vs node deps"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"

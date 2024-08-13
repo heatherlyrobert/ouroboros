@@ -105,6 +105,35 @@ char    g_deps_block  [LEN_RECD]  = "";
 static void  o___PROGRAM_________o () { return; }
 
 char
+GRAHP_node_clean        (int n)
+{
+      /*---(data)--------------*/
+      g_nodes [n].n_name [0] = '\0';
+      g_nodes [n].n_deps [0] = '\0';
+      g_nodes [n].n_cumd [0] = '\0';
+      g_nodes [n].n_miss [0] = '\0';
+      g_nodes [n].n_focus    = '-';
+      /*---(working)-----------*/
+      g_nodes [n].n_self     = -1;
+      g_nodes [n].n_level    = -1;
+      g_nodes [n].n_row      = -1;
+      g_nodes [n].n_block    = '-';
+      /*---(predecessors)------*/
+      g_nodes [n].n_pred     = 0;
+      g_nodes [n].n_phead    = NULL;
+      g_nodes [n].n_ptail    = NULL;
+      g_nodes [n].n_filled   = 0;
+      g_nodes [n].n_ready    = '-';
+      /*---(successors)--------*/
+      g_nodes [n].n_succ     = 0;
+      g_nodes [n].n_shead    = NULL;
+      g_nodes [n].n_stail    = NULL;
+      /*---(done)--------------*/
+      return 0;
+}
+
+
+char
 GRAPH_purge             (void)
 {
    int         i           =    0;

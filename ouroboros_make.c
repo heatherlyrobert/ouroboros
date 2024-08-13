@@ -27,6 +27,16 @@ MAKE_gather             (char a_recd [LEN_RECD], int a_end)
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   DEBUG_DATA   yLOG_value   ("a_end"     , a_end);
+   --rce; if (a_end < 0) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_DATA   yLOG_value   ("g_nnode"   , g_nnode);
+   --rce; if (a_end >= g_nnode) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(prepare)------------------------*/
    ystrlcpy (x_recd, a_recd, LEN_RECD);
    if (x_recd [l - 1] == '\n')  x_recd [--l] = '\0';

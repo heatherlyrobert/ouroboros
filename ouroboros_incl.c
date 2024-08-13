@@ -316,9 +316,6 @@ INCL_list_add           (char a_cat, char a_header [LEN_TITLE])
    char        rce         =  -10;
    char       *x_list      = NULL;
    char        t           [LEN_HUND]  = "";
-
-   return 1;
-
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/

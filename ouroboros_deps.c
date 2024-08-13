@@ -22,17 +22,29 @@ DEPS__add               (char a_source [LEN_TITLE], char a_target [LEN_LABEL], c
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
    DEBUG_PROG   yLOG_point   ("a_source"  , a_source);
-   --rce;  if (a_source == NULL || a_source [0] == '\0') {
+   --rce;  if (a_source == NULL) {
+      DEBUG_PROG   yLOG_note    ("null dependency source");
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    DEBUG_PROG   yLOG_info    ("a_source"  , a_source);
+   --rce;  if (a_source [0] == '\0') {
+      DEBUG_PROG   yLOG_note    ("empty dependency source");
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    DEBUG_PROG   yLOG_point   ("a_target"  , a_target);
-   --rce;  if (a_target == NULL || a_target [0] == '\0') {
+   --rce;  if (a_target == NULL) {
+      DEBUG_PROG   yLOG_note    ("null dependency target");
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    DEBUG_PROG   yLOG_info    ("a_target"  , a_target);
+   --rce;  if (a_target [0] == '\0') {
+      DEBUG_PROG   yLOG_note    ("empty dependency target");
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    --rce;  if (strcmp (a_source, a_target) == 0) {
       DEBUG_PROG   yLOG_note    ("circular dependency requested");
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
@@ -73,6 +85,7 @@ DEPS__add               (char a_source [LEN_TITLE], char a_target [LEN_LABEL], c
       break;
    }
    ystrlcat (x_list, t + 1, LEN_RECD);
+   DEBUG_PROG   yLOG_info    ("x_list"    , x_list);
    /*---(not-standard)-------------------*/
    if (x_beg < 0) {
       DEBUG_PROG   yLOG_note    ("not found, so add to WTF");
