@@ -27,7 +27,7 @@ static s_ncat    = 0;
 
 
 tINCL g_incls [MAX_INCL] = {
-   /*---(ansi c)-------------------------*/
+   /*---(ansi c)------------------------- ogl  cur  drw  blk  zen  */
    /* original c standard */
    { 'a', "assert"                   , 0, '-', '-', '-', '-', '-' },
    { 'a', "ctype"                    , 0, '-', '-', '-', '-', '-' },
@@ -467,9 +467,21 @@ INCL_add_by_group       (int a_end, char a_type)
 {
    char        rce         =  -10;
    int         i           =    0;
-   --rce;  if (a_type     == 0)                  return rce;
-   --rce;  if (strchr ("OC", a_type) == NULL)    return rce;
+   /*---(header)-------------------------*/
+   DEBUG_DATA  yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_DATA   yLOG_value   ("a_type"    , a_type);
+   --rce;  if (a_type     == 0) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_DATA   yLOG_char    ("a_type"    , a_type);
+   --rce;  if (strchr ("OC", a_type) == NULL) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    for (i = 0; i < MAX_INCL; ++i) {
+      DEBUG_DATA   yLOG_complex ("loop"      , "%3d, %c, %-30.30s, %c, %c", i, g_incls [i].i_cat, g_incls [i].i_name, g_incls [i].i_opengl, g_incls [i].i_curses);
       if (g_incls [i].i_cat == 0)   break;
       switch (a_type) {
       case 'O' :
