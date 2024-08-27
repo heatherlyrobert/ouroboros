@@ -27,7 +27,7 @@ static s_ncat    = 0;
 
 
 tINCL g_incls [MAX_INCL] = {
-   /*---(ansi c)------------------------- ogl  cur  drw  blk  zen  */
+   /*---(ansi c)-------------------- cnt  ogl  cur  drw  blk  zen  */
    /* original c standard */
    { 'a', "assert"                   , 0, '-', '-', '-', '-', '-' },
    { 'a', "ctype"                    , 0, '-', '-', '-', '-', '-' },
@@ -46,7 +46,7 @@ tINCL g_incls [MAX_INCL] = {
    { 'a', "stdlib"                   , 0, '-', '-', '-', '-', '-' },
    { 'a', "string"                   , 0, '-', '-', '-', '-', '-' },
    { 'a', "time"                     , 0, '-', '-', '-', '-', '-' },
-   /*---(ansi c updates)-----------------, 0*/
+   /*---(ansi c updates)------------ cnt  ogl  cur  drw  blk  zen  */
    /* c99, c23, ... , 0*/
    { 'a', "complex"                  , 0, '-', '-', '-', '-', '-' },
    { 'a', "err"                      , 0, '-', '-', '-', '-', '-' },
@@ -66,7 +66,7 @@ tINCL g_incls [MAX_INCL] = {
    { 'a', "uchar"                    , 0, '-', '-', '-', '-', '-' },
    { 'a', "wchar"                    , 0, '-', '-', '-', '-', '-' },
    { 'a', "wctype"                   , 0, '-', '-', '-', '-', '-' },
-   /*---(posix c standard)---------------, 0*/
+   /*---(posix c standard)---------- cnt  ogl  cur  drw  blk  zen  */
    /* wider POXIX related libraries (maybe harder to port) , 0*/
    { 'p', "aio"                      , 0, '-', '-', '-', '-', '-' },
    { 'p', "arpa/inet"                , 0, '-', '-', '-', '-', '-' },
@@ -135,7 +135,7 @@ tINCL g_incls [MAX_INCL] = {
    { 'p', "utmpx"                    , 0, '-', '-', '-', '-', '-' },
    { 'p', "wordexp"                  , 0, '-', '-', '-', '-', '-' },
 
-   /*---(heatherly core)-----------------*/
+   /*---(heatherly core)------------ cnt  ogl  cur  drw  blk  zen  */
    /* core, nearly every program uses these libraries */
    { 'c', "zenodotus"                , 0, '-', '-', 'v', 'é', '-' },
    { 'c', "yLOG"                     , 0, 'y', 'y', 'y', 'é', '-' },
@@ -144,7 +144,7 @@ tINCL g_incls [MAX_INCL] = {
    { 'c', "ySTR"                     , 0, 'y', 'y', 'y', 'é', '-' },
    { 'c', "yENV"                     , 0, '-', '-', 'y', 'é', '-' },
 
-   /*---(heatherly vikeys)---------------*/
+   /*---(heatherly vikeys)---------- cnt  ogl  cur  drw  blk  zen  */
    /* vikeys components supporting full vi-keys environment */
    { 'v', "yVIHUB"                   , 0, '-', '-', 'y', 'ê', '-' },
    { 'v', "yMODE"                    , 0, 'y', 'y', 'y', 'ê', '-' },
@@ -160,7 +160,7 @@ tINCL g_incls [MAX_INCL] = {
 
    { 'v', "yGOD"                     , 0, '-', '-', 'y', '-', '-' },
 
-   /*---(heatherly vikeys)---------------*/
+   /*---(heatherly vikeys)---------- cnt  ogl  cur  drw  blk  zen  */
    /* graphics specific libraries */
    /* -    -------------------------  */
    { 'g', "ncurses"                  , 0, '-', 'y', '-', '-', '-' },
@@ -183,7 +183,7 @@ tINCL g_incls [MAX_INCL] = {
    { 'g', "yVIOPENGL"                , 0, 'y', '-', 'y', '-', '-' },
    { 'g', "yVICURSES"                , 0, '-', 'y', 'y', '-', '-' },
 
-   /*---(heatherly other)----------------*/
+   /*---(heatherly other)----------- cnt  ogl  cur  drw  blk  zen  */
    /* mine, but not core, vikey, or graphics libraries */
    { 'o', "yDLST"                    , 0, '-', '-', 'y', 'ì', '-' },
    { 'o', "ySORT"                    , 0, '-', '-', 'y', 'ì', '-' },
@@ -203,7 +203,7 @@ tINCL g_incls [MAX_INCL] = {
    { 'o', "yGOLEM"                   , 0, '-', '-', 'y', '-', '-' },
    { 'o', "yKINE"                    , 0, '-', '-', 'y', '-', '-' },
 
-   /*---(heatherly solo)-----------------*/
+   /*---(heatherly solo)------------ cnt  ogl  cur  drw  blk  zen  */
    /* just taking in for definitions in header file */
    { 's', "yLOG_solo"                , 0, '-', '-', '-', '-', '-' },
    { 's', "yLOG_uver"                , 0, '-', '-', 'y', 'é', 'y' },
@@ -215,26 +215,26 @@ tINCL g_incls [MAX_INCL] = {
    { 's', "yENV_uver"                , 0, '-', '-', 'y', 'é', 'y' },
    { 's', "yDLST_solo"               , 0, '-', '-', 'y', 'é', 'y' },
    { 's', "yCOLOR_solo"              , 0, '-', '-', 'y', 'é', 'y' },
-   { 's', "yVIHUB_solo"              , 0, 'y', 'y', '-', '-', '-' },
+   { 's', "yVIHUB_solo"              , 0, 'y', 'y', 'y', 'ê', 'y' },
 
-   /*---(heatherly unit testing)---------*/
+   /*---(heatherly unit testin------ cnt  ogl  cur  drw  blk  zen  */
    { 'u', "yUNIT_solo"               , 0, '-', '-', 'y', '-', 'y' },
    { 'u', "yUNIT"                    , 0, '-', '-', 'y', '-', '-' },
    { 'u', "koios"                    , 0, '-', '-', 'v', '-', '-' },
 
-   /*---(heatherly DEPRECATED)-----------*/
+   /*---(heatherly DEPRECATED)------ cnt  ogl  cur  drw  blk  zen  */
    /* just taking in for definitions in header file */
    { 'X', "yVIKEYS"                  , 0, '-', '-', '-', '-', '-' },
    { 'X', "yXINIT"                   , 0, '-', '-', '-', '-', '-' },
 
-   /*---(alien)--------------------------*/
+   /*---(alien)--------------------- cnt  ogl  cur  drw  blk  zen  */
    /* just taking in for definitions in header file */
    { '!', "png"                      , 0, '-', '-', '-', '-', '-' },
    { '!', "jpeglib"                  , 0, '-', '-', '-', '-', '-' },
    { '!', "openssl/sha"              , 0, '-', '-', '-', '-', '-' },
    { '!', "ft2build"                 , 0, '-', '-', '-', '-', '-' },
 
-   /*---(end)----------------------------*/
+   /*---(end)----------------------- cnt  ogl  cur  drw  blk  zen  */
    {  0 , "end-of-list"              , 0, '-', '-', '-' },
 };
 int  g_nincl   = 0;

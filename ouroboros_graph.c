@@ -245,11 +245,11 @@ GRAPH_add_node          (char a_name [LEN_TITLE])
       return rce;
    }
    /*---(filter)-------------------------*/
-   if (strcmp (a_name, "yVIHUB_solo") == 0) {
-      DEBUG_PROG  yLOG_note    ("always ignore yVIHUB_solo");
-      DEBUG_DATA  yLOG_exit    (__FUNCTION__);
-      return 0;
-   }
+   /*> if (strcmp (a_name, "yVIHUB_solo") == 0) {                                     <* 
+    *>    DEBUG_PROG  yLOG_note    ("always ignore yVIHUB_solo");                     <* 
+    *>    DEBUG_DATA  yLOG_exit    (__FUNCTION__);                                    <* 
+    *>    return 0;                                                                   <* 
+    *> }                                                                              <*/
    n = GRAPH_by_name (a_name);
    DEBUG_PROG   yLOG_value   ("n"         , n);
    if (n < 0) {
