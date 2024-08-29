@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.4- handle predictable blocks/groups"
-#define     P_VERNUM    "0.4f"
-#define     P_VERTXT    "fixed last unit test script in graph section (little harder)"
+#define     P_VERNUM    "0.4g"
+#define     P_VERTXT    "confirmed deps and wave unit testing"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
