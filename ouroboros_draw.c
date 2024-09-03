@@ -51,16 +51,20 @@ DRAW_init               (char a_layout, char a_size, char a_decor, char a_cols, 
    int         i           =    0;
    int         l           =    0;
    char        s           [LEN_RECD]  = "";
+   char        x_horz, x_topp, x_bott;
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   DEBUG_PROG   yLOG_complex ("args"      , "%c %c %c %2d %2d", a_layout, a_size, a_decor, a_cols, a_rows);
    /*---(style-hints)--------------------*/
    my.d_layout   = a_layout;
    my.d_size     = a_size;
    my.d_decor    = a_decor;
    /*---(grid sizing)--------------------*/
    switch (a_size) {
-   case 'u'  : my.x_side =  2; my.x_wide =  7; my.x_gap =  3; my.y_side = 1; my.y_tall = 3; my.y_gap = 0;  break;
-   case 'l'  : my.x_side = 15; my.x_wide = 23; my.x_gap =  6; my.y_side = 2; my.y_tall = 6; my.y_gap = 2;  break;
-   case 'H'  : my.x_side = 16; my.x_wide = 30; my.x_gap = 12; my.y_side = 3; my.y_tall = 8; my.y_gap = 3;  break;
-   default   : my.x_side = 10; my.x_wide = 15; my.x_gap =  3; my.y_side = 1; my.y_tall = 5; my.y_gap = 2;  break;
+   case YASCII_MICRO  : my.x_side =  2; my.x_wide =  7; my.x_gap =  3; my.y_side = 1; my.y_tall = 3; my.y_gap = 0;  break;
+   case YASCII_LARGE  : my.x_side = 15; my.x_wide = 23; my.x_gap =  6; my.y_side = 2; my.y_tall = 6; my.y_gap = 2;  break;
+   case YASCII_HUGE   : my.x_side = 16; my.x_wide = 30; my.x_gap = 12; my.y_side = 3; my.y_tall = 8; my.y_gap = 3;  break;
+   default            : my.x_side = 10; my.x_wide = 15; my.x_gap =  3; my.y_side = 1; my.y_tall = 5; my.y_gap = 2;  break;
    }
    /*---(save row/col)-------------------*/
    if      (a_cols <= 0)          my.x_cols = 1;
@@ -69,43 +73,55 @@ DRAW_init               (char a_layout, char a_size, char a_decor, char a_cols, 
    if      (a_rows <= 0)          my.y_rows = 1;
    else if (a_rows >  50)         my.x_cols = 50;
    else                           my.y_rows = a_rows;
+   DEBUG_PROG   yLOG_complex ("grid"      , "x %2d %2d %2d   y %2d %2d %2d", my.x_side, my.x_wide, my.x_gap, my.y_side, my.y_tall, my.y_gap);
    /*---(full sizing)--------------------*/
    switch (a_layout) {
    case 's'  :
-      my.x_min =  0;
+      x_horz   =  0;
+      x_topp   =  0;
+      x_bott   =  0;
+      my.x_min = x_horz;
       my.x_max = my.x_min + my.x_wide * my.x_cols - my.x_gap;
       if (my.x_max < 80)  my.x_max = 80;
-      my.x_end = my.x_max;
+      my.x_end = my.x_max + x_horz;
       my.y_min =  5;
       my.y_max = my.y_min + my.y_tall * my.y_rows - my.y_gap;
       my.y_end = my.y_max + 2;
+      yASCII_grid_new_custom (a_size, a_decor, a_cols, a_rows, my.x_min, my.x_end - my.x_max, my.y_min, my.y_end - my.y_max, my.x_end, my.y_end);
       break;
-      yASCII_grid_new_full (a_size, a_decor, a_cols, a_rows, 0, 0, 5, 2);
    case 'b'  :
-      my.x_min =  8;
+      x_horz   =  8;
+      x_topp   =  6;
+      x_bott   =  3;
+      my.x_min = x_horz;
       my.x_max = my.x_min + my.x_wide * my.x_cols - my.x_gap;
-      my.x_end = my.x_max + 8;
-      my.y_min =  6;
+      my.x_end = my.x_max + x_horz;
+      my.y_min = x_topp;
       my.y_max = my.y_min + my.y_tall * my.y_rows - my.y_gap;
-      my.y_end = my.y_max + 3;
-      yASCII_grid_new_full (a_size, a_decor, a_cols, a_rows, 8, 8, 6, 3);
+      my.y_end = my.y_max + x_bott;
+      yASCII_grid_new_full (a_size, a_decor, a_cols, a_rows, my.x_min, my.x_end - my.x_max, my.y_min, my.y_end - my.y_max);
       break;
    default   :
-      my.x_min =  0;
+      x_horz   =  0;
+      x_topp   =  0;
+      x_bott   =  0;
+      my.x_min = x_horz;
       my.x_max = my.x_min + my.x_wide * my.x_cols - my.x_gap;
-      my.x_end = my.x_max;
-      my.y_min =  0;
+      my.x_end = my.x_max + x_horz;
+      my.y_min = x_topp;
       my.y_max = my.y_min + my.y_tall * my.y_rows - my.y_gap;
-      my.y_end = my.y_max;
-      yASCII_grid_new_full (a_size, a_decor, a_cols, a_rows, 0, 0, 0, 0);
+      my.y_end = my.y_max + x_bott;
+      yASCII_grid_new_full (a_size, a_decor, a_cols, a_rows, my.x_min, my.x_end - my.x_max, my.y_min, my.y_end - my.y_max);
       break;
    }
+   DEBUG_PROG   yLOG_complex ("full"      , "x %2d %2d %2d   y %2d %2d %2d", my.x_min, my.x_max, my.x_end, my.y_min, my.y_max, my.y_end);
    /*---(globals)------------------------*/
    for (i = 0; i < LEN_LABEL; ++i) {
       strcpy (zASCII_blocks [i].b_deps, "");
    }
    /*---(title block)--------------------*/
    if (strchr ("fs", a_layout) != NULL) {
+      DEBUG_PROG   yLOG_note    ("write title block");
       sprintf (s, "#!%s", P_FULLPATH);
       yASCII_print (0, 0, s, YASCII_CLEAR);
       sprintf (s, "## %s", P_ONELINE);
@@ -113,16 +129,18 @@ DRAW_init               (char a_layout, char a_size, char a_decor, char a_cols, 
    }
    /*---(headers)------------------------*/
    if (strchr ("fs", a_layout) != NULL) {
+      DEBUG_PROG   yLOG_note    ("write headers");
       for (x_lvl = 0; x_lvl < a_cols; ++x_lvl) {
          switch (a_size) {
-         case 'u' : sprintf (s, "[-%02d-]", x_lvl);      break;
-         case 'l' : sprintf (s, "[------%02d-------]", x_lvl); break;
+         case YASCII_MICRO : sprintf (s, "[-%02d-]", x_lvl);      break;
+         case YASCII_LARGE : sprintf (s, "[------%02d-------]", x_lvl); break;
          default  : sprintf (s, "[----%02d----]", x_lvl);      break;
          }
          yASCII_print (x_lvl * my.x_wide, 3, s, YASCII_CLEAR);
       }
    }
    /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
