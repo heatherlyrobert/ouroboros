@@ -189,10 +189,11 @@ PROG__args          (int a_argc, char *a_argv[])
          b = my.n_home;
       }
       rc = yJOBS_argument (&i, a, b, &(my.run_as), &(my.run_mode), my.run_file);
-      if (rc < 0) {
-         DEBUG_PROG  yLOG_exitr (__FUNCTION__, rce);
-         return rce;
-      }
+      DEBUG_ARGS  yLOG_value   ("yJOBS"  , rc);
+      /*> if (rc < 0) {                                                               <* 
+       *>    DEBUG_PROG  yLOG_exitr (__FUNCTION__, rce);                              <* 
+       *>    return rce;                                                              <* 
+       *> }                                                                           <*/
       if (rc == 1)  continue;
       /*---(configuration)---------------*/
       if      (strcmp (a, "--db"        ) == 0)  TWOARG rc = ystrlfile  ("--db", my.n_db, a_argv [i], "db", LEN_PATH);
@@ -371,8 +372,8 @@ PROG__unit_loud    (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
-   int         x_argc      = 4;
-   char       *x_argv [4]  = { "ouroboros_unit", "@@kitchen" , "@@yparse", "@@yascii" };
+   int         x_argc      = 5;
+   char       *x_argv [5]  = { "ouroboros_unit", "@@kitchen" , "@@yjobs" , "@@yparse", "@@yascii" };
    /*---(run)----------------------------*/
    rc = PROG_urgents (x_argc, x_argv);
    rc = PROG_startup (x_argc, x_argv);
