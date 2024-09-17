@@ -3,11 +3,15 @@
 
 
 
+/*====================------------------------------------====================*/
+/*===----                       updating totals                        ----===*/
+/*====================------------------------------------====================*/
+static void  o___TOTALING________o () { return; }
+
 static int   G_nproj;
 static int   G_nunit, G_nscrp, G_ncond, G_nstep, G_est, G_npass, G_nfail, G_nbadd, G_nvoid, G_nmiss, G_act, G_PASS, G_FAIL, G_WARN, G_NONE;
 static int   P_nunit, P_nscrp, P_ncond, P_nstep, P_est, P_npass, P_nfail, P_nbadd, P_nvoid, P_nmiss, P_act, P_PASS, P_FAIL, P_WARN, P_NONE;
 static int   U_nunit, U_nscrp, U_ncond, U_nstep, U_est, U_npass, U_nfail, U_nbadd, U_nvoid, U_nmiss, U_act, U_PASS, U_FAIL, U_WARN, U_NONE;
-
 
 char
 TDB_total_proj         (tWAVE *a_proj)
@@ -116,6 +120,131 @@ TDB_totalize            (void)
 
 
 
+/*====================------------------------------------====================*/
+/*===----                       open and close                         ----===*/
+/*====================------------------------------------====================*/
+static void  o___SHARED__________o () { return; }
+
+   /*> rc = SHARED_open (a_name, 'W', &x_db);                                         <*/
+
+char
+TBD__open               (char a_name [LEN_PATH], char a_mode, FILE **r_file)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        x_mode      [LEN_TERSE] = "";
+   FILE       *f           = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_FILE   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_FILE   yLOG_point   ("a_name"    , a_name);
+   --rce;  if (a_name      == NULL) {
+      DEBUG_FILE   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_FILE   yLOG_info    ("a_name"    , a_name);
+   DEBUG_FILE   yLOG_char    ("a_mode"    , a_mode);
+   --rce;  if (a_mode == 0 || strchr ("rw", a_mode) == NULL) {
+      DEBUG_FILE   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_FILE   yLOG_point   ("r_file"    , r_file);
+   --rce;  if (r_file      == NULL) {
+      DEBUG_FILE   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_INPT   yLOG_point   ("*r_file"   , *r_file);
+   --rce;  if (*r_file != NULL) {
+      DEBUG_FILE   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(set mode)-----------------------*/
+   DEBUG_FILE   yLOG_char    ("a_mode"    , a_mode);
+   --rce;  switch (a_mode) {
+   case 'r' :
+      strlcpy (x_mode, "rt", LEN_TERSE);
+      yURG_msg ('-', "reading text file å%sæ", a_name);
+      break;
+   case 'w' :
+      strlcpy (x_mode, "wt", LEN_TERSE);
+      yURG_msg ('-', "writing text file å%sæ", a_name);
+      break;
+   default  :
+      DEBUG_FILE   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_FILE   yLOG_info    ("x_mode"    , x_mode);
+   /*---(open)---------------------------*/
+   DEBUG_FILE   yLOG_info    ("a_name"    , a_name);
+   f = fopen (a_name, x_mode);
+   DEBUG_FILE   yLOG_point   ("f"         , f);
+   --rce;  if (f == NULL) {
+      DEBUG_FILE   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(save-back)----------------------*/
+   if (r_file != NULL)  *r_file = f;
+   /*---(complete)-----------------------*/
+   DEBUG_FILE   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+TDB__close              (FILE **b_file)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   /*---(header)-------------------------*/
+   DEBUG_FILE   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_INPT   yLOG_point   ("b_file"    , b_file);
+   --rce;  if (b_file == NULL) {
+      DEBUG_FILE   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_INPT   yLOG_point   ("*b_file"   , *b_file);
+   --rce;  if (*b_file == NULL) {
+      DEBUG_FILE   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(close)--------------------------*/
+   rc = fclose (*b_file);
+   DEBUG_OUTP   yLOG_value   ("close"     , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_FILE   yLOG_exitr   (__FUNCTION__, rce);
+      return rce; 
+   }
+   /*---(ground pointer)-----------------*/
+   *b_file = NULL;
+   DEBUG_INPT   yLOG_point   ("*b_file"   , *b_file);
+   /*---(complete)-----------------------*/
+   DEBUG_FILE   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
+
+/*====================------------------------------------====================*/
+/*===----                         write central                        ----===*/
+/*====================------------------------------------====================*/
+static void  o___WRITE___________o () { return; }
+
+/*> char                                                                                     <* 
+ *> TBD_header              (void)                                                           <* 
+ *> {                                                                                        <* 
+ *>    long        x_now       =    0;                                                       <* 
+ *>    tTIME      *x_broke     = NULL;                                                       <* 
+ *>    x_now   = time (NULL);                                                                <* 
+ *>    x_broke = localtime (&x_now);                                                         <* 
+ *>    strftime (x_heart, LEN_TITLE, "%y.%m.%d.%H.%M.%S.%u.%W.%j", x_broke);                 <* 
+ *>    fprintf (f, "#!/usr/local/bin/ouroboros\n");                                          <* 
+ *>    fprintf (f, "## ouroboros-aperantos (tail-eater) master unit testing sequencer\n");   <* 
+ *>    fprintf (f, "## central wave and dependency database\n");                             <* 
+ *>    fprintf (f, "## version      å%sæ %s\n", P_VERNUM, P_VERTXT);                         <* 
+ *>    fprintf (f, "## last updated å%sæ %ld\n", x_heart, x_now);                            <* 
+ *> }                                                                                        <*/
+
 char
 TDB_write               (char a_full [LEN_PATH])
 {
@@ -206,4 +335,16 @@ TDB_write               (char a_full [LEN_PATH])
    --rce; if (rc != 0)         return rce;
    /*---(complete)-----------------------*/
    return 0;
+}
+
+
+
+/*====================------------------------------------====================*/
+/*===----                         write central                        ----===*/
+/*====================------------------------------------====================*/
+static void  o___READ____________o () { return; }
+
+char
+TDB_read                (char a_full [LEN_PATH])
+{
 }

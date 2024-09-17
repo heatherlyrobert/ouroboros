@@ -137,7 +137,8 @@ PROG__init          (void)
    my.fail  = 0;
    my.badd  = 0;
    my.othr  = 0;
-   WAVE_init ();
+   NODE_init  ();
+   WAVE_init  ();
    GRAPH_init ();
    INCL_clear ();
    /*---(complete)-----------------------*/

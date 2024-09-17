@@ -274,24 +274,24 @@ DEPS__layer             (int n)
    DEBUG_PROG   yLOG_value   ("n"         , n);
    strcpy (g_nodes [n].n_cumd, "");
    DEBUG_PROG   yLOG_info    ("n_name"    , g_nodes [n].n_name);
-   /*> printf ("SOLVING     : %s\n", g_nodes [n].n_name);                             <*/
+   /*> printf ("SOLVING     : %s¦", g_nodes [n].n_name);                             <*/
    /*---(fill successors)-------------*/
-   x_pred = g_nodes [n].n_phead;
+   x_pred = g_nodes [n].n_hpred;
    DEBUG_PROG   yLOG_point   ("x_pred"    , x_pred);
    while (x_pred != NULL) {
-      DEBUG_PROG   yLOG_info    ("n_pred"    , x_pred->e_beg->n_name);
+      DEBUG_PROG   yLOG_info    ("n_cpred"    , x_pred->e_beg->n_name);
       DEPS_merge (x_pred->e_beg->n_cumd, g_nodes [n].n_cumd);
       ++c;
       x_pred = x_pred->e_pnext;
       DEBUG_PROG   yLOG_point   ("x_pred"    , x_pred);
    }
    DEBUG_PROG   yLOG_value   ("c"         , c);
-   /*> printf ("  PREDS     : %4då%sæ\n", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <*/
-   /*> printf ("  DEPS      : %4då%sæ\n", strlen (g_nodes [n].n_deps), g_nodes [n].n_deps);   <*/
+   /*> printf ("  PREDS     : %4då%sæ¦", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <*/
+   /*> printf ("  DEPS      : %4då%sæ¦", strlen (g_nodes [n].n_deps), g_nodes [n].n_deps);   <*/
    DEPS_missing (g_nodes [n].n_deps, g_nodes [n].n_cumd, g_deps_block, g_nodes [n].n_miss);
-   /*> printf ("  MISS      : %4då%sæ\n", strlen (g_nodes [n].n_miss), g_nodes [n].n_miss);   <*/
+   /*> printf ("  MISS      : %4då%sæ¦", strlen (g_nodes [n].n_miss), g_nodes [n].n_miss);   <*/
    DEPS_merge   (g_nodes [n].n_miss, g_nodes [n].n_cumd);
-   /*> printf ("  CUMPD     : %4då%sæ\n", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <*/
+   /*> printf ("  CUMPD     : %4då%sæ¦", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return c;
 }
@@ -333,7 +333,7 @@ DEPS_dump               (void)
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    DEBUG_PROG   yLOG_value   ("g_nnode"   , g_nnode);
    for (i = 0; i <  g_nnode; ++i) {
-      printf ("%3d  %-25.25s  %s\n", i, g_nodes [i].n_name, g_nodes [i].n_deps);
+      printf ("%3d  %-25.25s  %s¦", i, g_nodes [i].n_name, g_nodes [i].n_deps);
    }
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;

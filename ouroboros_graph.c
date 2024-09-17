@@ -87,10 +87,6 @@ struct {
 };
 
 
-tNODE   g_nodes   [MAX_NODE];
-int     g_nnode     =  0;
-int     g_ready     =  0;
-
 
 tEDGE   g_edges   [MAX_EDGE];
 int     g_nedge     =  0;
@@ -103,34 +99,6 @@ char    g_deps_block  [LEN_RECD]  = "";
 /*===----                      program level                           ----===*/
 /*====================------------------------------------====================*/
 static void  o___PROGRAM_________o () { return; }
-
-char
-GRAHP_node_clean        (int n)
-{
-      /*---(data)--------------*/
-      g_nodes [n].n_name [0] = '\0';
-      g_nodes [n].n_deps [0] = '\0';
-      g_nodes [n].n_cumd [0] = '\0';
-      g_nodes [n].n_miss [0] = '\0';
-      g_nodes [n].n_focus    = '-';
-      /*---(working)-----------*/
-      g_nodes [n].n_self     = -1;
-      g_nodes [n].n_level    = -1;
-      g_nodes [n].n_row      = -1;
-      g_nodes [n].n_block    = '-';
-      /*---(predecessors)------*/
-      g_nodes [n].n_pred     = 0;
-      g_nodes [n].n_phead    = NULL;
-      g_nodes [n].n_ptail    = NULL;
-      g_nodes [n].n_filled   = 0;
-      g_nodes [n].n_ready    = '-';
-      /*---(successors)--------*/
-      g_nodes [n].n_succ     = 0;
-      g_nodes [n].n_shead    = NULL;
-      g_nodes [n].n_stail    = NULL;
-      /*---(done)--------------*/
-      return 0;
-}
 
 
 char
@@ -158,10 +126,10 @@ GRAPH_purge             (void)
    g_nedge = 0;
    for (i = 0; i < MAX_NODE; ++i) {
       /*---(data)--------------*/
-      g_nodes [i].n_name [0] = '\0';
-      g_nodes [i].n_deps [0] = '\0';
-      g_nodes [i].n_cumd [0] = '\0';
-      g_nodes [i].n_miss [0] = '\0';
+      g_nodes [i].n_name [0] = '£';
+      g_nodes [i].n_deps [0] = '£';
+      g_nodes [i].n_cumd [0] = '£';
+      g_nodes [i].n_miss [0] = '£';
       g_nodes [i].n_focus    = '-';
       /*---(working)-----------*/
       g_nodes [i].n_self     = -1;
@@ -169,15 +137,15 @@ GRAPH_purge             (void)
       g_nodes [i].n_row      = -1;
       g_nodes [i].n_block    = '-';
       /*---(predecessors)------*/
-      g_nodes [i].n_pred     = 0;
-      g_nodes [i].n_phead    = NULL;
-      g_nodes [i].n_ptail    = NULL;
+      g_nodes [i].n_cpred     = 0;
+      g_nodes [i].n_hpred    = NULL;
+      g_nodes [i].n_tpred    = NULL;
       g_nodes [i].n_filled   = 0;
       g_nodes [i].n_ready    = '-';
       /*---(successors)--------*/
-      g_nodes [i].n_succ     = 0;
-      g_nodes [i].n_shead    = NULL;
-      g_nodes [i].n_stail    = NULL;
+      g_nodes [i].n_csucc     = 0;
+      g_nodes [i].n_hsucc    = NULL;
+      g_nodes [i].n_tsucc    = NULL;
       /*---(done)--------------*/
    }
    g_nnode = 0;
@@ -282,9 +250,9 @@ GRAPH_add_node          (char a_name [LEN_TITLE])
  *>    for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {                                                                   <* 
  *>       for (i = 0; i <  g_nnode; ++i) {                                                                             <* 
  *>          if (g_nodes [i].n_level != x_lvl)  continue;                                                              <* 
- *>          printf ("%3d  %3d  %-25.25s   %3dp  ", i, g_nodes [i].n_level, g_nodes [i].n_name, g_nodes [i].n_pred);   <* 
- *>          if (g_nodes [i].n_pred > 0)  {                                                                            <* 
- *>             x_pred = g_nodes [i].n_phead;                                                                          <* 
+ *>          printf ("%3d  %3d  %-25.25s   %3dp  ", i, g_nodes [i].n_level, g_nodes [i].n_name, g_nodes [i].n_cpred);   <* 
+ *>          if (g_nodes [i].n_cpred > 0)  {                                                                            <* 
+ *>             x_pred = g_nodes [i].n_hpred;                                                                          <* 
  *>             while (x_pred != NULL) {                                                                               <* 
  *>                printf (" %-15.15s", (x_pred->e_beg)->n_name);                                                      <* 
  *>                x_pred = x_pred->e_pnext;                                                                           <* 
@@ -302,27 +270,27 @@ GRAPH_add_node          (char a_name [LEN_TITLE])
 char*
 GRAPH_node_line         (int n)
 {
-   /*---(locals)-----------+-----+-----+-*/
-   char        s           [LEN_DESC]  = "";
-   char        t           [LEN_HUND]  = "";
-   char        u           [LEN_HUND]  = "";
-   /*---(empty)--------------------------*/
-   if (n < 0 || n >= g_nnode) {
-      snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : ·                    · ·  · ·                    ·                     · ·    · ·                    ·                      ´ åæ", n);
-      return my.unit_answer;
-   }
-   /*---(prepare)------------------------*/
-   if (g_nodes [n].n_pred > 0)  sprintf (t, "%2d %-20.20s %-20.20s %2d %c", g_nodes [n].n_pred, ((g_nodes [n].n_phead)->e_beg)->n_name, ((g_nodes [n].n_ptail)->e_beg)->n_name, g_nodes [n].n_filled, g_nodes [n].n_ready);
-   else                         strcpy  (t, " · ·                    ·                     · ·");
-   if (g_nodes [n].n_succ > 0)  sprintf (u, "%2d %-20.20s %-20.20s", g_nodes [n].n_succ, ((g_nodes [n].n_shead)->e_end)->n_name, ((g_nodes [n].n_stail)->e_end)->n_name);
-   else                         strcpy  (u, " · ·                    ·                     ·");
-   if      (g_nodes [n].n_level <  0)  strcpy (s, "-");
-   else if (g_nodes [n].n_level >  9)  strcpy (s, "Ï");
-   else                                sprintf (s, "%c", g_nodes [n].n_level + '0');
-   /*---(concatenate)--------------------*/
-   snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : %-20.20s %c %-1.1s %-49.49s   %-44.44s   ´ å%sæ", n, g_nodes [n].n_name, g_nodes [n].n_focus, s, t, u, g_nodes [n].n_deps);
-   /*---(complete)-----------------------*/
-   return my.unit_answer;
+   /*> /+---(locals)-----------+-----+-----+-+/                                                                                                                                                                                     <* 
+    *> char        s           [LEN_DESC]  = "";                                                                                                                                                                                    <* 
+    *> char        t           [LEN_HUND]  = "";                                                                                                                                                                                    <* 
+    *> char        u           [LEN_HUND]  = "";                                                                                                                                                                                    <* 
+    *> /+---(empty)--------------------------+/                                                                                                                                                                                     <* 
+    *> if (n < 0 || n >= g_nnode) {                                                                                                                                                                                                 <* 
+    *>    snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : ·                    · ·  · ·                    ·                     · ·    · ·                    ·                      ´ åæ", n);                           <* 
+    *>    return my.unit_answer;                                                                                                                                                                                                    <* 
+    *> }                                                                                                                                                                                                                            <* 
+    *> /+---(prepare)------------------------+/                                                                                                                                                                                     <* 
+    *> if (g_nodes [n].n_cpred > 0)  sprintf (t, "%2d %-20.20s %-20.20s %2d %c", g_nodes [n].n_cpred, ((g_nodes [n].n_cpred)->e_beg)->n_name, ((g_nodes [n].n_tpred)->e_beg)->n_name, g_nodes [n].n_filled, g_nodes [n].n_ready);   <* 
+    *> else                         strcpy  (t, " · ·                    ·                     · ·");                                                                                                                               <* 
+    *> if (g_nodes [n].n_csucc > 0)  sprintf (u, "%2d %-20.20s %-20.20s", g_nodes [n].n_csucc, ((g_nodes [n].n_hsucc)->e_end)->n_name, ((g_nodes [n].n_tsucc)->e_end)->n_name);                                                     <* 
+    *> else                         strcpy  (u, " · ·                    ·                     ·");                                                                                                                                 <* 
+    *> if      (g_nodes [n].n_level <  0)  strcpy (s, "-");                                                                                                                                                                         <* 
+    *> else if (g_nodes [n].n_level >  9)  strcpy (s, "Ï");                                                                                                                                                                         <* 
+    *> else                                sprintf (s, "%c", g_nodes [n].n_level + '0');                                                                                                                                            <* 
+    *> /+---(concatenate)--------------------+/                                                                                                                                                                                     <* 
+    *> snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : %-20.20s %c %-1.1s %-49.49s   %-44.44s   ´ å%sæ", n, g_nodes [n].n_name, g_nodes [n].n_focus, s, t, u, g_nodes [n].n_deps);                                         <* 
+    *> /+---(complete)-----------------------+/                                                                                                                                                                                     <* 
+    *> return my.unit_answer;                                                                                                                                                                                                       <*/
 }
 
 char
@@ -332,7 +300,7 @@ GRAPH_dump_nodes        (void)
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    DEBUG_PROG   yLOG_value   ("g_nnode"   , g_nnode);
    for (i = 0; i <  g_nnode; ++i) {
-      DEBUG_PROG   yLOG_complex ("node"      , "%3d  %-25.25s   %3dp   %3ds", i, g_nodes [i].n_name, g_nodes [i].n_pred, g_nodes [i].n_succ);
+      DEBUG_PROG   yLOG_complex ("node"      , "%3d  %-25.25s   %3dp   %3ds", i, g_nodes [i].n_name, g_nodes [i].n_cpred, g_nodes [i].n_csucc);
       printf ("%s\n", GRAPH_node_line (i));
    }
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
@@ -378,7 +346,7 @@ GRAPH_edge_add          (char a_type, char a_beg [LEN_TITLE], int a_end)
    }
    DEBUG_PROG   yLOG_info    ("name"      , g_nodes [a_end].n_name);
    /*---(check for duplicate)------------*/
-   x_pred = g_nodes [a_end].n_phead;
+   x_pred = g_nodes [a_end].n_hpred;
    while (x_pred != NULL) {
       if (strcmp (x_pred->e_beg->n_name, a_beg) == 0) {
          DEBUG_PROG   yLOG_note    ("found pre-existing, duplicate edge");
@@ -405,28 +373,28 @@ GRAPH_edge_add          (char a_type, char a_beg [LEN_TITLE], int a_end)
    g_edges [g_nedge].e_nbeg = x_beg;
    g_edges [g_nedge].e_beg  = &(g_nodes [x_beg]);
    /*---(beg-point on node)--------------*/
-   if (g_nodes [x_beg].n_shead == NULL) { /* first */
+   if (g_nodes [x_beg].n_hsucc == NULL) { /* first */
       DEBUG_PROG   yLOG_note    ("first successor");
-      g_nodes [x_beg].n_shead = &(g_edges [g_nedge]);
+      g_nodes [x_beg].n_hsucc = &(g_edges [g_nedge]);
    } else {  /*                          append */
       DEBUG_PROG   yLOG_note    ("append successor");
-      (g_nodes [x_beg].n_stail)->e_snext = &(g_edges [g_nedge]);
+      (g_nodes [x_beg].n_tsucc)->e_snext = &(g_edges [g_nedge]);
    }
-   g_nodes [x_beg].n_stail = &(g_edges [g_nedge]);
-   ++(g_nodes [x_beg].n_succ);
+   g_nodes [x_beg].n_tsucc = &(g_edges [g_nedge]);
+   ++(g_nodes [x_beg].n_csucc);
    /*---(end-point on edge)--------------*/
    g_edges [g_nedge].e_nend = a_end;
    g_edges [g_nedge].e_end  = &(g_nodes [a_end]);
    /*---(end-point on node)--------------*/
-   if (g_nodes [a_end].n_phead == NULL) { /* first */
+   if (g_nodes [a_end].n_hpred == NULL) { /* first */
       DEBUG_PROG   yLOG_note    ("first predecessor");
-      g_nodes [a_end].n_phead = &(g_edges [g_nedge]);
+      g_nodes [a_end].n_hpred = &(g_edges [g_nedge]);
    } else {  /*                          append */
       DEBUG_PROG   yLOG_note    ("append predecessor");
-      (g_nodes [a_end].n_ptail)->e_pnext = &(g_edges [g_nedge]);
+      (g_nodes [a_end].n_tpred)->e_pnext = &(g_edges [g_nedge]);
    }
-   g_nodes [a_end].n_ptail = &(g_edges [g_nedge]);
-   ++(g_nodes [a_end].n_pred);
+   g_nodes [a_end].n_tpred = &(g_edges [g_nedge]);
+   ++(g_nodes [a_end].n_cpred);
    /*---(counter)------------------------*/
    ++g_nedge;
    DEBUG_PROG   yLOG_value   ("g_nedge"   , g_nedge);
@@ -454,7 +422,7 @@ GRAPH_dump_edges        (void)
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    DEBUG_PROG   yLOG_value   ("g_nedge"   , g_nedge);
    for (i = 0; i <  g_nedge; ++i) {
-      printf ("%3d  %3d %-25.25s  %3d %-25.25s\n", i, g_edges [i].e_nbeg, g_nodes [g_edges [i].e_nbeg].n_name, g_edges [i].e_nend, g_nodes [g_edges [i].e_nend].n_name);
+      printf ("%3d  %3d %-25.25s  %3d %-25.25s¦", i, g_edges [i].e_nbeg, g_nodes [g_edges [i].e_nbeg].n_name, g_edges [i].e_nend, g_nodes [g_edges [i].e_nend].n_name);
    }
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -499,24 +467,24 @@ static void  o___DEPS____________o () { return; }
  *>    DEBUG_PROG   yLOG_value   ("n"         , n);                                                     <* 
  *>    strcpy (g_nodes [n].n_cumd, "");                                                                 <* 
  *>    DEBUG_PROG   yLOG_info    ("n_name"    , g_nodes [n].n_name);                                    <* 
- *>    /+> printf ("SOLVING     : %s\n", g_nodes [n].n_name);                             <+/           <* 
+ *>    /+> printf ("SOLVING     : %s¦", g_nodes [n].n_name);                             <+/           <* 
  *>    /+---(fill successors)-------------+/                                                            <* 
- *>    x_pred = g_nodes [n].n_phead;                                                                    <* 
+ *>    x_pred = g_nodes [n].n_hpred;                                                                    <* 
  *>    DEBUG_PROG   yLOG_point   ("x_pred"    , x_pred);                                                <* 
  *>    while (x_pred != NULL) {                                                                         <* 
- *>       DEBUG_PROG   yLOG_info    ("n_pred"    , x_pred->e_beg->n_name);                              <* 
+ *>       DEBUG_PROG   yLOG_info    ("n_cpred"    , x_pred->e_beg->n_name);                              <* 
  *>       DEPS_merge (x_pred->e_beg->n_cumd, g_nodes [n].n_cumd);                                       <* 
  *>       ++c;                                                                                          <* 
  *>       x_pred = x_pred->e_pnext;                                                                     <* 
  *>       DEBUG_PROG   yLOG_point   ("x_pred"    , x_pred);                                             <* 
  *>    }                                                                                                <* 
  *>    DEBUG_PROG   yLOG_value   ("c"         , c);                                                     <* 
- *>    /+> printf ("  PREDS     : %4då%sæ\n", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <+/   <* 
- *>    /+> printf ("  DEPS      : %4då%sæ\n", strlen (g_nodes [n].n_deps), g_nodes [n].n_deps);   <+/   <* 
+ *>    /+> printf ("  PREDS     : %4då%sæ¦", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <+/   <* 
+ *>    /+> printf ("  DEPS      : %4då%sæ¦", strlen (g_nodes [n].n_deps), g_nodes [n].n_deps);   <+/   <* 
  *>    DEPS_missing (g_nodes [n].n_deps, g_nodes [n].n_cumd, g_deps_block, g_nodes [n].n_miss);         <* 
- *>    /+> printf ("  MISS      : %4då%sæ\n", strlen (g_nodes [n].n_miss), g_nodes [n].n_miss);   <+/   <* 
+ *>    /+> printf ("  MISS      : %4då%sæ¦", strlen (g_nodes [n].n_miss), g_nodes [n].n_miss);   <+/   <* 
  *>    DEPS_merge   (g_nodes [n].n_miss, g_nodes [n].n_cumd);                                           <* 
- *>    /+> printf ("  CUMPD     : %4då%sæ\n", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <+/   <* 
+ *>    /+> printf ("  CUMPD     : %4då%sæ¦", strlen (g_nodes [n].n_cumd), g_nodes [n].n_cumd);   <+/   <* 
  *>    DEBUG_PROG   yLOG_exit    (__FUNCTION__);                                                        <* 
  *>    return c;                                                                                        <* 
  *> }                                                                                                   <*/
@@ -551,7 +519,7 @@ static void  o___DEPS____________o () { return; }
  *>    DEBUG_PROG   yLOG_enter   (__FUNCTION__);                                       <* 
  *>    DEBUG_PROG   yLOG_value   ("g_nnode"   , g_nnode);                              <* 
  *>    for (i = 0; i <  g_nnode; ++i) {                                                <* 
- *>       printf ("%3d  %-25.25s  %s\n", i, g_nodes [i].n_name, g_nodes [i].n_deps);   <* 
+ *>       printf ("%3d  %-25.25s  %s¦", i, g_nodes [i].n_name, g_nodes [i].n_deps);   <* 
  *>    }                                                                               <* 
  *>    DEBUG_PROG   yLOG_exit    (__FUNCTION__);                                       <* 
  *>    return 0;                                                                       <* 
@@ -600,8 +568,8 @@ GRAPH_solve_layer       (char a_mark, char a_lvl)
    /*---(prepare)------------------------*/
    DEBUG_PROG   yLOG_value   ("prepare"   , a_lvl);
    for (i = 0; i < g_nnode; ++i) {
-      DEBUG_PROG   yLOG_complex ("... check" , "%-20.20s  %3df %3dt", g_nodes [i].n_name, g_nodes [i].n_filled, g_nodes [i].n_pred);
-      if (g_nodes [i].n_filled == g_nodes [i].n_pred) {
+      DEBUG_PROG   yLOG_complex ("... check" , "%-20.20s  %3df %3dt", g_nodes [i].n_name, g_nodes [i].n_filled, g_nodes [i].n_cpred);
+      if (g_nodes [i].n_filled == g_nodes [i].n_cpred) {
          DEBUG_PROG   yLOG_info    ("n_ready"   , g_nodes [i].n_name);
          g_nodes [i].n_ready = 'y';
       }
@@ -618,7 +586,7 @@ GRAPH_solve_layer       (char a_mark, char a_lvl)
       ++c;
       ++g_ready;
       /*---(fill successors)-------------*/
-      x_succ = g_nodes [i].n_shead;
+      x_succ = g_nodes [i].n_hsucc;
       while (x_succ != NULL) {
          x_succ->e_filled = 'y';
          DEBUG_PROG   yLOG_complex ("... fill"  , "%s to %s", g_nodes [i].n_name, (x_succ->e_end)->n_name);
@@ -659,7 +627,7 @@ GRAPH_focus_pred        (int n)
    DEBUG_PROG   yLOG_value   ("n"         , n);
    g_nodes [n].n_focus = '°';
    /*---(fill successors)-------------*/
-   x_pred = g_nodes [n].n_phead;
+   x_pred = g_nodes [n].n_hpred;
    DEBUG_PROG   yLOG_point   ("x_pred"    , x_pred);
    while (x_pred != NULL) {
       GRAPH_focus_pred (x_pred->e_nbeg);
@@ -720,9 +688,9 @@ GRAPH_dump_seq          (void)
    for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {
       for (i = 0; i <  g_nnode; ++i) {
          if (g_nodes [i].n_level != x_lvl)  continue;
-         printf ("%3d  %3d  %-25.25s   %3dp  ", i, g_nodes [i].n_level, g_nodes [i].n_name, g_nodes [i].n_pred);
-         if (g_nodes [i].n_pred > 0)  {
-            x_pred = g_nodes [i].n_phead;
+         printf ("%3d  %3d  %-25.25s   %3dp  ", i, g_nodes [i].n_level, g_nodes [i].n_name, g_nodes [i].n_cpred);
+         if (g_nodes [i].n_cpred > 0)  {
+            x_pred = g_nodes [i].n_hpred;
             while (x_pred != NULL) {
                printf (" %-15.15s", (x_pred->e_beg)->n_name);
                x_pred = x_pred->e_pnext;
@@ -745,9 +713,9 @@ GRAPH_dump_all          (void)
    tEDGE      *x_pred      = NULL;
    printf ("\n\nouroboros predecessors\n\n");
    for (i = 0; i <  g_nnode; ++i) {
-      printf ("%3d  %3d  %-25.25s   %3dp  ", i, g_nodes [i].n_level, g_nodes [i].n_name, g_nodes [i].n_pred);
-      if (g_nodes [i].n_pred > 0)  {
-         x_pred = g_nodes [i].n_phead;
+      printf ("%3d  %3d  %-25.25s   %3dp  ", i, g_nodes [i].n_level, g_nodes [i].n_name, g_nodes [i].n_cpred);
+      if (g_nodes [i].n_cpred > 0)  {
+         x_pred = g_nodes [i].n_hpred;
          while (x_pred != NULL) {
             printf (" %-15.15s", (x_pred->e_beg)->n_name);
             x_pred = x_pred->e_pnext;
@@ -787,9 +755,9 @@ GRAPH__unit             (char *a_question, int n)
       /*> if (n >= g_nnode) {                                                                                                                                                                                                           <* 
        *>    snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : ·                    · ·  · ·                    ·                     · ·    · ·                    ·                      ´", n);                               <* 
        *> } else {                                                                                                                                                                                                                      <* 
-       *>    if (g_nodes [n].n_pred > 0)  sprintf (t, "%2d %-20.20s %-20.20s %2d %c", g_nodes [n].n_pred, ((g_nodes [n].n_phead)->e_beg)->n_name, ((g_nodes [n].n_ptail)->e_beg)->n_name, g_nodes [n].n_filled, g_nodes [n].n_ready);   <* 
+       *>    if (g_nodes [n].n_cpred > 0)  sprintf (t, "%2d %-20.20s %-20.20s %2d %c", g_nodes [n].n_cpred, ((g_nodes [n].n_cpred)->e_beg)->n_name, ((g_nodes [n].n_tpred)->e_beg)->n_name, g_nodes [n].n_filled, g_nodes [n].n_ready);   <* 
        *>    else                         strcpy  (t, " · ·                    ·                     · ·");                                                                                                                             <* 
-       *>    if (g_nodes [n].n_succ > 0)  sprintf (u, "%2d %-20.20s %-20.20s", g_nodes [n].n_succ, ((g_nodes [n].n_shead)->e_end)->n_name, ((g_nodes [n].n_stail)->e_end)->n_name);                                                     <* 
+       *>    if (g_nodes [n].n_csucc > 0)  sprintf (u, "%2d %-20.20s %-20.20s", g_nodes [n].n_csucc, ((g_nodes [n].n_hsucc)->e_end)->n_name, ((g_nodes [n].n_tsucc)->e_end)->n_name);                                                     <* 
        *>    else                         strcpy  (u, " · ·                    ·                     ·");                                                                                                                               <* 
        *>    if      (g_nodes [n].n_level <  0)  strcpy (s, "-");                                                                                                                                                                       <* 
        *>    else if (g_nodes [n].n_level >  9)  strcpy (s, "Ï");                                                                                                                                                                       <* 

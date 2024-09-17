@@ -318,7 +318,7 @@ DRAW_box                (char a_block, int n)
    DEBUG_PROG   yLOG_value   ("n_row aft" , x_node->n_row);
    ++(s_cols [x_node->n_level]);
    /*---(show box)-----------------------*/
-   yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", '-', x_node->n_pred, x_node->n_succ);
+   yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", '-', x_node->n_cpred, x_node->n_csucc);
    /*---(increment boxes)----------------*/
    ++s_boxes;
    DEBUG_PROG   yLOG_value   ("s_boxes"   , s_boxes);
@@ -352,7 +352,7 @@ DRAW_block_layer        (char a_block, int n)
    DEBUG_PROG   yLOG_info    ("x_miss"    , x_miss);
    /*---(walk predessors)-------------*/
    for (x_lvl = x_root->n_level - 1; x_lvl >= 0; --x_lvl) {
-      x_pred = x_root->n_phead;
+      x_pred = x_root->n_hpred;
       DEBUG_PROG   yLOG_point   ("head"      , x_pred);
       while (x_pred != NULL) {
          x_node = x_pred->e_beg;
@@ -367,7 +367,7 @@ DRAW_block_layer        (char a_block, int n)
             /*> if (x_node->n_row < 0) {                                                                                        <* 
              *>    x_node->n_row = s_cols [x_node->n_level];                                                                    <* 
              *>    ++(s_cols [x_node->n_level]);                                                                                <* 
-             *>    yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", '-', x_node->n_pred, x_node->n_succ);   <* 
+             *>    yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", '-', x_node->n_cpred, x_node->n_csucc);   <* 
              *>    ++s_boxes;                                                                                                   <* 
              *> }                                                                                                               <*/
             /*---(add connection)-----------*/
@@ -397,7 +397,7 @@ DRAW_block_layer        (char a_block, int n)
       DEPS_merge (g_nodes [n].n_cumd, zASCII_blocks [i].b_deps);
       sprintf (s, ",%s,", g_nodes [n].n_name);
       DEPS_merge (s, zASCII_blocks [i].b_deps);
-      /*> printf ("%c %-20.20s  %s  å%sæ\n", zASCII_blocks [i].b_abbr, zASCII_blocks [i].b_title, g_nodes [n].n_name, zASCII_blocks [i].b_deps);   <*/
+      /*> printf ("%c %-20.20s  %s  å%sæ¦", zASCII_blocks [i].b_abbr, zASCII_blocks [i].b_title, g_nodes [n].n_name, zASCII_blocks [i].b_deps);   <*/
    }
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
@@ -455,7 +455,7 @@ DRAW_block_source       (char a_block, char a_prog [LEN_TITLE])
    /*> x_node = &(g_nodes [n]);                                                                                     <* 
     *> x_node->n_row = s_cols [x_node->n_level];                                                                    <* 
     *> ++(s_cols [x_node->n_level]);                                                                                <* 
-    *> yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", '-', x_node->n_pred, x_node->n_succ);   <* 
+    *> yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", '-', x_node->n_cpred, x_node->n_csucc);   <* 
     *> ++s_boxes;                                                                                                   <*/
    /*---(start process)------------------*/
    DRAW_block_layer (a_block, n);
@@ -478,7 +478,7 @@ DRAW_block_source       (char a_block, char a_prog [LEN_TITLE])
  *>       x_node = &(g_nodes [n]);                                                                                <* 
  *>       x_node->n_row = s_cols [x_node->n_level];                                                               <* 
  *>       ++(s_cols [x_node->n_level]);                                                                           <* 
- *>       yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", x_node->n_pred, x_node->n_succ);   <* 
+ *>       yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", x_node->n_cpred, x_node->n_csucc);   <* 
  *>    }                                                                                                          <* 
  *>    return 0;                                                                                                  <* 
  *> }                                                                                                             <*/

@@ -12,7 +12,7 @@
 #define     P_NAMESAKE  "ouroboros-aperantos (tail-eater)"
 #define     P_PRONOUNCE "ohr·oh·bohr·ohs"
 #define     P_TRANSLATE "oura (tail) boros (eater) aperantos (vast, infinite, limitless)"
-#define     P_HERITAGE  "the world serpent symbolizing eternal cyclic renewal"
+#define     P_HERITAGE  "the world-encircling serpent symbolizing eternal cyclic renewal"
 #define     P_BRIEFLY   "symbol of cyclic renewal"
 #define     P_IMAGERY   "powerful, world-encircling serpent swallowing its own tail"
 #define     P_REASON    "symbol of life, death, and renewal matching up with testing"
@@ -34,9 +34,9 @@
 #define     P_CREATED   "2020-12"
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
-#define     P_VERMINOR  "0.4- handle predictable blocks/groups"
-#define     P_VERNUM    "0.4k"
-#define     P_VERTXT    "all unit testing passes, including proj"
+#define     P_VERMINOR  "0.5- update to nodes being dynamic"
+#define     P_VERNUM    "0.5a"
+#define     P_VERTXT    "NODE__new, __wipe, and __free are unit tested"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -76,13 +76,34 @@
  *
  * #define     P_SUCCESS   "how fast, efficiently, and sugically can i isolate and fix under intense pressure"
  *
- * how fast and methodically can i isolate and repair under intense pressure
+ */
+
+/* ´········1·········2·········3·········4·········5·········6·········7·········8*/
+/* 123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
+
+/*
  *
- * this means i need...
+ * how fast, methodically, and reliably i can isolate and repair under intense pressure
+ *
+ * fast, methodical, and reliable trouble isolation, bypass, and repair under pressure
+ *
+ * fast, methodical, and reliable trouble diagnosis, mitigation, repair, and re-certificiation under pressure
+ *
+ *   without exception, programs always age badly, break, or go sideways when
+ *   exposed to unusual, exceptional, and unforseen conditions.
+ *
+ *   without exception, programs behave badly, break, or go sideways when
+ *   exposed to unusual, exceptional, and unforseen conditions.  my goal is to
+ *   provide diagnosis and isolation tools to enable fast, methodical, and
+ *   reliable mitigation and repair under presure and time constraints.
+ *
+ *   without exception, my goal is to provide fast, methodical, and reliable
+ *   trouble diagnosis, mitigation, repair, and re-certification under pressure
+ *   and time constraints, i.e., ready for a harsh world.
  *    -- logical boundaries and known interfaces
- *    -- clear logging and tracing
- *    -- ready fall-back points
- *    -- redundancies
+ *    -- clear logging, tracing,  to enable useful auditing
+ *    -- ready fall-back points (and simpified versions)
+ *    -- redundancies, fail-overs, and backup systems
  *    -- quick, clear, and proven auditing
  *
  * 
@@ -252,8 +273,8 @@ struct cGLOBALS
 extern      tGLOBALS    my;
 
 
-#define     B_WAVE         'W'
 #define     B_NODE         'N'
+#define     B_WAVE         'W'
 
 
 typedef struct cWAVE  tWAVE;
@@ -299,12 +320,12 @@ struct cWAVE {
    int         w_none;
    /*---(project links)--------*/
    char        sort        [LEN_HUND];
-   tWAVE      *p_prev;
-   tWAVE      *p_next;
+   tWAVE      *w_prev_proj;
+   tWAVE      *w_next_proj;
    /*---(script links)---------*/
    char        key         [LEN_HUND];
-   tWAVE      *s_prev;
-   tWAVE      *s_next;
+   tWAVE      *w_prev_wave;
+   tWAVE      *w_next_wave;
    /*---(sorting)--------------*/
    char        w_unique    [LEN_HUND];
    tSORT      *w_ysort;
@@ -357,9 +378,13 @@ extern tWAVE     *s_tail;
 #define   MAX_NODE       100
 #define   MAX_LEVEL       20
 
-typedef  struct cINCL tINCL;
+
+
+typedef  struct cINCL  tINCL;
 typedef  struct cNODE  tNODE;
 typedef  struct cEDGE  tEDGE;
+
+
 
 struct cINCL {
    char        i_cat;
@@ -388,15 +413,17 @@ struct cNODE {
    char        n_row;
    char        n_block;
    /*---(predecessors)------*/
-   char        n_pred;
-   tEDGE      *n_phead;
-   tEDGE      *n_ptail;
+   char        n_cpred;
+   tEDGE      *n_hpred;
+   tEDGE      *n_tpred;
    char        n_filled;
    char        n_ready;
    /*---(successors)--------*/
-   char        n_succ;
-   tEDGE      *n_shead;
-   tEDGE      *n_stail;
+   char        n_csucc;
+   tEDGE      *n_hsucc;
+   tEDGE      *n_tsucc;
+   /*---(sorting)--------------*/
+   tSORT      *n_ysort;
    /*---(done)--------------*/
 };
 extern tNODE   g_nodes   [MAX_NODE];
@@ -540,6 +567,24 @@ char        GRAPH_box_deps          (char a_name [LEN_TITLE], char r_deps [LEN_R
 char        GRAPH_dump_placement    (void);
 /*---(unittest)-------------*/
 char*       DRAW__unit              (char *a_question, int n);
+/*---(done)-----------------*/
+
+
+
+/*===[[ ouroboros_node.c ]]===================================================*/
+/*········· ´······················ ´·········································*/
+/*---(memory)---------------*/
+char        NODE__wipe              (tNODE *a_dst);
+char        NODE__new               (char a_proj [LEN_LABEL], char a_force, tNODE **r_new);
+char        NODE__free              (tNODE **r_old);
+/*---(program)--------------*/
+char        NODE_purge              (void);
+char        NODE_init               (void);
+char        NODE_wrap               (void);
+/*---(singles)--------------*/
+char        NODE_add                (char a_name [LEN_TITLE]);
+/*---(unittest)----------------*/
+char*       NODE__unit              (char *a_question, int n);
 /*---(done)-----------------*/
 
 
