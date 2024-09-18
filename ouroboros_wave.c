@@ -792,15 +792,15 @@ WAVE_gather             (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char
 static void  o___SEARCH__________o () { return; }
 
 int  WAVE_count     (void)                       { return  ySORT_count     (B_WAVE); }
-char WAVE_by_index  (int n, tWAVE **a_cur)       { return  ySORT_by_index  (B_WAVE, n, a_cur); }
-char WAVE_by_cursor (char a_dir, tWAVE **a_cur)  { return  ySORT_by_cursor (B_WAVE, a_dir, a_cur); }
+char WAVE_by_index  (int n, tWAVE **r_cur)       { return  ySORT_by_index  (B_WAVE, n, r_cur); }
+char WAVE_by_cursor (char a_dir, tWAVE **r_cur)  { return  ySORT_by_cursor (B_WAVE, a_dir, r_cur); }
 
 char
-WAVE_by_proj            (char a_proj [LEN_TITLE], tWAVE **a_cur)
+WAVE_by_proj            (char a_proj [LEN_TITLE], tWAVE **r_cur)
 {
    char        x_key       [LEN_LONG]  = "";
    WAVE__key (a_proj, "",  0, x_key, NULL);
-   return  ySORT_by_name (B_WAVE, x_key, a_cur);
+   return  ySORT_by_name (B_WAVE, x_key, r_cur);
 }
 
 

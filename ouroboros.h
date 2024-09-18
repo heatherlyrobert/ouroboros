@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.5- update to nodes being dynamic"
-#define     P_VERNUM    "0.5a"
-#define     P_VERTXT    "NODE__new, __wipe, and __free are unit tested"
+#define     P_VERNUM    "0.5b"
+#define     P_VERTXT    "NODE_add, _by_name, _by_index, _by_cursor, _purge unit tested"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -504,9 +504,9 @@ char        WAVE_pull_central       (cchar a_file [LEN_PATH]);
 char        WAVE_gather             (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char a_full [LEN_PATH], char a_type);
 /*---(search)------------------*/
 int         WAVE_count              (void);
-char        WAVE_by_index           (int n, tWAVE **a_cur);
-char        WAVE_by_cursor          (char a_dir, tWAVE **a_cur);
-char        WAVE_by_proj            (char a_proj [LEN_TITLE], tWAVE **a_cur);
+char        WAVE_by_index           (int n, tWAVE **r_cur);
+char        WAVE_by_cursor          (char a_dir, tWAVE **r_cur);
+char        WAVE_by_proj            (char a_proj [LEN_TITLE], tWAVE **r_cur);
 /*---(import)------------------*/
 char        WAVE_inventory          (char *a_path);
 char        WAVE_here               (void);
@@ -583,6 +583,14 @@ char        NODE_init               (void);
 char        NODE_wrap               (void);
 /*---(singles)--------------*/
 char        NODE_add                (char a_name [LEN_TITLE]);
+/*---(search)---------------*/
+int         NODE_count              (void);
+char        NODE_by_name            (char a_name [LEN_LABEL], tNODE **r_cur);
+int         NODE_by_index           (int  n, tNODE **r_cur);
+char        NODE_by_cursor          (char a_dir, tNODE **r_cur);
+/*---(report)------------------*/
+char*       NODE_line               (int n);
+char        NODE_dump               (void);
 /*---(unittest)----------------*/
 char*       NODE__unit              (char *a_question, int n);
 /*---(done)-----------------*/
