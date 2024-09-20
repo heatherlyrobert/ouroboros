@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.5- update to nodes being dynamic"
-#define     P_VERNUM    "0.5b"
-#define     P_VERTXT    "NODE_add, _by_name, _by_index, _by_cursor, _purge unit tested"
+#define     P_VERNUM    "0.5c"
+#define     P_VERTXT    "EDGE__new, __wipe, __free all moved to dynamic memory/ysort"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -273,7 +273,8 @@ struct cGLOBALS
 extern      tGLOBALS    my;
 
 
-#define     B_NODE         'N'
+#define     B_NODE         'n'
+#define     B_EDGE         'e'
 #define     B_WAVE         'W'
 
 
@@ -380,9 +381,10 @@ extern tWAVE     *s_tail;
 
 
 
-typedef  struct cINCL  tINCL;
-typedef  struct cNODE  tNODE;
-typedef  struct cEDGE  tEDGE;
+typedef  struct cINCL      tINCL;
+typedef  struct cNODE      tNODE;
+typedef  struct cEDGE_OLD  tEDGE_OLD;
+typedef  struct cEDGE      tEDGE;
 
 
 
@@ -434,7 +436,30 @@ extern int     g_ready;
 
 /*===[[ EDGES ]]==============================================================*/
 #define   MAX_EDGE      2000
+
 struct cEDGE {
+   /*---(ends)--------------*/
+   tNODE      *e_source;
+   tNODE      *e_target;
+   /*---(working)-----------*/
+   char        e_filled;
+   char        e_type;        /* real/clear vs created/assumed    */
+   char        e_used;
+   /*---(beg-point list)----*/
+   tNODE      *e_pprev;
+   tNODE      *e_pnext;
+   /*---(end-point list)----*/
+   tNODE      *e_sprev;
+   tNODE      *e_snext;
+   /*---(sorting)--------------*/
+   char        e_unique    [LEN_DESC];
+   tSORT      *e_ysort;
+   /*---(done)--------------*/
+};
+extern tEDGE   g_edges   [MAX_EDGE];
+
+
+struct cEDGE_OLD {
    /*---(ends)--------------*/
    int         e_nbeg;
    tNODE      *e_beg;
@@ -450,9 +475,11 @@ struct cEDGE {
    /*---(end-point list)----*/
    tNODE      *e_sprev;
    tNODE      *e_snext;
+   /*---(sorting)--------------*/
+   tSORT      *e_ysort;
    /*---(done)--------------*/
 };
-extern tEDGE   g_edges   [MAX_EDGE];
+extern tEDGE_OLD   g_edges_OLD   [MAX_EDGE];
 extern int     g_nedge;
 extern char    g_maxlvl;
 
@@ -582,7 +609,8 @@ char        NODE_purge              (void);
 char        NODE_init               (void);
 char        NODE_wrap               (void);
 /*---(singles)--------------*/
-char        NODE_add                (char a_name [LEN_TITLE]);
+char        NODE_add                (char a_name [LEN_TITLE], tNODE **r_new);
+char        NODE_remove             (char a_name [LEN_TITLE], tNODE **r_old);
 /*---(search)---------------*/
 int         NODE_count              (void);
 char        NODE_by_name            (char a_name [LEN_LABEL], tNODE **r_cur);
@@ -593,6 +621,22 @@ char*       NODE_line               (int n);
 char        NODE_dump               (void);
 /*---(unittest)----------------*/
 char*       NODE__unit              (char *a_question, int n);
+/*---(done)-----------------*/
+
+
+
+/*===[[ ouroboros_node.c ]]===================================================*/
+/*········· ´······················ ´·········································*/
+/*---(memory)---------------*/
+char        EDGE__wipe              (tEDGE *a_dst);
+char        EDGE__new               (tNODE *a_source, tNODE *a_target, char a_force, tEDGE **r_new);
+char        EDGE__free              (tEDGE **r_old);
+/*---(program)--------------*/
+char        EDGE_purge              (void);
+char        EDGE_init               (void);
+char        EDGE_wrap               (void);
+/*---(unittest)----------------*/
+char*       EDGE__unit              (char *a_question, int n);
 /*---(done)-----------------*/
 
 

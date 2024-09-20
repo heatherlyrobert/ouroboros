@@ -138,6 +138,7 @@ PROG__init          (void)
    my.badd  = 0;
    my.othr  = 0;
    NODE_init  ();
+   EDGE_init  ();
    WAVE_init  ();
    GRAPH_init ();
    INCL_clear ();

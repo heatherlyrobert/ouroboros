@@ -267,7 +267,7 @@ static void  o___GATHER__________o () { return; }
 char
 DEPS__layer             (int n)
 {
-   tEDGE      *x_pred      = NULL;
+   tEDGE_OLD  *x_pred      = NULL;
    char        c           =    0;
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(mark)------------------------*/
@@ -303,7 +303,7 @@ DEPS_gather             (void)
    int         i           =    0;
    char        x_lvl       =    0;
    int         c           =    0;
-   tEDGE      *x_pred      = NULL;
+   tEDGE_OLD  *x_pred      = NULL;
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {
       DEBUG_PROG   yLOG_value   ("x_lvl"     , x_lvl);

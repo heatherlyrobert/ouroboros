@@ -87,10 +87,7 @@ struct {
 };
 
 
-
-tEDGE   g_edges   [MAX_EDGE];
-int     g_nedge     =  0;
-char    g_maxlvl    =  0;
+tEDGE_OLD   g_edges_OLD   [MAX_EDGE];
 
 char    g_deps_block  [LEN_RECD]  = "";
 
@@ -107,20 +104,20 @@ GRAPH_purge             (void)
    int         i           =    0;
    for (i = 0; i < MAX_EDGE; ++i) {
       /*---(ends)--------------*/
-      g_edges [i].e_nbeg     = 0;
-      g_edges [i].e_beg      = NULL;
-      g_edges [i].e_filled   = '-';
-      g_edges [i].e_nend     = 0;
-      g_edges [i].e_end      = NULL;
+      g_edges_OLD [i].e_nbeg     = 0;
+      g_edges_OLD [i].e_beg      = NULL;
+      g_edges_OLD [i].e_filled   = '-';
+      g_edges_OLD [i].e_nend     = 0;
+      g_edges_OLD [i].e_end      = NULL;
       /*---(working)-----------*/
-      g_edges [i].e_type     = '-';
-      g_edges [i].e_used     = '-';
+      g_edges_OLD [i].e_type     = '-';
+      g_edges_OLD [i].e_used     = '-';
       /*---(beg-point list)----*/
-      g_edges [i].e_pprev    = NULL;
-      g_edges [i].e_pnext    = NULL;
+      g_edges_OLD [i].e_pprev    = NULL;
+      g_edges_OLD [i].e_pnext    = NULL;
       /*---(end-point list)----*/
-      g_edges [i].e_sprev    = NULL;
-      g_edges [i].e_snext    = NULL;
+      g_edges_OLD [i].e_sprev    = NULL;
+      g_edges_OLD [i].e_snext    = NULL;
       /*---(done)--------------*/
    }
    g_nedge = 0;
@@ -245,7 +242,7 @@ GRAPH_add_node          (char a_name [LEN_TITLE])
  *>    int         i           =    0;                                                                                 <* 
  *>    char        x_lvl       =    0;                                                                                 <* 
  *>    int         c           =    0;                                                                                 <* 
- *>    tEDGE      *x_pred      = NULL;                                                                                 <* 
+ *>    tEDGE_OLD  *x_pred      = NULL;                                                                                 <* 
  *>    char        x_cumd      [LEN_RECD]  = "";                                                                       <* 
  *>    for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {                                                                   <* 
  *>       for (i = 0; i <  g_nnode; ++i) {                                                                             <* 
@@ -320,7 +317,7 @@ GRAPH_edge_add          (char a_type, char a_beg [LEN_TITLE], int a_end)
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    int         x_beg       =    0;
-   tEDGE      *x_pred      = NULL;
+   tEDGE_OLD  *x_pred      = NULL;
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -368,32 +365,32 @@ GRAPH_edge_add          (char a_type, char a_beg [LEN_TITLE], int a_end)
       return rce;
    }
    /*---(set type)-----------------------*/
-   g_edges [g_nedge].e_type = a_type;
+   g_edges_OLD [g_nedge].e_type = a_type;
    /*---(beg-point on edge)--------------*/
-   g_edges [g_nedge].e_nbeg = x_beg;
-   g_edges [g_nedge].e_beg  = &(g_nodes [x_beg]);
+   g_edges_OLD [g_nedge].e_nbeg = x_beg;
+   g_edges_OLD [g_nedge].e_beg  = &(g_nodes [x_beg]);
    /*---(beg-point on node)--------------*/
    if (g_nodes [x_beg].n_hsucc == NULL) { /* first */
       DEBUG_PROG   yLOG_note    ("first successor");
-      g_nodes [x_beg].n_hsucc = &(g_edges [g_nedge]);
+      g_nodes [x_beg].n_hsucc = &(g_edges_OLD [g_nedge]);
    } else {  /*                          append */
       DEBUG_PROG   yLOG_note    ("append successor");
-      (g_nodes [x_beg].n_tsucc)->e_snext = &(g_edges [g_nedge]);
+      (g_nodes [x_beg].n_tsucc)->e_snext = &(g_edges_OLD [g_nedge]);
    }
-   g_nodes [x_beg].n_tsucc = &(g_edges [g_nedge]);
+   g_nodes [x_beg].n_tsucc = &(g_edges_OLD [g_nedge]);
    ++(g_nodes [x_beg].n_csucc);
    /*---(end-point on edge)--------------*/
-   g_edges [g_nedge].e_nend = a_end;
-   g_edges [g_nedge].e_end  = &(g_nodes [a_end]);
+   g_edges_OLD [g_nedge].e_nend = a_end;
+   g_edges_OLD [g_nedge].e_end  = &(g_nodes [a_end]);
    /*---(end-point on node)--------------*/
    if (g_nodes [a_end].n_hpred == NULL) { /* first */
       DEBUG_PROG   yLOG_note    ("first predecessor");
-      g_nodes [a_end].n_hpred = &(g_edges [g_nedge]);
+      g_nodes [a_end].n_hpred = &(g_edges_OLD [g_nedge]);
    } else {  /*                          append */
       DEBUG_PROG   yLOG_note    ("append predecessor");
-      (g_nodes [a_end].n_tpred)->e_pnext = &(g_edges [g_nedge]);
+      (g_nodes [a_end].n_tpred)->e_pnext = &(g_edges_OLD [g_nedge]);
    }
-   g_nodes [a_end].n_tpred = &(g_edges [g_nedge]);
+   g_nodes [a_end].n_tpred = &(g_edges_OLD [g_nedge]);
    ++(g_nodes [a_end].n_cpred);
    /*---(counter)------------------------*/
    ++g_nedge;
@@ -422,7 +419,7 @@ GRAPH_dump_edges        (void)
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    DEBUG_PROG   yLOG_value   ("g_nedge"   , g_nedge);
    for (i = 0; i <  g_nedge; ++i) {
-      printf ("%3d  %3d %-25.25s  %3d %-25.25s¦", i, g_edges [i].e_nbeg, g_nodes [g_edges [i].e_nbeg].n_name, g_edges [i].e_nend, g_nodes [g_edges [i].e_nend].n_name);
+      printf ("%3d  %3d %-25.25s  %3d %-25.25s¦", i, g_edges_OLD [i].e_nbeg, g_nodes [g_edges_OLD [i].e_nbeg].n_name, g_edges_OLD [i].e_nend, g_nodes [g_edges_OLD [i].e_nend].n_name);
    }
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -460,7 +457,7 @@ static void  o___DEPS____________o () { return; }
 /*> char                                                                                                <* 
  *> GRAPH_deps_preds        (int n)                                                                     <* 
  *> {                                                                                                   <* 
- *>    tEDGE      *x_pred      = NULL;                                                                  <* 
+ *>    tEDGE_OLD  *x_pred      = NULL;                                                                  <* 
  *>    char        c           =    0;                                                                  <* 
  *>    DEBUG_PROG   yLOG_enter   (__FUNCTION__);                                                        <* 
  *>    /+---(mark)------------------------+/                                                            <* 
@@ -496,7 +493,7 @@ static void  o___DEPS____________o () { return; }
  *>    int         i           =    0;                                                     <* 
  *>    char        x_lvl       =    0;                                                     <* 
  *>    int         c           =    0;                                                     <* 
- *>    tEDGE      *x_pred      = NULL;                                                     <* 
+ *>    tEDGE_OLD  *x_pred      = NULL;                                                     <* 
  *>    DEBUG_PROG   yLOG_enter   (__FUNCTION__);                                           <* 
  *>    for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {                                       <* 
  *>       DEBUG_PROG   yLOG_value   ("x_lvl"     , x_lvl);                                 <* 
@@ -540,7 +537,7 @@ GRAPH_seq_clear         (void)
    DEBUG_PROG   yLOG_senter  (__FUNCTION__);
    DEBUG_PROG   yLOG_snote   ("edges");
    for (i = 0; i < g_nedge; ++i) {
-      g_edges [i].e_filled  = '-';
+      g_edges_OLD [i].e_filled  = '-';
    }
    DEBUG_PROG   yLOG_snote   ("nodes");
    for (i = 0; i < g_nnode; ++i) {
@@ -562,7 +559,7 @@ GRAPH_solve_layer       (char a_mark, char a_lvl)
    char        rce         =  -10;
    int         i           =    0;
    int         c           =    0;
-   tEDGE      *x_succ      = NULL;
+   tEDGE_OLD  *x_succ      = NULL;
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(prepare)------------------------*/
@@ -620,7 +617,7 @@ GRAPH_solve             (char a_mark)
 char
 GRAPH_focus_pred        (int n)
 {
-   tEDGE      *x_pred      = NULL;
+   tEDGE_OLD  *x_pred      = NULL;
    char        c           =    0;
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(mark)------------------------*/
@@ -683,7 +680,7 @@ GRAPH_dump_seq          (void)
    int         i           =    0;
    char        x_lvl       =    0;
    int         c           =    0;
-   tEDGE      *x_pred      = NULL;
+   tEDGE_OLD  *x_pred      = NULL;
    printf ("\n\nouroboros sequence solution\n\n");
    for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {
       for (i = 0; i <  g_nnode; ++i) {
@@ -710,7 +707,7 @@ GRAPH_dump_all          (void)
 {
    int         i           =    0;
    char        x_lvl       =    0;
-   tEDGE      *x_pred      = NULL;
+   tEDGE_OLD  *x_pred      = NULL;
    printf ("\n\nouroboros predecessors\n\n");
    for (i = 0; i <  g_nnode; ++i) {
       printf ("%3d  %3d  %-25.25s   %3dp  ", i, g_nodes [i].n_level, g_nodes [i].n_name, g_nodes [i].n_cpred);

@@ -333,7 +333,7 @@ DRAW_block_layer        (char a_block, int n)
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
    tNODE      *x_root      = NULL;
-   tEDGE      *x_pred      = NULL;
+   tEDGE_OLD  *x_pred      = NULL;
    tNODE      *x_node      = NULL;
    char        c           =    0;
    char        x_miss      [LEN_RECD]  = "";
@@ -580,7 +580,7 @@ GRAPH_dump_placement    (void)
    int         i           =    0;
    char        x_lvl       =    0;
    int         c           =    0;
-   tEDGE      *x_pred      = NULL;
+   tEDGE_OLD  *x_pred      = NULL;
    printf ("\n\nouroboros drawing placement\n\n");
    for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {
       for (i = 0; i <  g_nnode; ++i) {

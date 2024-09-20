@@ -116,7 +116,7 @@ NODE__new               (char a_name [LEN_LABEL], char a_force, tNODE **r_new)
       return rce;
    }
    rc = ySORT_prepare (B_NODE);
-   DEBUG_DATA   yLOG_value   ("prep tsae" , rc);
+   DEBUG_DATA   yLOG_value   ("prep nodes", rc);
    --rce;  if (rc < 0) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
@@ -169,7 +169,6 @@ NODE__free              (tNODE **r_old)
    /*---(complete)-----------------------*/
    DEBUG_DATA   yLOG_exit    (__FUNCTION__);
    return 0;
-
 }
 
 
@@ -192,7 +191,7 @@ NODE_purge              (void)
    rc = ySORT_by_cursor (B_NODE, YDLST_HEAD, &x_node);
    DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_node);
    while (rc >= 0 && x_node != NULL) {
-      rc = NODE__free (&x_node);
+      rc = NODE_remove (x_node->n_name, NULL);
       if (rc < 0)  break;
       rc = ySORT_by_cursor (B_NODE, YDLST_HEAD, &x_node);
       DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_node);
@@ -225,6 +224,7 @@ NODE_init               (void)
 char
 NODE_wrap               (void)
 {
+   NODE_purge ();
    return 0;
 }
 
@@ -236,7 +236,7 @@ NODE_wrap               (void)
 static void  o___NODES___________o () { return; }
 
 char
-NODE_add                (char a_name [LEN_TITLE])
+NODE_add                (char a_name [LEN_TITLE], tNODE **r_new)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -250,9 +250,53 @@ NODE_add                (char a_name [LEN_TITLE])
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(save-back)----------------------*/
+   if (r_new != NULL)  *r_new = x_node;
    /*---(defense)------------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-   return rc;
+   return 0;
+}
+
+char
+NODE_remove             (char a_name [LEN_TITLE], tNODE **r_old)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   tNODE      *x_node      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(filter)-------------------------*/
+   rc = NODE__new (a_name, '-', &x_node);
+   DEBUG_PROG   yLOG_value   ("new"       , rc);
+   DEBUG_PROG   yLOG_point   ("x_node"    , x_node);
+   --rce;  if (rc < 0 || x_node == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(check use)----------------------*/
+   DEBUG_PROG   yLOG_value   ("n_cpred"   , x_node->n_cpred);
+   --rce;  if (x_node->n_cpred > 0) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_PROG   yLOG_value   ("n_csucc"   , x_node->n_csucc);
+   --rce;  if (x_node->n_csucc > 0) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(free)---------------------------*/
+   rc = NODE__free (&x_node);
+   DEBUG_PROG   yLOG_value   ("free"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(ground)-------------------------*/
+   if (r_old != NULL)  *r_old = NULL;
+   /*---(defense)------------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
 }
 
 /*> char                                                                                                               <* 
@@ -261,7 +305,7 @@ NODE_add                (char a_name [LEN_TITLE])
  *>    int         i           =    0;                                                                                 <* 
  *>    char        x_lvl       =    0;                                                                                 <* 
  *>    int         c           =    0;                                                                                 <* 
- *>    tEDGE      *x_pred      = NULL;                                                                                 <* 
+ *>    tEDGE_OLD  *x_pred      = NULL;                                                                                 <* 
  *>    char        x_cumd      [LEN_RECD]  = "";                                                                       <* 
  *>    for (x_lvl = 0; x_lvl < MAX_LEVEL; ++x_lvl) {                                                                   <* 
  *>       for (i = 0; i <  g_nnode; ++i) {                                                                             <* 
@@ -316,19 +360,19 @@ NODE_line               (int n)
    /*---(find node)----------------------*/
    rc = NODE_by_index (n, &x_node);
    if (rc < 0 || x_node == NULL) {
-      snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : ·                    · ·  · ·                    ·                     · ·    · ·                    ·                      ´ åæ", n);
-      return rce;
+      snprintf (my.unit_answer, LEN_RECD, "NODE full   (%2d) : ·                    · ·  · ·                    ·                     · ·    · ·                    ·                      ´ åæ", n);
+      return my.unit_answer;
    }
    /*---(prepare)------------------------*/
-   if (x_node->n_cpred > 0)        sprintf (t, "%2d %-20.20s %-20.20s %2d %c", x_node->n_cpred, ((x_node->n_hpred)->e_beg)->n_name, ((x_node->n_tpred)->e_beg)->n_name, x_node->n_filled, x_node->n_ready);
+   if (x_node->n_cpred > 0)        sprintf (t, "%2d %-20.20s %-20.20s %2d %c", x_node->n_cpred, ((x_node->n_hpred)->e_source)->n_name, ((x_node->n_tpred)->e_target)->n_name, x_node->n_filled, x_node->n_ready);
    else                            strcpy  (t, " · ·                    ·                     · ·");
-   if (x_node->n_csucc > 0)        sprintf (u, "%2d %-20.20s %-20.20s", x_node->n_csucc, ((x_node->n_hsucc)->e_end)->n_name, ((x_node->n_tsucc)->e_end)->n_name);
+   if (x_node->n_csucc > 0)        sprintf (u, "%2d %-20.20s %-20.20s", x_node->n_csucc, ((x_node->n_hsucc)->e_source)->n_name, ((x_node->n_tsucc)->e_target)->n_name);
    else                            strcpy  (u, " · ·                    ·                     ·");
    if      (x_node->n_level <  0)  strcpy (s, "-");
    else if (x_node->n_level >  9)  strcpy (s, "Ï");
    else                            sprintf (s, "%c", x_node->n_level + '0');
    /*---(concatenate)--------------------*/
-   snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : %-20.20s %c %-1.1s %-49.49s   %-44.44s   ´ å%sæ", n, x_node->n_name, x_node->n_focus, s, t, u, x_node->n_deps);
+   snprintf (my.unit_answer, LEN_RECD, "NODE full   (%2d) : %-20.20s %c %-1.1s %-49.49s   %-44.44s   ´ å%sæ", n, x_node->n_name, x_node->n_focus, s, t, u, x_node->n_deps);
    /*---(complete)-----------------------*/
    return my.unit_answer;
 }
@@ -336,16 +380,26 @@ NODE_line               (int n)
 char
 NODE_dump               (void)
 {
-   /*> int         i           =    0;                                                                                                                <* 
-    *> DEBUG_PROG   yLOG_enter   (__FUNCTION__);                                                                                                      <* 
-    *> DEBUG_PROG   yLOG_value   ("g_nnode"   , g_nnode);                                                                                             <* 
-    *> for (i = 0; i <  g_nnode; ++i) {                                                                                                               <* 
-    *>    DEBUG_PROG   yLOG_complex ("node"      , "%3d  %-25.25s   %3dp   %3ds", i, g_nodes [i].n_name, g_nodes [i].n_cpred, g_nodes [i].n_csucc);   <* 
-    *>    printf ("%s\n", GRAPH_node_line (i));                                                                                                       <* 
-    *> }                                                                                                                                              <* 
-    *> DEBUG_PROG   yLOG_exit    (__FUNCTION__);                                                                                                      <* 
-    *> return 0;                                                                                                                                      <*/
+   /*---(locals)-----------+-----------+-*/
+   char        rce         =  -10;
+   int         rc          =    0;
+   int         i           =    0;
+   tNODE      *x_node      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_CONF  yLOG_enter   (__FUNCTION__);
+   /*---(walk entries)-------------------*/
+   rc = ySORT_by_cursor (B_NODE, YDLST_HEAD, &x_node);
+   while (rc >= 0 && x_node != NULL) {
+      DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %4d, %p", rc, i, x_node);
+      printf ("%s\n", GRAPH_node_line (i++));
+      rc = ySORT_by_cursor (B_NODE, YDLST_NEXT, &x_node);
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_DATA   yLOG_exit    (__FUNCTION__);
+   return 0;
 }
+
+
 
 /*====================------------------------------------====================*/
 /*===----                         unit testing                         ----===*/
@@ -366,36 +420,12 @@ NODE__unit              (char *a_question, int n)
    char        i           =    0;
    char        x_focus     =    0;
    /*---(prepare)------------------------*/
-   ystrlcpy  (my.unit_answer, "GRAPH            : question not understood", LEN_RECD);
+   ystrlcpy  (my.unit_answer, "NODE             : question not understood", LEN_RECD);
    /*---(crontab name)-------------------*/
    if (strcmp (a_question, "full"          )  == 0) {
       NODE_by_index (n, &x_cur);
       ystrlcpy (my.unit_answer, NODE_line (n), LEN_RECD);
-      /*> if (n >= g_nnode) {                                                                                                                                                                                                           <* 
-       *>    snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : ·                    · ·  · ·                    ·                     · ·    · ·                    ·                      ´", n);                               <* 
-       *> } else {                                                                                                                                                                                                                      <* 
-       *>    if (g_nodes [n].n_cpred > 0)  sprintf (t, "%2d %-20.20s %-20.20s %2d %c", g_nodes [n].n_cpred, ((g_nodes [n].n_cpred)->e_beg)->n_name, ((g_nodes [n].n_tpred)->e_beg)->n_name, g_nodes [n].n_filled, g_nodes [n].n_ready);   <* 
-       *>    else                         strcpy  (t, " · ·                    ·                     · ·");                                                                                                                             <* 
-       *>    if (g_nodes [n].n_csucc > 0)  sprintf (u, "%2d %-20.20s %-20.20s", g_nodes [n].n_csucc, ((g_nodes [n].n_hsucc)->e_end)->n_name, ((g_nodes [n].n_tsucc)->e_end)->n_name);                                                     <* 
-       *>    else                         strcpy  (u, " · ·                    ·                     ·");                                                                                                                               <* 
-       *>    if      (g_nodes [n].n_level <  0)  strcpy (s, "-");                                                                                                                                                                       <* 
-       *>    else if (g_nodes [n].n_level >  9)  strcpy (s, "Ï");                                                                                                                                                                       <* 
-       *>    else                                sprintf (s, "%c", g_nodes [n].n_level + '0');                                                                                                                                          <* 
-       *>    snprintf (my.unit_answer, LEN_RECD, "GRAPH node  (%2d) : %-20.20s %c %-1.1s %-49.49s   %-44.44s   ´", n, g_nodes [n].n_name, g_nodes [n].n_focus, s, t, u);                                                                <* 
-       *> }                                                                                                                                                                                                                             <*/
    }
-   /*> else if (strcmp (a_question, "edge"          )  == 0) {                        <* 
-    *> }                                                                              <*/
-   /*> else if (strcmp (a_question, "count"         )  == 0) {                                                                           <* 
-    *>    if      (g_nnode == 0)          strcpy (s, "empty");                                                                           <* 
-    *>    else if (g_nnode == g_ready)    strcpy (s, "SOLVED");                                                                          <* 
-    *>    else if (g_ready >  0)          strcpy (s, "in-process");                                                                      <* 
-    *>    else                            strcpy (s, "clear");                                                                           <* 
-    *>    for (i = 0; i <  g_nnode; ++i) {                                                                                               <* 
-    *>       if (g_nodes [i].n_focus  != '-')  ++x_focus;                                                                                <* 
-    *>    }                                                                                                                              <* 
-    *>    snprintf (my.unit_answer, LEN_RECD, "GRAPH count      : %3dn, %3de, %3dr, %3df, %s", g_nnode, g_nedge, g_ready, x_focus, s);   <* 
-    *> }                                                                                                                                 <*/
    /*---(complete)-----------------------*/
    return my.unit_answer;
 }
