@@ -234,47 +234,198 @@ EDGE_wrap               (void)
 /*====================------------------------------------====================*/
 static void  o___EDGES___________o () { return; }
 
-
-
-
-
-
-
-
-
-
+char
+EDGE_source             (tNODE *a_source, tEDGE *a_edge)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_PROG   yLOG_point   ("a_source"  , a_source);
+   --rce;  if (a_source == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_PROG   yLOG_point   ("a_edge"    , a_edge);
+   --rce;  if (a_edge == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(update edge with node)----------*/
+   a_edge->e_source = a_source;
+   /*---(beg-point on node)--------------*/
+   if (a_source->n_hpred == NULL) { /* first */
+      DEBUG_PROG   yLOG_note    ("first predecessor");
+      a_source->n_hpred = a_source;
+   } else {  /*----------------------- append */
+      DEBUG_PROG   yLOG_note    ("append predecessor");
+      (a_source->n_tpred)->e_pnext = a_source;
+   }
+   a_source->n_tpred = a_edge;
+   /*---(update node count)--------------*/
+   ++(a_source->n_cpred);
+   /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
 
 char
-EDGE_add                (char a_type, char a_beg [LEN_TITLE], int a_end)
+EDGE_target             (tNODE *a_target, tEDGE *a_edge)
 {
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_PROG   yLOG_point   ("a_target"  , a_target);
+   --rce;  if (a_target == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_PROG   yLOG_point   ("a_edge"    , a_edge);
+   --rce;  if (a_edge == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(update edge with node)----------*/
+   a_edge->e_target = a_target;
+   /*---(end-point on node)--------------*/
+   if (a_target->n_hsucc == NULL) { /* first */
+      DEBUG_PROG   yLOG_note    ("first successor");
+      a_target->n_hsucc = a_target;
+   } else {  /*----------------------- append */
+      DEBUG_PROG   yLOG_note    ("append successor");
+      (a_target->n_tsucc)->e_snext = a_target;
+   }
+   a_target->n_tsucc = a_target;
+   /*---(update node count)--------------*/
+   ++(a_target->n_csucc);
+   /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+EDGE_add                (tNODE *a_source, tNODE *a_target, char a_type, tEDGE **r_new)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   tEDGE      *x_edge      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_PROG   yLOG_point   ("a_source"  , a_source);
+   --rce;  if (a_source == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_PROG   yLOG_point   ("a_target"  , a_target);
+   --rce;  if (a_target == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   --rce;  if (a_source == a_target) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(filter)-------------------------*/
+   rc = EDGE__new (a_source, a_target, '-', &x_edge);
+   DEBUG_PROG   yLOG_value   ("new"       , rc);
+   DEBUG_PROG   yLOG_point   ("x_edge"    , x_edge);
+   --rce;  if (rc < 0 || x_edge == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(hook)---------------------------*/
+   rc = EDGE_source (a_source, x_edge);
+   DEBUG_PROG   yLOG_value   ("source"    , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   rc = EDGE_target (a_target, x_edge);
+   DEBUG_PROG   yLOG_value   ("target"    , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(save-back)----------------------*/
+   if (r_new != NULL)  *r_new = x_edge;
+   /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+EDGE_add_by_names       (char a_source [LEN_LABEL], char a_target [LEN_LABEL], char a_type, tEDGE **r_new)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   tNODE      *x_source    = NULL;
+   tNODE      *x_target    = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_PROG   yLOG_point   ("a_source"  , a_source);
+   --rce;  if (a_source == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_PROG   yLOG_point   ("a_target"  , a_target);
+   --rce;  if (a_target == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(find)---------------------------*/
+   rc = NODE_by_name (a_source, &x_source);
+   DEBUG_PROG   yLOG_value   ("source"    , rc);
+   --rce;  if (rc < 0 || x_source == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   rc = NODE_by_name (a_target, &a_target);
+   DEBUG_PROG   yLOG_value   ("target"    , rc);
+   --rce;  if (rc < 0 || a_target == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(add)----------------------------*/
+   rc = EDGE_add (x_source, x_target, a_type, r_new);
+   DEBUG_PROG   yLOG_value   ("add"       , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
+
+/*====================------------------------------------====================*/
+/*===----                     searching and finding                    ----===*/
+/*====================------------------------------------====================*/
+static void  o___SEARCH__________o () { return; }
+
+int  EDGE_count     (void)                                    { return  ySORT_count     (B_EDGE); }
+char EDGE_by_path   (char a_path [LEN_DESC] , tEDGE **r_cur)  { return  ySORT_by_name   (B_EDGE, a_path, r_cur); }
+int  EDGE_by_index  (int  n                 , tEDGE **r_cur)  { return  ySORT_by_index  (B_EDGE, n     , r_cur); }
+char EDGE_by_cursor (char a_dir             , tEDGE **r_cur)  { return  ySORT_by_cursor (B_EDGE, a_dir , r_cur); }
+
+
+
+
+
    /*> /+---(locals)-----------+-----+-----+-+/                                                 <* 
     *> char        rce         =  -10;                                                          <* 
     *> int         x_beg       =    0;                                                          <* 
-    *> tEDGE      *x_pred      = NULL;                                                          <* 
     *> /+---(header)-------------------------+/                                                 <* 
     *> DEBUG_PROG   yLOG_enter   (__FUNCTION__);                                                <* 
     *> /+---(defense)------------------------+/                                                 <* 
-    *> DEBUG_PROG   yLOG_point   ("a_beg"     , a_beg);                                         <* 
-    *> --rce;  if (a_beg == NULL) {                                                             <* 
-    *>    DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);                                        <* 
-    *>    return rce;                                                                           <* 
-    *> }                                                                                        <* 
-    *> DEBUG_PROG   yLOG_info    ("a_beg"     , a_beg);                                         <* 
-    *> --rce;  if (strcmp (a_beg, "") == 0) {                                                   <* 
-    *>    DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);                                        <* 
-    *>    return rce;                                                                           <* 
-    *> }                                                                                        <* 
-    *> DEBUG_PROG   yLOG_value   ("a_end"     , a_end);                                         <* 
-    *> --rce;  if (a_end < 0) {                                                                 <* 
-    *>    DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);                                        <* 
-    *>    return rce;                                                                           <* 
-    *> }                                                                                        <* 
-    *> DEBUG_PROG   yLOG_value   ("g_nnode"   , g_nnode);                                       <* 
-    *> --rce;  if (a_end >= g_nnode) {                                                          <* 
-    *>    DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);                                        <* 
-    *>    return rce;                                                                           <* 
-    *> }                                                                                        <* 
-    *> DEBUG_PROG   yLOG_info    ("name"      , g_nodes [a_end].n_name);                        <* 
     *> /+---(check for duplicate)------------+/                                                 <* 
     *> x_pred = g_nodes [a_end].n_hpred;                                                        <* 
     *> while (x_pred != NULL) {                                                                 <* 
@@ -337,13 +488,12 @@ EDGE_add                (char a_type, char a_beg [LEN_TITLE], int a_end)
     *>  *>       INCL_add_by_name ("zenodotus", a_end);                                   <*    <* 
     *>  *>    }                                                                           <*    <* 
     *>  *> }                                                                              <+/   <* 
-    *> /+---(complete)-----------------------+/                                                 <* 
+    *> /+---(complete)-----------------------+/                                           
     *> DEBUG_PROG   yLOG_exit    (__FUNCTION__);                                                <* 
     *> return 0;                                                                                <*/
-}
 
-char EDGE_real         (char a_beg [LEN_TITLE], int a_end) { return EDGE_add ('r', a_beg, a_end); }
-char EDGE_virt         (char a_beg [LEN_TITLE], int a_end) { return EDGE_add ('v', a_beg, a_end); }
+/*> char EDGE_real         (char a_beg [LEN_TITLE], int a_end) { return EDGE_add ('r', a_beg, a_end); }   <*/
+/*> char EDGE_virt         (char a_beg [LEN_TITLE], int a_end) { return EDGE_add ('v', a_beg, a_end); }   <*/
 
 char
 EDGE_dump               (void)

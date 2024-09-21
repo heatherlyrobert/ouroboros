@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.5- update to nodes being dynamic"
-#define     P_VERNUM    "0.5c"
-#define     P_VERTXT    "EDGE__new, __wipe, __free all moved to dynamic memory/ysort"
+#define     P_VERNUM    "0.5d"
+#define     P_VERTXT    "built basic EDGE_add and EDGE_add_by_names, starting unit test"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -609,8 +609,8 @@ char        NODE_purge              (void);
 char        NODE_init               (void);
 char        NODE_wrap               (void);
 /*---(singles)--------------*/
-char        NODE_add                (char a_name [LEN_TITLE], tNODE **r_new);
-char        NODE_remove             (char a_name [LEN_TITLE], tNODE **r_old);
+char        NODE_add                (char a_name [LEN_LABEL], tNODE **r_new);
+char        NODE_remove             (char a_name [LEN_LABEL], tNODE **r_old);
 /*---(search)---------------*/
 int         NODE_count              (void);
 char        NODE_by_name            (char a_name [LEN_LABEL], tNODE **r_cur);
@@ -635,6 +635,14 @@ char        EDGE__free              (tEDGE **r_old);
 char        EDGE_purge              (void);
 char        EDGE_init               (void);
 char        EDGE_wrap               (void);
+/*---(singles)--------------*/
+char        EDGE_add                (tNODE *a_beg, tNODE *a_end, char a_type, tEDGE **r_new);
+char        EDGE_add_by_names       (char a_source [LEN_LABEL], char a_target [LEN_LABEL], char a_type, tEDGE **r_new);
+/*---(search)---------------*/
+int         EDGE_count              (void);
+char        EDGE_by_path            (char a_path [LEN_DESC] , tEDGE **r_cur);
+int         EDGE_by_index           (int  n                 , tEDGE **r_cur);
+char        EDGE_by_cursor          (char a_dir             , tEDGE **r_cur);
 /*---(unittest)----------------*/
 char*       EDGE__unit              (char *a_question, int n);
 /*---(done)-----------------*/

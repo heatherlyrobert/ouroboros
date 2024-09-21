@@ -236,7 +236,7 @@ NODE_wrap               (void)
 static void  o___NODES___________o () { return; }
 
 char
-NODE_add                (char a_name [LEN_TITLE], tNODE **r_new)
+NODE_add                (char a_name [LEN_LABEL], tNODE **r_new)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -258,7 +258,7 @@ NODE_add                (char a_name [LEN_TITLE], tNODE **r_new)
 }
 
 char
-NODE_remove             (char a_name [LEN_TITLE], tNODE **r_old)
+NODE_remove             (char a_name [LEN_LABEL], tNODE **r_old)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -326,7 +326,6 @@ NODE_remove             (char a_name [LEN_TITLE], tNODE **r_old)
  *>    }                                                                                                               <* 
  *>    return 0;                                                                                                       <* 
  *> }                                                                                                                  <*/
-
 
 
 
