@@ -81,6 +81,7 @@ EDGE__new               (tNODE *a_source, tNODE *a_target, char a_force, tEDGE *
    DEBUG_DATA   yLOG_info    ("->n_name"  , a_target->n_name);
    /*---(make key)-----------------------*/
    snprintf (x_unique, LEN_DESC, "%-20.20s Ö %s", a_source->n_name, a_target->n_name);
+   DEBUG_DATA   yLOG_info    ("x_unique"  , x_unique);
    /*---(check for duplicate)------------*/
    rc = ySORT_by_name (B_EDGE, x_unique, &x_new);
    DEBUG_DATA   yLOG_point   ("x_exist"   , x_new);
@@ -247,6 +248,7 @@ EDGE_source             (tNODE *a_source, tEDGE *a_edge)
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   DEBUG_PROG   yLOG_info    ("source"    , a_source->n_name);
    DEBUG_PROG   yLOG_point   ("a_edge"    , a_edge);
    --rce;  if (a_edge == NULL) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
@@ -255,16 +257,16 @@ EDGE_source             (tNODE *a_source, tEDGE *a_edge)
    /*---(update edge with node)----------*/
    a_edge->e_source = a_source;
    /*---(beg-point on node)--------------*/
-   if (a_source->n_hpred == NULL) { /* first */
-      DEBUG_PROG   yLOG_note    ("first predecessor");
-      a_source->n_hpred = a_source;
+   if (a_source->n_hsucc == NULL) { /* first */
+      DEBUG_PROG   yLOG_note    ("first successor");
+      a_source->n_hsucc = a_edge;
    } else {  /*----------------------- append */
-      DEBUG_PROG   yLOG_note    ("append predecessor");
-      (a_source->n_tpred)->e_pnext = a_source;
+      DEBUG_PROG   yLOG_note    ("append successor");
+      (a_source->n_tsucc)->e_pnext = a_edge;
    }
-   a_source->n_tpred = a_edge;
+   a_source->n_tsucc = a_edge;
    /*---(update node count)--------------*/
-   ++(a_source->n_cpred);
+   ++(a_source->n_csucc);
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -283,6 +285,7 @@ EDGE_target             (tNODE *a_target, tEDGE *a_edge)
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   DEBUG_PROG   yLOG_info    ("target"    , a_target->n_name);
    DEBUG_PROG   yLOG_point   ("a_edge"    , a_edge);
    --rce;  if (a_edge == NULL) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
@@ -291,16 +294,16 @@ EDGE_target             (tNODE *a_target, tEDGE *a_edge)
    /*---(update edge with node)----------*/
    a_edge->e_target = a_target;
    /*---(end-point on node)--------------*/
-   if (a_target->n_hsucc == NULL) { /* first */
-      DEBUG_PROG   yLOG_note    ("first successor");
-      a_target->n_hsucc = a_target;
+   if (a_target->n_hpred == NULL) { /* first */
+      DEBUG_PROG   yLOG_note    ("first predecessor");
+      a_target->n_hpred = a_edge;
    } else {  /*----------------------- append */
-      DEBUG_PROG   yLOG_note    ("append successor");
-      (a_target->n_tsucc)->e_snext = a_target;
+      DEBUG_PROG   yLOG_note    ("append predecessor");
+      (a_target->n_tpred)->e_snext = a_edge;
    }
-   a_target->n_tsucc = a_target;
+   a_target->n_tpred = a_edge;
    /*---(update node count)--------------*/
-   ++(a_target->n_csucc);
+   ++(a_target->n_cpred);
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -321,11 +324,13 @@ EDGE_add                (tNODE *a_source, tNODE *a_target, char a_type, tEDGE **
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   DEBUG_PROG   yLOG_info    ("source"    , a_source->n_name);
    DEBUG_PROG   yLOG_point   ("a_target"  , a_target);
    --rce;  if (a_target == NULL) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   DEBUG_PROG   yLOG_info    ("target"    , a_target->n_name);
    --rce;  if (a_source == a_target) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
@@ -366,6 +371,7 @@ EDGE_add_by_names       (char a_source [LEN_LABEL], char a_target [LEN_LABEL], c
    char        rc          =    0;
    tNODE      *x_source    = NULL;
    tNODE      *x_target    = NULL;
+   tEDGE      *x_edge      = NULL;
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -386,19 +392,23 @@ EDGE_add_by_names       (char a_source [LEN_LABEL], char a_target [LEN_LABEL], c
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   rc = NODE_by_name (a_target, &a_target);
+   DEBUG_PROG   yLOG_info    ("source"    , x_source->n_name);
+   rc = NODE_by_name (a_target, &x_target);
    DEBUG_PROG   yLOG_value   ("target"    , rc);
    --rce;  if (rc < 0 || a_target == NULL) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   DEBUG_PROG   yLOG_info    ("target"    , x_target->n_name);
    /*---(add)----------------------------*/
-   rc = EDGE_add (x_source, x_target, a_type, r_new);
+   rc = EDGE_add (x_source, x_target, a_type, &x_edge);
    DEBUG_PROG   yLOG_value   ("add"       , rc);
    --rce;  if (rc < 0) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(save-back)----------------------*/
+   if (r_new != NULL)  *r_new = x_edge;
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -495,6 +505,35 @@ char EDGE_by_cursor (char a_dir             , tEDGE **r_cur)  { return  ySORT_by
 /*> char EDGE_real         (char a_beg [LEN_TITLE], int a_end) { return EDGE_add ('r', a_beg, a_end); }   <*/
 /*> char EDGE_virt         (char a_beg [LEN_TITLE], int a_end) { return EDGE_add ('v', a_beg, a_end); }   <*/
 
+
+
+/*====================------------------------------------====================*/
+/*===----                        report/dumping                        ----===*/
+/*====================------------------------------------====================*/
+static void  o___REPORT__________o () { return; }
+
+char*
+EDGE_line               (int n)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   tEDGE      *x_edge      = NULL;
+   char        s           [LEN_DESC]  = "";
+   char        t           [LEN_HUND]  = "";
+   char        u           [LEN_HUND]  = "";
+   /*---(find node)----------------------*/
+   rc = EDGE_by_index (n, &x_edge);
+   if (rc < 0 || x_edge == NULL) {
+      snprintf (my.unit_answer, LEN_RECD, "EDGE full   (%2d) : ·                    ·                    · · ·  åæ", n);
+      return my.unit_answer;
+   }
+   /*---(concatenate)--------------------*/
+   snprintf (my.unit_answer, LEN_RECD, "EDGE full   (%2d) : %-20.20s %-20.20s %c %c %c  å%sæ", n, x_edge->e_source->n_name, x_edge->e_target->n_name, x_edge->e_filled, x_edge->e_type, x_edge->e_used, x_edge->e_unique);
+   /*---(complete)-----------------------*/
+   return my.unit_answer;
+}
+
 char
 EDGE_dump               (void)
 {
@@ -507,3 +546,35 @@ EDGE_dump               (void)
     *> DEBUG_PROG   yLOG_exit    (__FUNCTION__);                                                                                                                              <* 
     *> return 0;                                                                                                                                                              <*/
 }
+
+
+
+/*====================------------------------------------====================*/
+/*===----                         unit testing                         ----===*/
+/*====================------------------------------------====================*/
+static void  o___UNITTEST________o () { return; }
+
+char*
+EDGE__unit              (char *a_question, int n)
+{ 
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   int         rc          =    0;
+   int         c           =    0;
+   char        s           [LEN_DESC]  = "";
+   char        t           [LEN_HUND]  = "";
+   char        u           [LEN_HUND]  = "";
+   tEDGE      *x_cur       = NULL;
+   char        i           =    0;
+   char        x_focus     =    0;
+   /*---(prepare)------------------------*/
+   ystrlcpy  (my.unit_answer, "EDGE             : question not understood", LEN_RECD);
+   /*---(crontab name)-------------------*/
+   if (strcmp (a_question, "full"          )  == 0) {
+      EDGE_by_index (n, &x_cur);
+      ystrlcpy (my.unit_answer, EDGE_line (n), LEN_RECD);
+   }
+   /*---(complete)-----------------------*/
+   return my.unit_answer;
+}
+

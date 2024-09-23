@@ -353,25 +353,31 @@ NODE_line               (int n)
    char        rce         =  -10;
    char        rc          =    0;
    tNODE      *x_node      = NULL;
-   char        s           [LEN_DESC]  = "";
-   char        t           [LEN_HUND]  = "";
-   char        u           [LEN_HUND]  = "";
+   char        x_preds     [LEN_HUND]  = "";
+   char        x_succs     [LEN_HUND]  = "";
+   char        x_level     [LEN_DESC]  = "";
    /*---(find node)----------------------*/
    rc = NODE_by_index (n, &x_node);
    if (rc < 0 || x_node == NULL) {
       snprintf (my.unit_answer, LEN_RECD, "NODE full   (%2d) : ·                    · ·  · ·                    ·                     · ·    · ·                    ·                      ´ åæ", n);
       return my.unit_answer;
    }
-   /*---(prepare)------------------------*/
-   if (x_node->n_cpred > 0)        sprintf (t, "%2d %-20.20s %-20.20s %2d %c", x_node->n_cpred, ((x_node->n_hpred)->e_source)->n_name, ((x_node->n_tpred)->e_target)->n_name, x_node->n_filled, x_node->n_ready);
-   else                            strcpy  (t, " · ·                    ·                     · ·");
-   if (x_node->n_csucc > 0)        sprintf (u, "%2d %-20.20s %-20.20s", x_node->n_csucc, ((x_node->n_hsucc)->e_source)->n_name, ((x_node->n_tsucc)->e_target)->n_name);
-   else                            strcpy  (u, " · ·                    ·                     ·");
-   if      (x_node->n_level <  0)  strcpy (s, "-");
-   else if (x_node->n_level >  9)  strcpy (s, "Ï");
-   else                            sprintf (s, "%c", x_node->n_level + '0');
+   /*---(predessors)---------------------*/
+   if (x_node->n_cpred > 0)        sprintf (x_preds, "%2d %-20.20s %-20.20s %2d %c", x_node->n_cpred, ((x_node->n_hpred)->e_source)->n_name, ((x_node->n_tpred)->e_source)->n_name, x_node->n_filled, x_node->n_ready);
+   else                            strcpy  (x_preds, " · ·                    ·                     · ·");
+   /*> if (x_node->n_cpred > 0)        sprintf (x_preds, "%2d %-20.20s %-20.20s %2d %c", x_node->n_cpred, ((x_node->n_hpred)->e_target)->n_name, ((x_node->n_tpred)->e_target)->n_name, x_node->n_filled, x_node->n_ready);   <* 
+    *> else                            strcpy  (x_preds, " · ·                    ·                     · ·");                                                                                                                <*/
+   /*---(successors)---------------------*/
+   if (x_node->n_csucc > 0)        sprintf (x_succs, "%2d %-20.20s %-20.20s", x_node->n_csucc, ((x_node->n_hsucc)->e_target)->n_name, ((x_node->n_tsucc)->e_target)->n_name);
+   else                            strcpy  (x_succs, " · ·                    ·                     ·");
+   /*> if (x_node->n_csucc > 0)        sprintf (x_succs, "%2d %-20.20s %-20.20s", x_node->n_csucc, ((x_node->n_hsucc)->e_source)->n_name, ((x_node->n_tsucc)->e_source)->n_name);   <* 
+    *> else                            strcpy  (x_succs, " · ·                    ·                     ·");                                                                        <*/
+   /*---(level)--------------------------*/
+   if      (x_node->n_level <  0)  strcpy  (x_level, "-");
+   else if (x_node->n_level >  9)  strcpy  (x_level, "Ï");
+   else                            sprintf (x_level, "%c", x_node->n_level + '0');
    /*---(concatenate)--------------------*/
-   snprintf (my.unit_answer, LEN_RECD, "NODE full   (%2d) : %-20.20s %c %-1.1s %-49.49s   %-44.44s   ´ å%sæ", n, x_node->n_name, x_node->n_focus, s, t, u, x_node->n_deps);
+   snprintf (my.unit_answer, LEN_RECD, "NODE full   (%2d) : %-20.20s %c %-1.1s %-49.49s   %-44.44s   ´ å%sæ", n, x_node->n_name, x_node->n_focus, x_level, x_preds, x_succs, x_node->n_deps);
    /*---(complete)-----------------------*/
    return my.unit_answer;
 }

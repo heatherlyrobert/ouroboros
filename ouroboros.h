@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.5- update to nodes being dynamic"
-#define     P_VERNUM    "0.5d"
-#define     P_VERTXT    "built basic EDGE_add and EDGE_add_by_names, starting unit test"
+#define     P_VERNUM    "0.5e"
+#define     P_VERTXT    "built and unit tested edge foundation -- not remove and purge yet"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -643,6 +643,8 @@ int         EDGE_count              (void);
 char        EDGE_by_path            (char a_path [LEN_DESC] , tEDGE **r_cur);
 int         EDGE_by_index           (int  n                 , tEDGE **r_cur);
 char        EDGE_by_cursor          (char a_dir             , tEDGE **r_cur);
+/*---(report)------------------*/
+char*       EDGE_line               (int n);
 /*---(unittest)----------------*/
 char*       EDGE__unit              (char *a_question, int n);
 /*---(done)-----------------*/
