@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.5- update to nodes being dynamic"
-#define     P_VERNUM    "0.5f"
-#define     P_VERTXT    "improve edge unit output to debug EDGE_add (added unit testing)"
+#define     P_VERNUM    "0.5g"
+#define     P_VERTXT    "EDGE_purge, EDGE_remove, EDGE_purge_for_node built and unit tested"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -632,7 +632,6 @@ char        EDGE__wipe              (tEDGE *a_dst);
 char        EDGE__new               (tNODE *a_source, tNODE *a_target, char a_force, tEDGE **r_new);
 char        EDGE__free              (tEDGE **r_old);
 /*---(program)--------------*/
-char        EDGE_purge              (void);
 char        EDGE_init               (void);
 char        EDGE_wrap               (void);
 /*---(singles)--------------*/
@@ -643,6 +642,8 @@ char        EDGE_add_by_names       (char a_source [LEN_LABEL], char a_target [L
 char        EDGE__unhook_source     (tEDGE *a_edge);
 char        EDGE__unhook_target     (tEDGE *a_edge);
 char        EDGE_remove             (tEDGE **b_old);
+char        EDGE_purge              (void);
+char        EDGE_purge_for_node     (tNODE *a_node);
 /*---(search)---------------*/
 int         EDGE_count              (void);
 char        EDGE_by_path            (char a_path [LEN_DESC] , tEDGE **r_cur);

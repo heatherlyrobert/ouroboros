@@ -179,29 +179,6 @@ EDGE__free              (tEDGE **r_old)
 static void  o___PROGRAM_________o () { return; }
 
 char
-EDGE_purge              (void)
-{
-   /*---(locals)-----------+-----------+-*/
-   char        rce         =  -10;
-   int         rc          =    0;
-   tEDGE      *x_edge      = NULL;
-   /*---(header)-------------------------*/
-   DEBUG_CONF  yLOG_enter   (__FUNCTION__);
-   /*---(walk entries)-------------------*/
-   rc = ySORT_by_cursor (B_EDGE, YDLST_HEAD, &x_edge);
-   DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_edge);
-   while (rc >= 0 && x_edge != NULL) {
-      /*> rc = EDGE_remove (x_edge->n_name);                                          <*/
-      if (rc < 0)  break;
-      rc = ySORT_by_cursor (B_EDGE, YDLST_HEAD, &x_edge);
-      DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_edge);
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_DATA   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
 EDGE_init               (void)
 {
    /*---(locals)-----------+-----+-----+-*/
@@ -435,18 +412,19 @@ EDGE__unhook_source     (tEDGE *a_edge)
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   /*---(find link)----------------------*/
    x_source = a_edge->e_source;
    DEBUG_PROG   yLOG_point   ("x_source"  , x_source);
    --rce;  if (x_source == NULL) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   DEBUG_PROG   yLOG_info    ("x_source"  , x_source);
+   /*---(find link)----------------------*/
    x_curr = x_source->n_hsucc;
    while (x_curr != a_edge) {
       DEBUG_PROG   yLOG_complex ("x_curr"    , "%2d, %p", i++, x_curr);
       if (x_curr == NULL)  break;
-      x_curr = x_curr->e_pnext;
+      x_curr = x_curr->e_snext;
    }
    --rce;  if (x_curr   == NULL) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
@@ -475,6 +453,57 @@ EDGE__unhook_source     (tEDGE *a_edge)
 char
 EDGE__unhook_target     (tEDGE *a_edge)
 {
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   int         i           =    0;
+   tNODE      *x_target    = NULL;
+   tEDGE      *x_curr      = NULL;
+   tEDGE      *x_prev      = NULL;
+   tEDGE      *x_next      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_PROG   yLOG_point   ("a_edge"    , a_edge);
+   --rce;  if (a_edge == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   x_target = a_edge->e_target;
+   DEBUG_PROG   yLOG_point   ("x_target"  , x_target);
+   --rce;  if (x_target == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_PROG   yLOG_info    ("x_target"  , x_target);
+   /*---(find link)----------------------*/
+   x_curr = x_target->n_hpred;
+   while (x_curr != a_edge) {
+      DEBUG_PROG   yLOG_complex ("x_curr"    , "%2d, %p", i++, x_curr);
+      if (x_curr == NULL)  break;
+      x_curr = x_curr->e_pnext;
+   }
+   --rce;  if (x_curr   == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(get key pointers)---------------*/
+   x_prev = x_curr->e_pprev;
+   x_next = x_curr->e_pnext;
+   DEBUG_PROG   yLOG_complex ("edges"     , "%p <- %p -> %p", x_prev, x_curr, x_next);
+   /*---(unhook)-------------------------*/
+   if (x_next != NULL)  x_next->e_pprev    = x_curr->e_pprev;
+   else                 x_target->n_tpred  = x_curr->e_pprev;
+   if (x_prev != NULL)  x_prev->e_pnext    = x_curr->e_pnext;
+   else                 x_target->n_hpred  = x_curr->e_pnext;
+   /*---(cleanse)------------------------*/
+   a_edge->e_target = NULL;
+   a_edge->e_pprev  = NULL;
+   a_edge->e_pnext  = NULL;
+   /*---(update node count)--------------*/
+   --(x_target->n_cpred);
+   /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -525,6 +554,55 @@ EDGE_remove             (tEDGE **b_old)
    if (b_old != NULL)  *b_old = NULL;
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+EDGE_purge              (void)
+{
+   /*---(locals)-----------+-----------+-*/
+   char        rce         =  -10;
+   int         rc          =    0;
+   tEDGE      *x_edge      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_CONF  yLOG_enter   (__FUNCTION__);
+   /*---(walk entries)-------------------*/
+   rc = ySORT_by_cursor (B_EDGE, YDLST_HEAD, &x_edge);
+   DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_edge);
+   while (rc >= 0 && x_edge != NULL) {
+      rc = EDGE_remove (&x_edge);
+      if (rc < 0)  break;
+      rc = ySORT_by_cursor (B_EDGE, YDLST_HEAD, &x_edge);
+      DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_edge);
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_DATA   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+EDGE_purge_for_node     (tNODE *a_node)
+{
+   /*---(locals)-----------+-----------+-*/
+   char        rce         =  -10;
+   int         rc          =    0;
+   int         n           =    0;
+   tEDGE      *x_edge      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_CONF  yLOG_enter   (__FUNCTION__);
+   /*---(walk entries)-------------------*/
+   rc = ySORT_by_index  (B_EDGE, n, &x_edge);
+   DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_edge);
+   while (rc >= 0 && x_edge != NULL) {
+      if (x_edge->e_source == a_node || x_edge->e_target == a_node) {
+         rc = EDGE_remove (&x_edge);
+      } else ++n;
+      if (rc < 0)  break;
+      rc = ySORT_by_index  (B_EDGE, n, &x_edge);
+      DEBUG_CONF  yLOG_complex ("entry"     , "%4d, %p", rc, x_edge);
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_DATA   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
