@@ -228,7 +228,6 @@ GRAPH_add_node          (char a_name [LEN_TITLE])
    }
    /*> if (strcmp (a_name, "zenodotus") != 0) {                                       <* 
     *>    DEBUG_PROG   yLOG_note    ("create a link back to zenodotus");              <* 
-    *>    INCL_add_by_name ("zenodotus", n);                                          <* 
     *>    GRAPH_edge_add   ("zenodotus", n);                                          <* 
     *> }                                                                              <*/
    /*---(defense)------------------------*/
@@ -401,7 +400,6 @@ GRAPH_edge_add          (char a_type, char a_beg [LEN_TITLE], int a_end)
    /*> if (strcmp (g_nodes [x_beg].n_name, "zenodotus") == 0) {                       <* 
     *>    if (strstr (g_nodes [a_end].n_name, "_solo") != NULL) {                     <* 
     *>       DEBUG_PROG   yLOG_note    ("call to add tie to _solo");                  <* 
-    *>       INCL_add_by_name ("zenodotus", a_end);                                   <* 
     *>    }                                                                           <* 
     *> }                                                                              <*/
    /*---(complete)-----------------------*/

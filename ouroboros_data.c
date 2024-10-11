@@ -4,7 +4,7 @@
 
 
 char
-DATA_file_type          (char a_proj [LEN_TITLE], char a_file [LEN_HUND], char *r_type)
+DATA_file_type          (char a_project [LEN_LABEL], char a_file [LEN_HUND], char *r_type)
 {
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
@@ -16,13 +16,13 @@ DATA_file_type          (char a_proj [LEN_TITLE], char a_file [LEN_HUND], char *
    /*---(default)------------------------*/
    if (r_type != NULL)  *r_type = TYPE_NONE;
    /*---(defense)------------------------*/
-   DEBUG_DATA  yLOG_point   ("a_proj"     , a_proj);
-   --rce;  if (a_proj == NULL) {
+   DEBUG_DATA  yLOG_point   ("a_project"  , a_project);
+   --rce;  if (a_project == NULL) {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_DATA  yLOG_info    ("a_proj"     , a_proj);
-   --rce;  if (a_proj [0] == '\0') {
+   DEBUG_DATA  yLOG_info    ("a_project"  , a_project);
+   --rce;  if (a_project [0] == '\0') {
       DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
@@ -55,7 +55,7 @@ DATA_file_type          (char a_proj [LEN_TITLE], char a_file [LEN_HUND], char *
    if      (strcmp  (a_file, "Makefile"       ) == 0)    x_type = TYPE_MAKE;
    else if (strcmp  (a_file, "master.h"       ) == 0)    x_type = TYPE_HEAD;
    /*---(prefixed names)--------------*/
-   if (strncmp (a_file, a_proj, strlen (a_proj)) == 0) {
+   if (strncmp (a_file, a_project, strlen (a_project)) == 0) {
       if      (l >= 6 && strcmp (a_file + l - 5, ".wave"   ) == 0)  x_type = TYPE_WAVE;
       else if (l >= 6 && strcmp (a_file + l - 5, ".unit"   ) == 0)  x_type = TYPE_UNIT;
       else if (l >= 7 && strcmp (a_file + l - 6, ".munit"  ) == 0)  x_type = TYPE_MUNIT;
@@ -158,13 +158,14 @@ DATA_gather_prep        (char a_full [LEN_PATH], char a_type, char r_file [LEN_P
 }
 
 char
-DATA_gather_file        (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char a_full [LEN_PATH], char a_type)
+DATA_gather_file        (char a_project [LEN_LABEL], char a_entry [LEN_TITLE], char a_full [LEN_PATH], char a_type)
 {
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
    int         rc          =    0;
    char        x_file      [LEN_PATH]  = "";
    int         c           =    0;
+   tNODE      *x_target    = NULL;
    int         x_end       =    0;
    FILE       *f           =    0;
    char       *rcp         = NULL;
@@ -174,16 +175,16 @@ DATA_gather_file        (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char
    /*---(header)-------------------------*/
    DEBUG_DATA   yLOG_enter   (__FUNCTION__);
    /*---(add project)--------------------*/
-   x_end = GRAPH_add_node (a_proj);
-   DEBUG_DATA   yLOG_value   ("x_end"     , x_end);
-   --rce; if (x_end < 0) {
+   DEBUG_DATA   yLOG_info    ("a_project" , a_project);
+   rc = NODE_add (a_project, &x_target);
+   DEBUG_DATA   yLOG_complex ("add"       , "%4drc, %p", rc, x_target);
+   --rce; if (rc < 0 || x_target == NULL) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    DEBUG_DATA   yLOG_char    ("a_type"    , a_type);
    if (a_type == TYPE_UNIT || a_type == TYPE_WAVE) {
-      /*> rc = INCL_add_by_name ("koios", x_end);                                     <*/
-      rc = DEPS_add ("koios", a_proj);
+      rc = DEPS_add ("koios", a_project);
       DEBUG_DATA   yLOG_value   ("koios"     , rc);
    }
    /*---(defense)------------------------*/
@@ -221,18 +222,18 @@ DATA_gather_file        (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char
       /*---(handle)----------------------*/
       switch (a_type) {
       case TYPE_MAKE  :  /* handle Makefile "include" lines */
-         rc = MAKE_gather   (x_recd, x_end);
+         rc = MAKE_gather   (a_project, x_recd);
          break;
       case TYPE_WAVE  :  /* handle koios "WAVE" lines */
          DEBUG_DATA   yLOG_note    ("WAVE files should not be handled here");
          break;
       case TYPE_UNIT  :  /* handle unit test "incl" lines */
-         rc = YUNIT_gather  (a_proj, x_recd, x_end);
+         rc = YUNIT_gather  (a_project, x_recd, x_end);
          break;
       case TYPE_HEAD  :  /* handle c/h "#include" lines */
       case TYPE_CODE  :
       case TYPE_MUNIT :
-         rc = INCL_gather   (x_recd, x_end);
+         rc = INCL_gather   (a_project, x_recd);
          break;
       default        :
          DEBUG_DATA   yLOG_note    ("file type unknown, nothing to process");
@@ -271,7 +272,7 @@ DATA_gather_project     (char a_full [LEN_PATH])
    char        x_type      = TYPE_NONE;
    int         l           =    0;
    char        x_full      [LEN_PATH]  = "";
-   char        x_proj      [LEN_LABEL] = "";
+   char        x_project   [LEN_LABEL] = "";
    char        c           =    0;
    /*---(header)-------------------------*/
    DEBUG_DATA   yLOG_enter   (__FUNCTION__);
@@ -283,15 +284,15 @@ DATA_gather_project     (char a_full [LEN_PATH])
    }
    DEBUG_DATA   yLOG_info    ("a_full"    , a_full);
    /*---(get the home)-------------------*/
-   INCL_list_clear  ();
+   INCL_clear  ();
    /*---(get the home)-------------------*/
-   rc = ystrlproj (a_full, x_proj);
+   rc = ystrlproj (a_full, x_project);
    DEBUG_DATA   yLOG_value   ("strlproj"  , rc);
    --rce;  if (rc < 0)  {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_DATA   yLOG_info    ("x_proj"    , x_proj);
+   DEBUG_DATA   yLOG_info    ("x_project" , x_project);
    /*---(open directory)-----------------*/
    x_dir = opendir (a_full);
    DEBUG_DATA   yLOG_point   ("x_dir"     , x_dir);
@@ -315,7 +316,7 @@ DATA_gather_project     (char a_full [LEN_PATH])
       }
       DEBUG_DATA   yLOG_info    ("d_name"    , x_entry->d_name);
       /*---(filter)----------------------*/
-      rc = DATA_file_type (x_proj, x_entry->d_name, &x_type);
+      rc = DATA_file_type (x_project, x_entry->d_name, &x_type);
       DEBUG_DATA   yLOG_value   ("file_type" , rc);
       if (x_type == TYPE_NONE) {
          DEBUG_DATA   yLOG_note    ("file type is not useful, continue");
@@ -328,9 +329,9 @@ DATA_gather_project     (char a_full [LEN_PATH])
       else                       sprintf (x_full, "%s/%s", a_full, x_entry->d_name);
       DEBUG_DATA   yLOG_info    ("x_full"    , x_full);
       if (x_type == TYPE_WAVE) {
-         rc = WAVE_gather      (x_proj, x_entry->d_name, x_full, x_type);
+         rc = WAVE_gather      (x_project, x_entry->d_name, x_full, x_type);
       } else {
-         rc = DATA_gather_file (x_proj, x_entry->d_name, x_full, x_type);
+         rc = DATA_gather_file (x_project, x_entry->d_name, x_full, x_type);
       }
       DEBUG_DATA   yLOG_value   ("dispatch"  , rc);
       if (rc < 0) {
@@ -348,7 +349,7 @@ DATA_gather_project     (char a_full [LEN_PATH])
       return rce;
    }
    /*---(write includes)-----------------*/
-   INCL_finalize (x_proj, a_full);
+   INCL_finalize (x_project, a_full);
    /*---(complete)-----------------------*/
    DEBUG_DATA   yLOG_exit    (__FUNCTION__);
    return c;

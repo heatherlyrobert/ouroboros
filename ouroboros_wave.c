@@ -860,7 +860,7 @@ WAVE_inventory          (char *a_path)
       return rce;
    }
    /*---(clear include lists)------------*/
-   INCL_list_clear ();
+   INCL_clear ();
    /*---(walk entries)-------------------*/
    --rce; while (1) {
       /*---(prepare)---------------------*/
@@ -912,7 +912,6 @@ WAVE_inventory          (char *a_path)
          if (x_end < 0) {
             x_end = GRAPH_add_node (my.proj);
             rc = DEPS_add ("koios", my.proj);
-            /*> INCL_add_by_name ("koios", x_end);                                    <*/
             /*> GRAPH_edge_virt  ("koios", x_end);                                    <*/
          }
          break;
@@ -921,7 +920,7 @@ WAVE_inventory          (char *a_path)
          if (x_end < 0) {
             x_end = GRAPH_add_node (my.proj);
             GRAPH_edge_virt ("yUNIT_solo", x_end);
-            INCL_list_add  ('u', "yUNIT_solo");
+            INCL_add  (-1, 'u', "yUNIT_solo", '-');
          }
          /*> rc = INCL_gather_in_c (my.proj, x_name);                                 <*/
          break;

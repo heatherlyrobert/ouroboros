@@ -686,7 +686,6 @@ char EDGE_by_cursor (char a_dir             , tEDGE **r_cur)  { return  ySORT_by
  *> /+> if (strcmp (g_nodes [x_beg].n_name, "zenodotus") == 0) {                       <*    <* 
  *>  *>    if (strstr (g_nodes [a_end].n_name, "_solo") != NULL) {                     <*    <* 
  *>  *>       DEBUG_PROG   yLOG_note    ("call to add tie to _solo");                  <*    <* 
- *>  *>       INCL_add_by_name ("zenodotus", a_end);                                   <*    <* 
  *>  *>    }                                                                           <*    <* 
  *>  *> }                                                                              <+/   <* 
  *> /+---(complete)-----------------------+/                                           

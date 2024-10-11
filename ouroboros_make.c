@@ -1,8 +1,10 @@
 /*===============================[[ beg-code ]]===============================*/
 #include    "ouroboros.h"
 
+/*> int a_end                                                                         <*/
+
 char
-MAKE_gather             (char a_recd [LEN_RECD], int a_end)
+MAKE_gather             (char a_proj [LEN_LABEL], char a_recd [LEN_RECD])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -15,6 +17,12 @@ MAKE_gather             (char a_recd [LEN_RECD], int a_end)
    /*---(header)-------------------------*/
    DEBUG_DATA  yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
+   DEBUG_DATA   yLOG_point   ("a_proj"    , a_proj);
+   --rce; if (a_proj == NULL || a_proj [0] == '\0') {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_DATA   yLOG_info    ("a_proj"    , a_proj);
    DEBUG_DATA   yLOG_point   ("a_recd"    , a_recd);
    --rce; if (a_recd == NULL) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
@@ -24,16 +32,6 @@ MAKE_gather             (char a_recd [LEN_RECD], int a_end)
    l = strlen (a_recd);
    DEBUG_DATA   yLOG_value   ("l"         , l);
    --rce; if (l <= 0) {
-      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_DATA   yLOG_value   ("a_end"     , a_end);
-   --rce; if (a_end < 0) {
-      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_DATA   yLOG_value   ("g_nnode"   , g_nnode);
-   --rce; if (a_end >= g_nnode) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
@@ -71,8 +69,7 @@ MAKE_gather             (char a_recd [LEN_RECD], int a_end)
       return 0;
    }
    /*---(handle)----------------------*/
-   /*> rc = INCL_add_by_name ("zenodotus", a_end);                                    <*/
-   rc = DEPS_add ("zenodotus", g_nodes [a_end].n_name);
+   rc = DEPS_add ("zenodotus", a_proj);
    DEBUG_DATA   yLOG_value   ("add"       , rc);
    /*---(complete)-----------------------*/
    DEBUG_DATA  yLOG_exit    (__FUNCTION__);

@@ -244,6 +244,8 @@ NODE_add                (char a_name [LEN_LABEL], tNODE **r_new)
    tNODE      *x_node      = NULL;
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(default)------------------------*/
+   if (r_new != NULL)  *r_new = NULL;
    /*---(filter)-------------------------*/
    rc = NODE__new (a_name, '-', &x_node);
    --rce;  if (rc < 0 || x_node == NULL) {

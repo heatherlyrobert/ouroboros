@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.5- update to nodes being dynamic"
-#define     P_VERNUM    "0.5g"
-#define     P_VERTXT    "EDGE_purge, EDGE_remove, EDGE_purge_for_node built and unit tested"
+#define     P_VERNUM    "0.5h"
+#define     P_VERTXT    "tightened up foundation parts of INCL and its unit testing"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -696,24 +696,24 @@ char*       GRAPH__unit             (char *a_question, int n);
 /*===[[ ouroboros_incl.c ]]===================================================*/
 /*········· ´······················ ´·········································*/
 /*---(program)--------------*/
-char        INCL_clear              (void);
+char        INCL_purge              (void);
+char        INCL_init               (void);
+char        INCL_wrap               (void);
 char        INCL_zenodotus          (void);
 /*---(lists)----------------*/
-char        INCL_list_clear         (void);
-char        INCL_list_add           (char a_cat, char a_header [LEN_TITLE]);
-int         INCL_by_name            (char a_header [LEN_TITLE], char *r_block);
+char        INCL_clear              (void);
+char        INCL_add                (int  n, char a_cat, char a_header [LEN_LABEL], char a_test);
+char        INCL_add_by_group       (char a_project [LEN_LABEL], char a_group);
 /*---(find)-----------------*/
-int         INCL_add_by_name        (char a_beg [LEN_TITLE], int a_end);
-char        INCL_add_by_group       (int a_end, char a_type);
+int         INCL_by_name            (char a_header [LEN_TITLE]);
+char        INCL_data               (int n, char *r_cat, char r_name [LEN_TITLE], int *r_count, char *r_opengl, char *r_curses, char *r_draw, char *r_block, char *r_zeno);
 /*---(gather)---------------*/
-char        INCL_gather_detail      (char a_header [LEN_TITLE], int a_end);
-char        INCL_gather             (char a_recd [LEN_RECD], int a_end);
+char        INCL_gather_detail      (char a_project [LEN_LABEL], char a_entry [LEN_TITLE]);
+char        INCL_gather             (char a_project [LEN_LABEL], char a_recd [LEN_RECD]);
 /*---(report)---------------*/
 char        INCL_list               (void);
 char        INCL_finalize           (char a_proj [LEN_LABEL], char a_full [LEN_PATH]);
 char        INCL_block              (char a_proj [LEN_TITLE]);
-/*---(database)-------------*/
-char        INCL_handler            (int n, uchar a_verb [LEN_TERSE]);
 /*---(unittest)-------------*/
 char*       INCL__unit              (char *a_question, int n);
 /*---(done)-----------------*/
@@ -723,9 +723,10 @@ char*       INCL__unit              (char *a_question, int n);
 /*===[[ ouroboros_deps.c ]]===================================================*/
 /*········· ´······················ ´·········································*/
 /*---(single)---------------*/
-char        DEPS__add               (char a_source [LEN_TITLE], char a_target [LEN_LABEL], char a_force);
-char        DEPS_add                (char a_source [LEN_TITLE], char a_target [LEN_LABEL]);
-char        DEPS_force              (char a_source [LEN_TITLE], char a_target [LEN_LABEL]);
+char        DEPS__defense           (char a_source [LEN_LABEL], char a_target [LEN_LABEL]);
+char        DEPS__add               (char a_source [LEN_LABEL], char a_target [LEN_LABEL], char a_force);
+char        DEPS_add                (char a_source [LEN_LABEL], char a_target [LEN_LABEL]);
+char        DEPS_force              (char a_source [LEN_LABEL], char a_target [LEN_LABEL]);
 /*---(lists)----------------*/
 char        DEPS_merge              (char a_deps [LEN_RECD], char r_cumd [LEN_RECD]);
 char        DEPS_missing            (char a_deps [LEN_RECD], char a_cumd [LEN_RECD], char a_block [LEN_RECD], char r_miss [LEN_RECD]);
@@ -740,16 +741,16 @@ char        DEPS_dump               (void);
 
 /*===[[ ouroboros_make.c ]]===================================================*/
 /*········· ´······················ ´·········································*/
-char        MAKE_gather             (char a_recd [LEN_RECD], int a_end);
+char        MAKE_gather             (char a_proj [LEN_LABEL], char a_recd [LEN_RECD]);
 /*---(done)-----------------*/
 
 
 
 /*===[[ ouroboros_make.c ]]===================================================*/
 /*········· ´······················ ´·········································*/
-char        DATA_file_type          (char a_proj [LEN_TITLE], char a_file [LEN_HUND], char *r_type);
+char        DATA_file_type          (char a_project [LEN_LABEL], char a_file [LEN_HUND], char *r_type);
 char        DATA_gather_prep        (char a_file [LEN_PATH], char a_type, char r_file [LEN_PATH]);
-char        DATA_gather_file        (char a_proj [LEN_TITLE], char a_entry [LEN_TITLE], char a_full [LEN_PATH], char a_type);
+char        DATA_gather_file        (char a_project [LEN_LABEL], char a_entry [LEN_TITLE], char a_full [LEN_PATH], char a_type);
 char        DATA_gather_project     (char a_full [LEN_PATH]);
 /*---(done)-----------------*/
 

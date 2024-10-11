@@ -3,21 +3,31 @@
 
 
 
+/*
+ * file        : ouroboros_deps.c
+ * subject     : links two nodes together, or a header and a node
+ *
+ * terms       : source     beginning of the edge (as 20 char text string)
+ *               target     ending of the edge    (as 20 char text string)
+ *               deps       new sources required for a node
+ *               cumd       cumulative source required for a node
+ *               miss       nodes that need creating for a node (not in cum)
+ *
+ *
+ */
+
+
+
 /*====================------------------------------------====================*/
 /*===----                     new dependencies                         ----===*/
 /*====================------------------------------------====================*/
 static void  o___SINGLE__________o () { return; }
 
 char
-DEPS__add               (char a_source [LEN_TITLE], char a_target [LEN_LABEL], char a_force)
+DEPS__defense           (char a_source [LEN_LABEL], char a_target [LEN_LABEL])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
-   char        rc          =    0;
-   char       *x_list      = NULL;
-   int         x_beg       =   -1;
-   int         x_end       =   -1;
-   char        t           [LEN_HUND]  = "";
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -50,16 +60,102 @@ DEPS__add               (char a_source [LEN_TITLE], char a_target [LEN_LABEL], c
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DEPS__ends              (char a_source [LEN_LABEL], char a_target [LEN_LABEL], char a_force, int *r_beg, tNODE **r_src, tNODE **r_trg)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   int         x_beg       =   -1;
+   tNODE      *x_src       = NULL;
+   tNODE      *x_trg       = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(default)------------------------*/
+   if (r_beg  != NULL)  *r_beg = -1;
+   if (r_src  != NULL)  *r_src = NULL;
+   if (r_trg  != NULL)  *r_trg = NULL;
+   /*---(check for source)---------------*/
+   x_beg = INCL_by_name (a_source);
+   DEBUG_PROG   yLOG_value   ("incl"      , x_beg);
+   --rce;  if (x_beg >= 0) {
+      DEBUG_PROG   yLOG_note    ("a_source is an include file");
+   } else {
+      DEBUG_PROG   yLOG_note    ("a_source is a new/existing node");
+      rc = NODE_by_name (a_source, &x_src);
+      DEBUG_PROG   yLOG_complex ("src"       , "%4d, %p", rc, x_src);
+      if (a_force != 'y') {
+         DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+      rc = NODE_add (a_source, &x_src);
+      DEBUG_PROG   yLOG_complex ("force"     , "%4d, %p", rc, x_src);
+      if (rc < 0 || x_src == NULL) {
+         DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+   }
+   /*---(check for target)---------------*/
+   rc = NODE_by_name (a_target, &x_trg);
+   DEBUG_PROG   yLOG_complex ("trg"       , "%4d, %p", rc, x_trg);
+   --rce;  if (rc < 0) {
+      if (a_force != 'y') {
+         DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+      rc = NODE_add (a_target, &x_trg);
+      DEBUG_PROG   yLOG_complex ("force"     , "%4d, %p", rc, x_trg);
+      if (rc < 0 || x_trg == NULL) {
+         DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+   }
+   /*---(save-back)----------------------*/
+   if (r_beg  != NULL)  *r_beg = x_beg;
+   if (r_src  != NULL)  *r_src = x_src;
+   if (r_trg  != NULL)  *r_trg = x_trg;
+   /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DEPS__add               (char a_source [LEN_LABEL], char a_target [LEN_LABEL], char a_force)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char       *x_list      = NULL;
+   int         x_beg       =   -1;
+   int         x_end       =   -1;
+   char        t           [LEN_HUND]  = "";
+   tNODE      *x_source    = NULL;
+   tNODE      *x_target    = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   rc = DEPS__defense (a_source, a_target);
+   DEBUG_PROG   yLOG_value   ("defense"   , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(find beg-point)-----------------*/
-   x_beg = INCL_by_name (a_source, NULL);
+   x_beg = INCL_by_name (a_source);
    DEBUG_PROG   yLOG_value   ("x_beg"     , x_beg);
    --rce;  if (x_beg < 0) {
       DEBUG_PROG   yLOG_note    ("a_source not found, but must record");
    }
    /*---(find end-point)-----------------*/
-   x_end = GRAPH_by_name (a_target);
-   DEBUG_PROG   yLOG_value   ("x_end"     , x_end);
-   --rce;  if (x_end < 0) {
+   rc = NODE_by_name (a_target, &x_source);
+   /*> x_end = GRAPH_by_name (a_target);                                              <*/
+   DEBUG_PROG   yLOG_complex ("find"      , "%4d, %p", rc, x_source);
+   --rce;  if (rc < 0) {
       if (a_force != 'y') {
          DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
          return rce;
@@ -89,12 +185,12 @@ DEPS__add               (char a_source [LEN_TITLE], char a_target [LEN_LABEL], c
    /*---(not-standard)-------------------*/
    if (x_beg < 0) {
       DEBUG_PROG   yLOG_note    ("not found, so add to WTF");
-      rc = INCL_list_add (DEPWTF, a_source);
+      rc = INCL_add (-1, DEPWTF, a_source, '-');
       DEBUG_PROG   yLOG_exit    (__FUNCTION__);
       return 3;
    }
    /*---(add)----------------------------*/
-   rc = INCL_list_add (g_incls [x_beg].i_cat, g_incls [x_beg].i_name);
+   rc = INCL_add (x_beg, 0, NULL, '-');
    DEBUG_PROG   yLOG_value   ("list"      , rc);
    if (rc == 1) {
       DEBUG_PROG   yLOG_note    ("add to include counts");
@@ -116,8 +212,9 @@ DEPS__add               (char a_source [LEN_TITLE], char a_target [LEN_LABEL], c
       if (g_incls [x_beg].i_draw == 'y') {
          rc = DEPS_add ("zenodotus", a_source);
          DEBUG_PROG   yLOG_value   ("solo/uver" , rc);
-         x_beg = GRAPH_by_name (a_source);
-         DEBUG_PROG   yLOG_value   ("x_beg"     , x_beg);
+         /*> x_beg = GRAPH_by_name (a_source);                                        <*/
+         rc = NODE_add (a_source, NULL);
+         DEBUG_PROG   yLOG_value   ("rc"        , rc);
          rc = GRAPH_edge_virt ("zenodotus", x_beg);
          DEBUG_PROG   yLOG_value   ("edge"      , rc);
          DEBUG_PROG   yLOG_exit    (__FUNCTION__);
@@ -129,8 +226,8 @@ DEPS__add               (char a_source [LEN_TITLE], char a_target [LEN_LABEL], c
    return 1;
 }
 
-char DEPS_add         (char a_source [LEN_TITLE], char a_target [LEN_LABEL]) { return DEPS__add (a_source, a_target, '-'); }
-char DEPS_force       (char a_source [LEN_TITLE], char a_target [LEN_LABEL]) { return DEPS__add (a_source, a_target, 'y'); }
+char DEPS_add         (char a_source [LEN_LABEL], char a_target [LEN_LABEL]) { return DEPS__add (a_source, a_target, '-'); }
+char DEPS_force       (char a_source [LEN_LABEL], char a_target [LEN_LABEL]) { return DEPS__add (a_source, a_target, 'y'); }
 
 
 

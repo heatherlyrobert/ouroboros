@@ -141,7 +141,7 @@ PROG__init          (void)
    EDGE_init  ();
    WAVE_init  ();
    GRAPH_init ();
-   INCL_clear ();
+   INCL_init  ();
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -328,6 +328,8 @@ char                /* PURPOSE : shutdown program and free memory ------------*/
 PROG__end           (void)
 {
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   NODE_wrap ();
+   EDGE_wrap ();
    WAVE_wrap ();
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;

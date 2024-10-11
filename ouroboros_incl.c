@@ -3,6 +3,16 @@
 
 
 
+/*
+ * file        : ouroboros_incl.c
+ * subject     : process files with ansi-c include directives
+ *
+ *
+ *
+ */
+
+
+
 struct {
    char        c_cat;
    char        c_name      [LEN_LABEL];
@@ -238,7 +248,10 @@ tINCL g_incls [MAX_INCL] = {
    {  0 , "end-of-list"              , 0, '-', '-', '-' },
 };
 int  g_nincl   = 0;
+int  g_nseen   = 0;
 int  g_handled = 0;
+int  g_nextra  = 0;
+int  g_ndrawn  = 0;
 
 
 
@@ -248,19 +261,25 @@ int  g_handled = 0;
 static void  o___PROGRAM_________o () { return; }
 
 char
-INCL_clear              (void)
+INCL_purge              (void)
 {
    int         i           =    0;
    g_nincl   = 0;
+   g_nseen   = 0;
    g_handled = 0;
+   g_nextra  = 0;
+   g_ndrawn  = 0;
    for (i = 0; i < MAX_INCL; ++i) {
       if (g_incls [i].i_cat == 0)   break;
       g_incls [i].i_count = 0;
       ++g_nincl;
    }
-   INCL_list_clear ();
+   INCL_clear ();
    return 0;
 }
+
+char INCL_init               (void) { return INCL_purge (); }
+char INCL_wrap               (void) { return INCL_purge (); }
 
 char
 INCL_zenodotus          (void)
@@ -273,9 +292,6 @@ INCL_zenodotus          (void)
       if (g_incls [i].i_cat == 0)   break;
       DEBUG_PROG   yLOG_complex ("looking"   , "%3d %-20.20s %c", i, g_incls [i].i_name, g_incls [i].i_zenodotus);
       if (g_incls [i].i_zenodotus != 'y')  continue;
-      /*> n = GRAPH_by_name (g_incls [i].i_name);                                     <* 
-       *> DEBUG_PROG   yLOG_value   ("n"         , n);                                <* 
-       *> INCL_add_by_name ("zenodotus", n);                                          <*/
       DEPS_force ("zenodotus", g_incls [i].i_name);
    }
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
@@ -290,7 +306,7 @@ INCL_zenodotus          (void)
 static void  o___DETAIL__________o () { return; }
 
 char
-INCL_list_clear         (void)
+INCL_clear              (void)
 {
    strcpy (my.depsolo , "´");
    strcpy (my.depunit , "´");
@@ -309,29 +325,49 @@ INCL_list_clear         (void)
    return 0;
 }
 
+/*
+ *  a_test flag is to divorce INCL functions from outside calls for early testing
+ */
+
 char
-INCL_list_add           (char a_cat, char a_header [LEN_TITLE])
+INCL_add                (int n, char a_cat, char a_header [LEN_TITLE], char a_test)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
+   char        rc          =    0;
+   char        x_cat       =  '-';
+   char        x_header    [LEN_TITLE] = "";
    char       *x_list      = NULL;
    char        t           [LEN_HUND]  = "";
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   /*---(defense)------------------------*/
-   DEBUG_PROG   yLOG_point   ("a_header"  , a_header);
-   --rce;  if (a_header     == NULL) {
-      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
+   /*---(handle direct)------------------*/
+   DEBUG_DATA   yLOG_value   ("n"         , n);
+   --rce;  if (n < 0 || n >= g_nincl) {
+      DEBUG_PROG   yLOG_point   ("a_header"  , a_header);
+      --rce;  if (a_header     == NULL) {
+         DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+      DEBUG_PROG   yLOG_info    ("a_header"  , a_header);
+      --rce;  if (a_header [0] == '\0') {
+         DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+      n = INCL_by_name (a_header);
+      x_cat = a_cat;
+      ystrlcpy (x_header, a_header, LEN_TITLE);
    }
-   DEBUG_PROG   yLOG_info    ("a_header"  , a_header);
-   --rce;  if (a_header [0] == '\0') {
-      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
+   /*---(handle indexed)-----------------*/
+   else {
+      x_cat = g_incls [n].i_cat;
+      ystrlcpy (x_header, g_incls [n].i_name, LEN_TITLE);
    }
+   DEBUG_PROG   yLOG_info    ("x_header"  , x_header);
    /*---(pick list)----------------------*/
-   DEBUG_PROG   yLOG_char    ("a_cat"     , a_cat);
-   --rce;  switch (a_cat) {
+   DEBUG_PROG   yLOG_char    ("x_cat"     , x_cat);
+   /*---(standards)------------*/
+   --rce;  switch (x_cat) {
    case DEPSOLO  :  x_list = my.depsolo;    break;
    case DEPUNIT  :  x_list = my.depunit;    break;
    case DEPANSI  :  x_list = my.depansi;    break;
@@ -341,23 +377,36 @@ INCL_list_add           (char a_cat, char a_header [LEN_TITLE])
    case DEPGRAPH :  x_list = my.depgraph;   break;
    case DEPOTHER :  x_list = my.depother;   break;
    case DEPALIEN :  x_list = my.depalien;   break;
-   case DEPINPT  :  x_list = my.depinpt;    break;
-   case DEPOUTP  :  x_list = my.depoutp;    break;
-   case DEPFILE  :  x_list = my.depfile;    break;
-   case DEPWTF   :  x_list = my.depwtf;     break;
-   default       :
-                    DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-                    return rce;
    }
+   /*---(extended)-------------*/
+   switch (x_cat) {
+   case DEPINPT  :  x_list = my.depinpt;  ++g_nextra;  break;
+   case DEPOUTP  :  x_list = my.depoutp;  ++g_nextra;  break;
+   case DEPFILE  :  x_list = my.depfile;  ++g_nextra;  break;
+   case DEPWTF   :  x_list = my.depwtf;   ++g_nextra;  break;
+   }
+   /*---(missing)--------------*/
+   if (x_list == NULL) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(increment handled/seen)---------*/
    DEBUG_PROG   yLOG_info    ("x_list"    , x_list);
+   ++g_nseen;
    /*---(prepare)------------------------*/
-   sprintf (t, ",%s,", a_header);
+   sprintf (t, ",%s,", x_header);
    DEBUG_PROG   yLOG_info    ("t"         , t);
    /*---(check individual)---------------*/
    --rce;  if (strstr (x_list, t) != NULL) {
       DEBUG_PROG   yLOG_note    ("already in specific list");
       DEBUG_PROG   yLOG_exit    (__FUNCTION__);
       return 2;
+   }
+   ++g_handled;
+   /*---(increment count)----------------*/
+   if (n >= 0 && n <= g_nincl) {
+      ++(g_incls [n].i_count);
+      DEBUG_PROG   yLOG_value   ("i_count"   , g_incls [n].i_count);
    }
    if (x_list [0]    == '´')  ystrlcpy (x_list   , ",", LEN_FULL);
    ystrlcat (x_list, t + 1, LEN_FULL);
@@ -369,34 +418,62 @@ INCL_list_add           (char a_cat, char a_header [LEN_TITLE])
       return 3;
    }
    if (my.depall [0] == '´')  ystrlcpy (my.depall, ",", LEN_RECD);
-   switch (a_cat) {
+   switch (x_cat) {
    case 'I' : ystrlcat (my.depall, "×", LEN_RECD);   break;
    case 'O' : ystrlcat (my.depall, "Ö", LEN_RECD);   break;
    case 'F' : ystrlcat (my.depall, "Ï", LEN_RECD);   break;
    }
    ystrlcat (my.depall, t + 1, LEN_RECD);
-   /*---(full total)---------------------*/
-   ++g_handled;
+   /*---(create node)--------------------*/
+   DEBUG_PROG   yLOG_char    ("a_test"    , a_test);
+   DEBUG_PROG   yLOG_char    ("i_draw"    , g_incls [n].i_draw);
+   if (a_test != 'y' && strchr ("yv", g_incls [n].i_draw) != NULL) {
+      DEBUG_PROG   yLOG_note    ("requested to draw header");
+      rc = NODE_add (g_incls [n].i_name, NULL);
+      DEBUG_PROG   yLOG_value   ("add"       , rc);
+      ++g_ndrawn;
+   } else {
+      DEBUG_PROG   yLOG_note    ("leave header invisible");
+   }
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 1;
 }
 
-int
-INCL_by_name            (char a_header [LEN_TITLE], char *r_block)
+char
+INCL_add_by_group       (char a_project [LEN_LABEL], char a_group)
 {
+   /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    int         i           =    0;
-   if (r_block  != NULL)  *r_block = '·';
-   --rce;  if (a_header == NULL)       return rce;
-   --rce;  if (a_header [0] == '\0')   return rce;
-   for (i = 0; i < MAX_INCL; ++i) {
-      if (g_incls [i].i_cat == 0)   break;
-      if (strcmp (g_incls [i].i_name, a_header) != 0)  continue;
-      if (r_block != NULL)  *r_block = g_incls [i].i_block;
-      return i;
+   /*---(header)-------------------------*/
+   DEBUG_DATA  yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_DATA   yLOG_value   ("a_group"   , a_group);
+   --rce;  if (a_group     == 0) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
    }
-   return rce;
+   DEBUG_DATA   yLOG_char    ("a_group"   , a_group);
+   --rce;  if (strchr ("OC", a_group) == NULL) {
+      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   for (i = 0; i < MAX_INCL; ++i) {
+      DEBUG_DATA   yLOG_complex ("loop"      , "%3d, %c, %-30.30s, %c, %c", i, g_incls [i].i_cat, g_incls [i].i_name, g_incls [i].i_opengl, g_incls [i].i_curses);
+      if (g_incls [i].i_cat == 0)   break;
+      switch (a_group) {
+      case 'O' :
+         if (g_incls [i].i_opengl == 'y')  DEPS_add (g_incls [i].i_name, a_project);
+         break;
+      case 'C' :
+         if (g_incls [i].i_curses == 'y')  DEPS_add (g_incls [i].i_name, a_project);
+         break;
+      }
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_DATA  yLOG_exit    (__FUNCTION__);
+   return 0;
 }
 
 
@@ -407,93 +484,53 @@ INCL_by_name            (char a_header [LEN_TITLE], char *r_block)
 static void  o___FIND____________o () { return; }
 
 int
-INCL_add_by_name        (char a_beg [LEN_TITLE], int a_end)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   int         n           =    0;
-   /*---(header)-------------------------*/
-   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   /*---(defense)------------------------*/
-   DEBUG_PROG   yLOG_point   ("a_beg"     , a_beg);
-   --rce;  if (a_beg     == NULL) {
-      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_PROG   yLOG_info    ("a_beg"     , a_beg);
-   --rce;  if (a_beg [0] == '\0') {
-      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_PROG   yLOG_value   ("a_end"     , a_end);
-   --rce;  if (a_end < 0) {
-      DEBUG_PROG   yLOG_note    ("negative a_end, better be unit testing");
-   }
-   /*---(find)---------------------------*/
-   n  = INCL_by_name (a_beg, NULL);
-   DEBUG_PROG   yLOG_value   ("by_name"   , n);
-   /*---(not-standard)-------------------*/
-   --rce;  if (n < 0) {
-      DEBUG_PROG   yLOG_note    ("not found, so add to WTF");
-      rc = INCL_list_add (DEPWTF, a_beg);
-      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(add)----------------------------*/
-   rc = INCL_list_add (g_incls [n].i_cat, g_incls [n].i_name);
-   DEBUG_PROG   yLOG_value   ("list"      , rc);
-   if (rc == 1) {
-      DEBUG_PROG   yLOG_note    ("add to include counts");
-      ++(g_incls [n].i_count);
-      DEBUG_PROG   yLOG_char    ("i_draw"    , g_incls [n].i_draw);
-      if (g_incls [n].i_draw == 'y') {
-         DEBUG_PROG   yLOG_note    ("add real graph edge");
-         rc = GRAPH_edge_real (a_beg, a_end);
-         DEBUG_PROG   yLOG_value   ("edge"      , rc);
-      } else if (g_incls [n].i_draw == 'v') {
-         DEBUG_PROG   yLOG_note    ("add virtual/koios graph edge");
-         rc = GRAPH_edge_virt (a_beg, a_end);
-         DEBUG_PROG   yLOG_value   ("edge"      , rc);
-      }
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-   return n;
-}
-
-char
-INCL_add_by_group       (int a_end, char a_type)
+INCL_by_name            (char a_header [LEN_TITLE])
 {
    char        rce         =  -10;
    int         i           =    0;
+   --rce;  if (a_header == NULL)       return rce;
+   --rce;  if (a_header [0] == '\0')   return rce;
+   for (i = 0; i < MAX_INCL; ++i) {
+      if (g_incls [i].i_cat == 0)   break;
+      if (strcmp (g_incls [i].i_name, a_header) != 0)  continue;
+      return i;
+   }
+   return rce;
+}
+
+char
+INCL_data               (int n, char *r_cat, char r_name [LEN_TITLE], int *r_count, char *r_opengl, char *r_curses, char *r_draw, char *r_block, char *r_zeno)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
    /*---(header)-------------------------*/
    DEBUG_DATA  yLOG_enter   (__FUNCTION__);
+   /*---(default)------------------------*/
+   if (r_cat    != NULL)  *r_cat     = '-';
+   if (r_name   != NULL)  ystrlcpy (r_name    , "", LEN_TITLE);
+   if (r_count  != NULL)  *r_count   =   0;
+   if (r_opengl != NULL)  *r_opengl  = '-';
+   if (r_curses != NULL)  *r_curses  = '-';
+   if (r_draw   != NULL)  *r_draw    = '-';
+   if (r_block  != NULL)  *r_block   = '-';
+   if (r_zeno   != NULL)  *r_zeno    = '-';
    /*---(defense)------------------------*/
-   DEBUG_DATA   yLOG_value   ("a_type"    , a_type);
-   --rce;  if (a_type     == 0) {
+   DEBUG_DATA   yLOG_value   ("n"         , n);
+   --rce;  if (n < 0 || n >= g_nincl) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_DATA   yLOG_char    ("a_type"    , a_type);
-   --rce;  if (strchr ("OC", a_type) == NULL) {
-      DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   for (i = 0; i < MAX_INCL; ++i) {
-      DEBUG_DATA   yLOG_complex ("loop"      , "%3d, %c, %-30.30s, %c, %c", i, g_incls [i].i_cat, g_incls [i].i_name, g_incls [i].i_opengl, g_incls [i].i_curses);
-      if (g_incls [i].i_cat == 0)   break;
-      switch (a_type) {
-      case 'O' :
-         /*> if (g_incls [i].i_opengl == 'y')  INCL_add_by_name (g_incls [i].i_name, a_end);   <*/
-         if (g_incls [i].i_opengl == 'y')  DEPS_add (g_incls [i].i_name, g_nodes [a_end].n_name);
-         break;
-      case 'C' :
-         /*> if (g_incls [i].i_curses == 'y')  INCL_add_by_name (g_incls [i].i_name, a_end);   <*/
-         if (g_incls [i].i_curses == 'y')  DEPS_add (g_incls [i].i_name, g_nodes [a_end].n_name);
-         break;
-      }
-   }
+   /*---(save-back)----------------------*/
+   if (r_cat    != NULL)  *r_cat     = g_incls [n].i_cat;
+   if (r_name   != NULL)  ystrlcpy (r_name    , g_incls [n].i_name, LEN_TITLE);
+   if (r_count  != NULL)  *r_count   = g_incls [n].i_count;
+   if (r_opengl != NULL)  *r_opengl  = g_incls [n].i_opengl;
+   if (r_curses != NULL)  *r_curses  = g_incls [n].i_curses;
+   if (r_draw   != NULL)  *r_draw    = g_incls [n].i_draw;
+   if (r_block  != NULL)  *r_block   = g_incls [n].i_block;
+   if (r_zeno   != NULL)  *r_zeno    = g_incls [n].i_zenodotus;
+   /*---(complete)-----------------------*/
+   DEBUG_DATA  yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -505,7 +542,7 @@ INCL_add_by_group       (int a_end, char a_type)
 static void  o___GATHER__________o () { return; }
 
 char
-INCL_gather_detail      (char a_header [LEN_TITLE], int a_end)
+INCL_gather_detail      (char a_project [LEN_LABEL], char a_entry [LEN_TITLE])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -517,14 +554,14 @@ INCL_gather_detail      (char a_header [LEN_TITLE], int a_end)
    /*---(header)-------------------------*/
    DEBUG_DATA  yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   DEBUG_DATA   yLOG_point   ("a_header"  , a_header);
-   --rce; if (a_header == NULL) {
+   DEBUG_DATA   yLOG_point   ("a_entry"   , a_entry);
+   --rce; if (a_entry == NULL) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_DATA   yLOG_info    ("a_header"  , a_header);
+   DEBUG_DATA   yLOG_info    ("a_entry"   , a_entry);
    /*---(filter)-------------------------*/
-   strcpy (t, a_header);
+   strcpy (t, a_entry);
    l = strlen (t);
    DEBUG_DATA   yLOG_value   ("l"         , l);
    --rce;  if (l < 3) {
@@ -541,12 +578,12 @@ INCL_gather_detail      (char a_header [LEN_TITLE], int a_end)
    /*---(special)------------------------*/
    --rce; if (strcmp (t, "make_opengl") == 0) {
       DEBUG_DATA   yLOG_note    ("found meta-opengl header");
-      INCL_add_by_group (a_end, 'O');
+      INCL_add_by_group (a_project, 'O');
       DEBUG_DATA  yLOG_exit    (__FUNCTION__);
       return 2;
    } else if (strcmp (t, "make_curses") == 0) {
       DEBUG_DATA   yLOG_note    ("found meta-curses header");
-      INCL_add_by_group (a_end, 'C');
+      INCL_add_by_group (a_project, 'C');
       DEBUG_DATA  yLOG_exit    (__FUNCTION__);
       return 1;
    }
@@ -556,31 +593,18 @@ INCL_gather_detail      (char a_header [LEN_TITLE], int a_end)
       return 0;
    }
    /*---(add to list)--------------------*/
-   /*> n = INCL_add_by_name (t, a_end);                                               <*/
-   DEPS_add (t, g_nodes [a_end].n_name);
-   /*> DEBUG_DATA   yLOG_complex ("FOUND"     , "%-20.20s  %3d", t, n);               <*/
+   rc = DEPS_add (t, a_project);
    if (n < 0) {
       DEBUG_DATA  yLOG_exit    (__FUNCTION__);
       return 0;
    }
-   /*> DEBUG_DATA   yLOG_info    ("found"     , g_incls [n].i_name);                  <*/
-   /*---(check for solos)----------------*/
-   /*> DEBUG_DATA   yLOG_char    ("zenodotus" , g_incls [n].i_zenodotus);             <*/
-   /*> if (g_incls [n].i_zenodotus == 'y') {                                                    <* 
-    *>    DEBUG_PROG   yLOG_note    ("add a graph edge from zenodotus to _solo/_uver");         <* 
-    *>    n  = GRAPH_by_name (t);                                                               <* 
-    *>    DEBUG_PROG   yLOG_value   ("new node"  , n);                                          <* 
-    *>    n = INCL_add_by_name ("zenodotus", a_end);                                            <* 
-    *>    /+> rc = GRAPH_edge_virt ("zenodotus", n);                                      <+/   <* 
-    *>    DEBUG_PROG   yLOG_value   ("edge"      , rc);                                         <* 
-    *> }                                                                                        <*/
    /*---(complete)-----------------------*/
    DEBUG_DATA  yLOG_exit    (__FUNCTION__);
    return 1;
 }
 
 char
-INCL_gather             (char a_recd [LEN_RECD], int a_end)
+INCL_gather             (char a_project [LEN_LABEL], char a_recd [LEN_RECD])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -621,15 +645,15 @@ INCL_gather             (char a_recd [LEN_RECD], int a_end)
          DEBUG_DATA   yLOG_info    ("p"         , p);
          if (x_delimit == '"') {
             DEBUG_DATA   yLOG_info    ("strcmp"    , p + l - 7);
-            if      (strcmp (p + l - 7, "_solo.h") == 0)  rc = INCL_gather_detail (p, a_end);
-            else if (strcmp (p + l - 7, "_uver.h") == 0)  rc = INCL_gather_detail (p, a_end);
+            if      (strcmp (p + l - 7, "_solo.h") == 0)  rc = INCL_gather_detail (a_project, p);
+            else if (strcmp (p + l - 7, "_uver.h") == 0)  rc = INCL_gather_detail (a_project, p);
             else {
                DEBUG_DATA  yLOG_note    ("ignore local headers except _solo and _uver");
                DEBUG_DATA  yLOG_exit    (__FUNCTION__);
                return 0;
             }
          } else {
-            rc = INCL_gather_detail (p, a_end);
+            rc = INCL_gather_detail (a_project, p);
          }
       }
    }
@@ -739,11 +763,9 @@ INCL_block              (char a_proj [LEN_TITLE])
    /*---(defense)------------------------*/
    --rce;  if (a_proj == NULL)             return rce;
    /*> if (strstr (a_proj, "_solo") != NULL) {                                        <* 
-    *>    INCL_add_by_name ("zenodotus", GRAPH_by_name (a_proj));                     <* 
     *> }                                                                              <*/
    /*> if (strcmp (a_proj, "yUNIT") == 0) {                                           <* 
     *>    GRAPH_add_node  ("yENV_solo");                                              <* 
-    *>    INCL_add_by_name ("yENV_solo", GRAPH_by_name (a_proj));                     <* 
     *> }                                                                              <*/
    /*---(show result)--------------------*/
    /*> printf ("PROJECT     : å%sæ\n", a_proj);                                       <* 
@@ -778,77 +800,6 @@ INCL_block              (char a_proj [LEN_TITLE])
    return 0;
 }
 
-/*> char                                                                              <* 
- *> INCL_solos              (char a_proj [LEN_TITLE])                                 <* 
- *> {                                                                                 <* 
- *>    char        n           =   -1;                                                <* 
- *> }                                                                                 <*/
-
-char
-INCL_handler            (int n, uchar a_verb [LEN_TERSE])
-{
-   /*---(locals)-----------+-----------+-*/
-   char        rce         =  -10;
-   int         rc          =    0;
-   int         c           =    0;
-   char        x_proj      [LEN_LABEL] = "";
-   char        x_depall    [LEN_RECD]  = "";
-   char       *p           = NULL;
-   char       *q           = ",";
-   char       *r           = NULL;
-   /*---(header)-------------------------*/
-   DEBUG_CONF  yLOG_enter   (__FUNCTION__);
-   /*---(defense)------------------------*/
-   DEBUG_CONF  yLOG_point   ("a_verb"     , a_verb);
-   --rce;  if (a_verb == NULL) {
-      DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_CONF  yLOG_info    ("a_verb"     , a_verb);
-   rc = yPARSE_ready (&c);
-   DEBUG_CONF  yLOG_value   ("rc"         , rc);
-   DEBUG_CONF  yLOG_value   ("c"          , c);
-   /*---(read project)-------------------*/
-   --rce; if (strncmp (a_verb, "WAVE", 4) != 0) {
-      DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(read unit test)-----------------*/
-   rc = yPARSE_scanf (a_verb, "LR"  , x_proj, x_depall);
-   /*---(trouble)------------------------*/
-   DEBUG_CONF  yLOG_value   ("scanf"      , rc);
-   if (rc < 0) {
-      DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(check project)------------------*/
-   DEBUG_CONF  yLOG_info    ("x_proj"     , x_proj);
-   n = GRAPH_by_name (x_proj);
-   if (n < 0)  n = GRAPH_add_node (x_proj);
-   DEBUG_CONF  yLOG_value   ("n"          , n);
-   if (n < 0) {
-      DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(check for empty)----------------*/
-   if (strcmp (x_depall, "´") == 0) {
-      DEBUG_PROG  yLOG_exit    (__FUNCTION__);
-      return 0;
-   }
-   /*---(handle)-------------------------*/
-   c = 0;
-   p = strtok_r (x_depall, q, &r);
-   while (p != NULL) {
-      /*> rc = INCL_add_by_name (p, n);                                               <*/
-      rc = DEPS_add (p, x_proj);
-      ++c;
-      p = strtok_r (NULL, q, &r);
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_CONF  yLOG_exit    (__FUNCTION__);
-   return c;
-}
-
 
 
 /*====================------------------------------------====================*/
@@ -870,12 +821,12 @@ INCL__unit              (char *a_question, int n)
    /*---(crontab name)-------------------*/
    if (strcmp (a_question, "count"         )  == 0) {
       for (i = 0; i < MAX_INCL; ++i) {
-         if (g_incls [i].i_cat == 0)   break;
-         if (g_incls [i].i_count <= 0) continue;
+         if (g_incls [i].i_cat   == 0)   break;
+         if (g_incls [i].i_count <= 0)   continue;
          ++x_count;
          x_total += g_incls [i].i_count;
       }
-      snprintf (my.unit_answer, LEN_RECD, "INCL count       : %4d count, %4d total, %4d handled", x_count, x_total, g_handled);
+      snprintf (my.unit_answer, LEN_RECD, "INCL count       : %4d list   , %4d seen   , %4d handled, %4d unique , %4d total  , %4d extra  , %4d drawn", g_nincl, g_nseen, g_handled, x_count, x_total, g_nextra, g_ndrawn);
    }
    /*---(complete)-----------------------*/
    return my.unit_answer;
