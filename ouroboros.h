@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.5- update to nodes being dynamic"
-#define     P_VERNUM    "0.5h"
-#define     P_VERTXT    "tightened up foundation parts of INCL and its unit testing"
+#define     P_VERNUM    "0.5i"
+#define     P_VERTXT    "broke out DEPS__ends from DEPS_add, and unit tested"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -399,8 +399,6 @@ struct cINCL {
    char        i_zenodotus;             /* add virtual link to zenodotus     */
 };
 extern tINCL g_incls [MAX_INCL];
-extern int   g_nincl;
-extern int   g_handled;
 
 struct cNODE {
    /*---(data)--------------*/
@@ -702,7 +700,7 @@ char        INCL_wrap               (void);
 char        INCL_zenodotus          (void);
 /*---(lists)----------------*/
 char        INCL_clear              (void);
-char        INCL_add                (int  n, char a_cat, char a_header [LEN_LABEL], char a_test);
+char        INCL_add                (int n, char a_cat, char a_header [LEN_TITLE]);
 char        INCL_add_by_group       (char a_project [LEN_LABEL], char a_group);
 /*---(find)-----------------*/
 int         INCL_by_name            (char a_header [LEN_TITLE]);
@@ -724,6 +722,7 @@ char*       INCL__unit              (char *a_question, int n);
 /*········· ´······················ ´·········································*/
 /*---(single)---------------*/
 char        DEPS__defense           (char a_source [LEN_LABEL], char a_target [LEN_LABEL]);
+char        DEPS__ends              (char a_source [LEN_LABEL], char a_target [LEN_LABEL], char a_force, int *r_beg, tNODE **r_src, tNODE **r_trg);
 char        DEPS__add               (char a_source [LEN_LABEL], char a_target [LEN_LABEL], char a_force);
 char        DEPS_add                (char a_source [LEN_LABEL], char a_target [LEN_LABEL]);
 char        DEPS_force              (char a_source [LEN_LABEL], char a_target [LEN_LABEL]);

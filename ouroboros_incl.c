@@ -247,11 +247,11 @@ tINCL g_incls [MAX_INCL] = {
    /*---(end)----------------------- cnt  ogl  cur  drw  blk  zen  */
    {  0 , "end-of-list"              , 0, '-', '-', '-' },
 };
-int  g_nincl   = 0;
-int  g_nseen   = 0;
-int  g_handled = 0;
-int  g_nextra  = 0;
-int  g_ndrawn  = 0;
+static int  s_nincl   = 0;
+static int  s_nseen   = 0;
+static int  s_handled = 0;
+static int  s_nextra  = 0;
+static int  s_ndrawn  = 0;
 
 
 
@@ -264,15 +264,15 @@ char
 INCL_purge              (void)
 {
    int         i           =    0;
-   g_nincl   = 0;
-   g_nseen   = 0;
-   g_handled = 0;
-   g_nextra  = 0;
-   g_ndrawn  = 0;
+   s_nincl   = 0;
+   s_nseen   = 0;
+   s_handled = 0;
+   s_nextra  = 0;
+   s_ndrawn  = 0;
    for (i = 0; i < MAX_INCL; ++i) {
       if (g_incls [i].i_cat == 0)   break;
       g_incls [i].i_count = 0;
-      ++g_nincl;
+      ++s_nincl;
    }
    INCL_clear ();
    return 0;
@@ -287,8 +287,8 @@ INCL_zenodotus          (void)
    int         i           =    0;
    int         n           =    0;
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   DEBUG_PROG   yLOG_value   ("g_nincl"   , g_nincl);
-   for (i = 0; i < g_nincl; ++i) {
+   DEBUG_PROG   yLOG_value   ("s_nincl"   , s_nincl);
+   for (i = 0; i < s_nincl; ++i) {
       if (g_incls [i].i_cat == 0)   break;
       DEBUG_PROG   yLOG_complex ("looking"   , "%3d %-20.20s %c", i, g_incls [i].i_name, g_incls [i].i_zenodotus);
       if (g_incls [i].i_zenodotus != 'y')  continue;
@@ -325,12 +325,8 @@ INCL_clear              (void)
    return 0;
 }
 
-/*
- *  a_test flag is to divorce INCL functions from outside calls for early testing
- */
-
 char
-INCL_add                (int n, char a_cat, char a_header [LEN_TITLE], char a_test)
+INCL_add                (int n, char a_cat, char a_header [LEN_TITLE])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -339,11 +335,13 @@ INCL_add                (int n, char a_cat, char a_header [LEN_TITLE], char a_te
    char        x_header    [LEN_TITLE] = "";
    char       *x_list      = NULL;
    char        t           [LEN_HUND]  = "";
+   char        x_show      =  '-';
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(handle direct)------------------*/
    DEBUG_DATA   yLOG_value   ("n"         , n);
-   --rce;  if (n < 0 || n >= g_nincl) {
+   --rce;  if (n < 0 || n >= s_nincl) {
+      DEBUG_PROG   yLOG_note    ("direct request (no index)");
       DEBUG_PROG   yLOG_point   ("a_header"  , a_header);
       --rce;  if (a_header     == NULL) {
          DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
@@ -360,6 +358,7 @@ INCL_add                (int n, char a_cat, char a_header [LEN_TITLE], char a_te
    }
    /*---(handle indexed)-----------------*/
    else {
+      DEBUG_PROG   yLOG_note    ("indexed request");
       x_cat = g_incls [n].i_cat;
       ystrlcpy (x_header, g_incls [n].i_name, LEN_TITLE);
    }
@@ -380,19 +379,19 @@ INCL_add                (int n, char a_cat, char a_header [LEN_TITLE], char a_te
    }
    /*---(extended)-------------*/
    switch (x_cat) {
-   case DEPINPT  :  x_list = my.depinpt;  ++g_nextra;  break;
-   case DEPOUTP  :  x_list = my.depoutp;  ++g_nextra;  break;
-   case DEPFILE  :  x_list = my.depfile;  ++g_nextra;  break;
-   case DEPWTF   :  x_list = my.depwtf;   ++g_nextra;  break;
+   case DEPINPT  :  x_list = my.depinpt;  ++s_nextra;  break;
+   case DEPOUTP  :  x_list = my.depoutp;  ++s_nextra;  break;
+   case DEPFILE  :  x_list = my.depfile;  ++s_nextra;  break;
+   case DEPWTF   :  x_list = my.depwtf;   ++s_nextra;  break;
    }
    /*---(missing)--------------*/
-   if (x_list == NULL) {
+   --rce;  if (x_list == NULL) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(increment handled/seen)---------*/
    DEBUG_PROG   yLOG_info    ("x_list"    , x_list);
-   ++g_nseen;
+   ++s_nseen;
    /*---(prepare)------------------------*/
    sprintf (t, ",%s,", x_header);
    DEBUG_PROG   yLOG_info    ("t"         , t);
@@ -402,9 +401,9 @@ INCL_add                (int n, char a_cat, char a_header [LEN_TITLE], char a_te
       DEBUG_PROG   yLOG_exit    (__FUNCTION__);
       return 2;
    }
-   ++g_handled;
+   ++s_handled;
    /*---(increment count)----------------*/
-   if (n >= 0 && n <= g_nincl) {
+   if (n >= 0 && n <= s_nincl) {
       ++(g_incls [n].i_count);
       DEBUG_PROG   yLOG_value   ("i_count"   , g_incls [n].i_count);
    }
@@ -425,16 +424,15 @@ INCL_add                (int n, char a_cat, char a_header [LEN_TITLE], char a_te
    }
    ystrlcat (my.depall, t + 1, LEN_RECD);
    /*---(create node)--------------------*/
-   DEBUG_PROG   yLOG_char    ("a_test"    , a_test);
-   DEBUG_PROG   yLOG_char    ("i_draw"    , g_incls [n].i_draw);
-   if (a_test != 'y' && strchr ("yv", g_incls [n].i_draw) != NULL) {
-      DEBUG_PROG   yLOG_note    ("requested to draw header");
-      rc = NODE_add (g_incls [n].i_name, NULL);
-      DEBUG_PROG   yLOG_value   ("add"       , rc);
-      ++g_ndrawn;
-   } else {
-      DEBUG_PROG   yLOG_note    ("leave header invisible");
+   x_show = g_incls [n].i_draw;
+   DEBUG_PROG   yLOG_char    ("x_show"    , x_show);
+   if (x_show != 0 && strchr ("yv", x_show) != NULL) {
+      DEBUG_PROG   yLOG_note    ("return request to show/draw header");
+      ++s_ndrawn;
+      DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+      return x_show;
    }
+   DEBUG_PROG   yLOG_note    ("leave header invisible");
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 1;
@@ -516,7 +514,7 @@ INCL_data               (int n, char *r_cat, char r_name [LEN_TITLE], int *r_cou
    if (r_zeno   != NULL)  *r_zeno    = '-';
    /*---(defense)------------------------*/
    DEBUG_DATA   yLOG_value   ("n"         , n);
-   --rce;  if (n < 0 || n >= g_nincl) {
+   --rce;  if (n < 0 || n >= s_nincl) {
       DEBUG_DATA   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
@@ -826,7 +824,7 @@ INCL__unit              (char *a_question, int n)
          ++x_count;
          x_total += g_incls [i].i_count;
       }
-      snprintf (my.unit_answer, LEN_RECD, "INCL count       : %4d list   , %4d seen   , %4d handled, %4d unique , %4d total  , %4d extra  , %4d drawn", g_nincl, g_nseen, g_handled, x_count, x_total, g_nextra, g_ndrawn);
+      snprintf (my.unit_answer, LEN_RECD, "INCL count       : %4d list   , %4d seen   , %4d handled, %4d unique , %4d total  , %4d extra  , %4d drawn", s_nincl, s_nseen, s_handled, x_count, x_total, s_nextra, s_ndrawn);
    }
    /*---(complete)-----------------------*/
    return my.unit_answer;

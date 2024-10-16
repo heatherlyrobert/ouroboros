@@ -920,7 +920,7 @@ WAVE_inventory          (char *a_path)
          if (x_end < 0) {
             x_end = GRAPH_add_node (my.proj);
             GRAPH_edge_virt ("yUNIT_solo", x_end);
-            INCL_add  (-1, 'u', "yUNIT_solo", '-');
+            INCL_add  (-1, 'u', "yUNIT_solo");
          }
          /*> rc = INCL_gather_in_c (my.proj, x_name);                                 <*/
          break;

@@ -74,6 +74,7 @@ DEPS__ends              (char a_source [LEN_LABEL], char a_target [LEN_LABEL], c
    int         x_beg       =   -1;
    tNODE      *x_src       = NULL;
    tNODE      *x_trg       = NULL;
+   char        x_draw      =  '-';
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(default)------------------------*/
@@ -83,27 +84,38 @@ DEPS__ends              (char a_source [LEN_LABEL], char a_target [LEN_LABEL], c
    /*---(check for source)---------------*/
    x_beg = INCL_by_name (a_source);
    DEBUG_PROG   yLOG_value   ("incl"      , x_beg);
-   --rce;  if (x_beg >= 0) {
-      DEBUG_PROG   yLOG_note    ("a_source is an include file");
-   } else {
+   --rce;  if (x_beg < 0) {
+      DEBUG_PROG   yLOG_note    ("source not found in include list");
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   rc = INCL_data (x_beg, NULL, NULL, NULL, NULL, NULL, &x_draw, NULL, NULL);
+   DEBUG_PROG   yLOG_char    ("x_draw"    , x_draw);
+   /*---(normal include)-----------------*/
+   --rce;  if (strchr ("yv", x_draw) == NULL) {
+      DEBUG_PROG   yLOG_note    ("a_source is an invisible include file");
+   }
+   /*---(visible include)----------------*/
+   else {
       DEBUG_PROG   yLOG_note    ("a_source is a new/existing node");
       rc = NODE_by_name (a_source, &x_src);
       DEBUG_PROG   yLOG_complex ("src"       , "%4d, %p", rc, x_src);
-      if (a_force != 'y') {
-         DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-         return rce;
-      }
-      rc = NODE_add (a_source, &x_src);
-      DEBUG_PROG   yLOG_complex ("force"     , "%4d, %p", rc, x_src);
-      if (rc < 0 || x_src == NULL) {
-         DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-         return rce;
+      if (rc >= 0 && x_src != NULL) {
+         DEBUG_PROG   yLOG_note    ("already created");
+      } else {
+         rc = NODE_add (a_source, &x_src);
+         DEBUG_PROG   yLOG_complex ("create"    , "%4d, %p", rc, x_src);
+         if (rc < 0 || x_src == NULL) {
+            DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+            return rce;
+         }
       }
    }
    /*---(check for target)---------------*/
    rc = NODE_by_name (a_target, &x_trg);
    DEBUG_PROG   yLOG_complex ("trg"       , "%4d, %p", rc, x_trg);
-   --rce;  if (rc < 0) {
+   --rce;  if (rc < 0 || x_trg == NULL) {
+      DEBUG_PROG   yLOG_char    ("a_force"   , a_force);
       if (a_force != 'y') {
          DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
          return rce;
@@ -134,8 +146,8 @@ DEPS__add               (char a_source [LEN_LABEL], char a_target [LEN_LABEL], c
    int         x_beg       =   -1;
    int         x_end       =   -1;
    char        t           [LEN_HUND]  = "";
-   tNODE      *x_source    = NULL;
-   tNODE      *x_target    = NULL;
+   tNODE      *x_src       = NULL;
+   tNODE      *x_trg       = NULL;
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -145,85 +157,118 @@ DEPS__add               (char a_source [LEN_LABEL], char a_target [LEN_LABEL], c
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   /*---(find beg-point)-----------------*/
-   x_beg = INCL_by_name (a_source);
-   DEBUG_PROG   yLOG_value   ("x_beg"     , x_beg);
-   --rce;  if (x_beg < 0) {
-      DEBUG_PROG   yLOG_note    ("a_source not found, but must record");
-   }
-   /*---(find end-point)-----------------*/
-   rc = NODE_by_name (a_target, &x_source);
-   /*> x_end = GRAPH_by_name (a_target);                                              <*/
-   DEBUG_PROG   yLOG_complex ("find"      , "%4d, %p", rc, x_source);
+   /*---(identify ends)------------------*/
+   rc = DEPS__ends    (a_source, a_target, a_force, &x_beg, &x_src, &x_trg);
+   DEBUG_PROG   yLOG_value   ("ends"      , rc);
    --rce;  if (rc < 0) {
-      if (a_force != 'y') {
-         DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-         return rce;
-      }
-      x_end = GRAPH_add_node (a_target);
-   }
-   /*---(prepare)------------------------*/
-   sprintf (t, ",%s,", a_source);
-   DEBUG_PROG   yLOG_info    ("t"         , t);
-   x_list = g_nodes [x_end].n_deps;
-   DEBUG_PROG   yLOG_info    ("x_list"    , x_list);
-   /*---(check)--------------------------*/
-   --rce;  if (strstr (x_list, t) != NULL) {
-      DEBUG_PROG   yLOG_note    ("already in list, just a duplicate");
-      DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-      return 2;
-   }
-   /*---(append)-------------------------*/
-   switch (x_list [0]) {
-   case '\0' :
-   case '´'  :
-      ystrlcpy (x_list   , ",", LEN_RECD);
-      break;
-   }
-   ystrlcat (x_list, t + 1, LEN_RECD);
-   DEBUG_PROG   yLOG_info    ("x_list"    , x_list);
-   /*---(not-standard)-------------------*/
-   if (x_beg < 0) {
-      DEBUG_PROG   yLOG_note    ("not found, so add to WTF");
-      rc = INCL_add (-1, DEPWTF, a_source, '-');
-      DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-      return 3;
-   }
-   /*---(add)----------------------------*/
-   rc = INCL_add (x_beg, 0, NULL, '-');
-   DEBUG_PROG   yLOG_value   ("list"      , rc);
-   if (rc == 1) {
-      DEBUG_PROG   yLOG_note    ("add to include counts");
-      ++(g_incls [x_beg].i_count);
-      DEBUG_PROG   yLOG_char    ("i_draw"    , g_incls [x_beg].i_draw);
-      if (g_incls [x_beg].i_draw == 'y') {
-         DEBUG_PROG   yLOG_note    ("add real graph edge");
-         rc = GRAPH_edge_real (a_source, x_end);
-         DEBUG_PROG   yLOG_value   ("edge"      , rc);
-      } else if (g_incls [x_beg].i_draw == 'v') {
-         DEBUG_PROG   yLOG_note    ("add virtual/koios graph edge");
-         rc = GRAPH_edge_virt (a_source, x_end);
-         DEBUG_PROG   yLOG_value   ("edge"      , rc);
-      }
-   }
-   /*---(check for solo/uver)------------*/
-   DEBUG_PROG   yLOG_char    ("i_zeno"    , g_incls [x_beg].i_zenodotus);
-   if (g_incls [x_beg].i_zenodotus == 'y') {
-      if (g_incls [x_beg].i_draw == 'y') {
-         rc = DEPS_add ("zenodotus", a_source);
-         DEBUG_PROG   yLOG_value   ("solo/uver" , rc);
-         /*> x_beg = GRAPH_by_name (a_source);                                        <*/
-         rc = NODE_add (a_source, NULL);
-         DEBUG_PROG   yLOG_value   ("rc"        , rc);
-         rc = GRAPH_edge_virt ("zenodotus", x_beg);
-         DEBUG_PROG   yLOG_value   ("edge"      , rc);
-         DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-         return rc;
-      }
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
    }
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 1;
+}
+
+char
+DEPS__add_OLD           (char a_source [LEN_LABEL], char a_target [LEN_LABEL], char a_force)
+{
+   /*> /+---(locals)-----------+-----+-----+-+/                                                 <* 
+    *> char        rce         =  -10;                                                          <* 
+    *> char        rc          =    0;                                                          <* 
+    *> char       *x_list      = NULL;                                                          <* 
+    *> int         x_beg       =   -1;                                                          <* 
+    *> int         x_end       =   -1;                                                          <* 
+    *> char        t           [LEN_HUND]  = "";                                                <* 
+    *> tNODE      *x_source    = NULL;                                                          <* 
+    *> tNODE      *x_target    = NULL;                                                          <* 
+    *> /+---(header)-------------------------+/                                                 <* 
+    *> DEBUG_PROG   yLOG_enter   (__FUNCTION__);                                                <* 
+    *> /+---(defense)------------------------+/                                                 <* 
+    *> rc = DEPS__defense (a_source, a_target);                                                 <* 
+    *> DEBUG_PROG   yLOG_value   ("defense"   , rc);                                            <* 
+    *> --rce;  if (rc < 0) {                                                                    <* 
+    *>    DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);                                        <* 
+    *>    return rce;                                                                           <* 
+    *> }                                                                                        <* 
+    *> /+---(find beg-point)-----------------+/                                                 <* 
+    *> x_beg = INCL_by_name (a_source);                                                         <* 
+    *> DEBUG_PROG   yLOG_value   ("x_beg"     , x_beg);                                         <* 
+    *> --rce;  if (x_beg < 0) {                                                                 <* 
+    *>    DEBUG_PROG   yLOG_note    ("a_source not found, but must record");                    <* 
+    *> }                                                                                        <* 
+    *> /+---(find end-point)-----------------+/                                                 <* 
+    *> rc = NODE_by_name (a_target, &x_source);                                                 <* 
+    *> /+> x_end = GRAPH_by_name (a_target);                                              <+/   <* 
+    *> DEBUG_PROG   yLOG_complex ("find"      , "%4d, %p", rc, x_source);                       <* 
+    *> --rce;  if (rc < 0) {                                                                    <* 
+    *>    if (a_force != 'y') {                                                                 <* 
+    *>       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);                                     <* 
+    *>       return rce;                                                                        <* 
+    *>    }                                                                                     <* 
+    *>    x_end = GRAPH_add_node (a_target);                                                    <* 
+    *> }                                                                                        <* 
+    *> /+---(prepare)------------------------+/                                                 <* 
+    *> sprintf (t, ",%s,", a_source);                                                           <* 
+    *> DEBUG_PROG   yLOG_info    ("t"         , t);                                             <* 
+    *> x_list = g_nodes [x_end].n_deps;                                                         <* 
+    *> DEBUG_PROG   yLOG_info    ("x_list"    , x_list);                                        <* 
+    *> /+---(check)--------------------------+/                                                 <* 
+    *> --rce;  if (strstr (x_list, t) != NULL) {                                                <* 
+    *>    DEBUG_PROG   yLOG_note    ("already in list, just a duplicate");                      <* 
+    *>    DEBUG_PROG   yLOG_exit    (__FUNCTION__);                                             <* 
+    *>    return 2;                                                                             <* 
+    *> }                                                                                        <* 
+    *> /+---(append)-------------------------+/                                                 <* 
+    *> switch (x_list [0]) {                                                                    <* 
+    *> case '\0' :                                                                              <* 
+    *> case '´'  :                                                                              <* 
+    *>    ystrlcpy (x_list   , ",", LEN_RECD);                                                  <* 
+    *>    break;                                                                                <* 
+    *> }                                                                                        <* 
+    *> ystrlcat (x_list, t + 1, LEN_RECD);                                                      <* 
+    *> DEBUG_PROG   yLOG_info    ("x_list"    , x_list);                                        <* 
+    *> /+---(not-standard)-------------------+/                                                 <* 
+    *> if (x_beg < 0) {                                                                         <* 
+    *>    DEBUG_PROG   yLOG_note    ("not found, so add to WTF");                               <* 
+    *>    rc = INCL_add (-1, DEPWTF, a_source);                                                 <* 
+    *>    DEBUG_PROG   yLOG_exit    (__FUNCTION__);                                             <* 
+    *>    return 3;                                                                             <* 
+    *> }                                                                                        <* 
+    *> /+---(add)----------------------------+/                                                 <* 
+    *> rc = INCL_add (x_beg, 0, NULL);                                                          <* 
+    *> DEBUG_PROG   yLOG_value   ("list"      , rc);                                            <* 
+    *> if (rc == 1) {                                                                           <* 
+    *>    DEBUG_PROG   yLOG_note    ("add to include counts");                                  <* 
+    *>    ++(g_incls [x_beg].i_count);                                                          <* 
+    *>    DEBUG_PROG   yLOG_char    ("i_draw"    , g_incls [x_beg].i_draw);                     <* 
+    *>    if (g_incls [x_beg].i_draw == 'y') {                                                  <* 
+    *>       DEBUG_PROG   yLOG_note    ("add real graph edge");                                 <* 
+   *>       rc = GRAPH_edge_real (a_source, x_end);                                            <* 
+      *>       DEBUG_PROG   yLOG_value   ("edge"      , rc);                                      <* 
+      *>    } else if (g_incls [x_beg].i_draw == 'v') {                                           <* 
+         *>       DEBUG_PROG   yLOG_note    ("add virtual/koios graph edge");                        <* 
+            *>       rc = GRAPH_edge_virt (a_source, x_end);                                            <* 
+            *>       DEBUG_PROG   yLOG_value   ("edge"      , rc);                                      <* 
+            *>    }                                                                                     <* 
+            *> }                                                                                        <* 
+            *> /+---(check for solo/uver)------------+/                                                 <* 
+            *> DEBUG_PROG   yLOG_char    ("i_zeno"    , g_incls [x_beg].i_zenodotus);                   <* 
+            *> if (g_incls [x_beg].i_zenodotus == 'y') {                                                <* 
+               *>    if (g_incls [x_beg].i_draw == 'y') {                                                  <* 
+                  *>       rc = DEPS_add ("zenodotus", a_source);                                             <* 
+                     *>       DEBUG_PROG   yLOG_value   ("solo/uver" , rc);                                      <* 
+                     *>       /+> x_beg = GRAPH_by_name (a_source);                                        <+/   <* 
+                     *>       rc = NODE_add (a_source, NULL);                                                    <* 
+                     *>       DEBUG_PROG   yLOG_value   ("rc"        , rc);                                      <* 
+                     *>       rc = GRAPH_edge_virt ("zenodotus", x_beg);                                         <* 
+                     *>       DEBUG_PROG   yLOG_value   ("edge"      , rc);                                      <* 
+                     *>       DEBUG_PROG   yLOG_exit    (__FUNCTION__);                                          <* 
+                     *>       return rc;                                                                         <* 
+                     *>    }                                                                                     <* 
+                     *> }                                                                                        <* 
+                     *> /+---(complete)-----------------------+/                                                 <* 
+                     *> DEBUG_PROG   yLOG_exit    (__FUNCTION__);                                                <* 
+                     *> return 1;                                                                                <*/
 }
 
 char DEPS_add         (char a_source [LEN_LABEL], char a_target [LEN_LABEL]) { return DEPS__add (a_source, a_target, '-'); }

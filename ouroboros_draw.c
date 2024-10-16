@@ -464,25 +464,6 @@ DRAW_block_source       (char a_block, char a_prog [LEN_TITLE])
    return 0;
 }
 
-/*> char                                                                                                          <* 
- *> DRAW_block              (char a_block)                                                                        <* 
- *> {                                                                                                             <* 
- *>    char        rce         =  -10;                                                                            <* 
- *>    int         i           =    0;                                                                            <* 
- *>    int         n           =    0;                                                                            <* 
- *>    tNODE      *x_node      = NULL;                                                                            <* 
- *>    for (i = 0; i < MAX_INCL; ++i) {                                                                           <* 
- *>       if (g_incls [i].i_cat == 0)   break;                                                                    <* 
- *>       if (a_block != g_incls [i].i_block)  continue;                                                          <* 
- *>       n = GRAPH_by_name (g_incls [i].i_name);                                                                 <* 
- *>       x_node = &(g_nodes [n]);                                                                                <* 
- *>       x_node->n_row = s_cols [x_node->n_level];                                                               <* 
- *>       ++(s_cols [x_node->n_level]);                                                                           <* 
- *>       yASCII_box_grid (x_node->n_level, x_node->n_row, x_node->n_name, "", x_node->n_cpred, x_node->n_csucc);   <* 
- *>    }                                                                                                          <* 
- *>    return 0;                                                                                                  <* 
- *> }                                                                                                             <*/
-
 char
 DRAW_box_clear          (void)
 {
