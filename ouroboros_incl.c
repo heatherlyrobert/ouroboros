@@ -462,10 +462,10 @@ INCL_add_by_group       (char a_project [LEN_LABEL], char a_group)
       if (g_incls [i].i_cat == 0)   break;
       switch (a_group) {
       case 'O' :
-         if (g_incls [i].i_opengl == 'y')  DEPS_add (g_incls [i].i_name, a_project);
+         if (g_incls [i].i_opengl == 'y')  DEPS_force (g_incls [i].i_name, a_project);
          break;
       case 'C' :
-         if (g_incls [i].i_curses == 'y')  DEPS_add (g_incls [i].i_name, a_project);
+         if (g_incls [i].i_curses == 'y')  DEPS_force (g_incls [i].i_name, a_project);
          break;
       }
    }
