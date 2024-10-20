@@ -297,6 +297,8 @@ EDGE_add                (tNODE *a_source, tNODE *a_target, char a_type, tEDGE **
    tEDGE      *x_edge      = NULL;
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(default)------------------------*/
+   if (r_new != NULL)  *r_new = NULL;
    /*---(defense)------------------------*/
    DEBUG_PROG   yLOG_point   ("a_source"  , a_source);
    --rce;  if (a_source == NULL) {
@@ -335,6 +337,8 @@ EDGE_add                (tNODE *a_source, tNODE *a_target, char a_type, tEDGE **
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(set type)-----------------------*/
+   x_edge->e_type = a_type;
    /*---(save-back)----------------------*/
    if (r_new != NULL)  *r_new = x_edge;
    /*---(complete)-----------------------*/
@@ -353,6 +357,8 @@ EDGE_add_by_names       (char a_source [LEN_LABEL], char a_target [LEN_LABEL], c
    tEDGE      *x_edge      = NULL;
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(default)------------------------*/
+   if (r_new != NULL)  *r_new = NULL;
    /*---(defense)------------------------*/
    DEBUG_PROG   yLOG_point   ("a_source"  , a_source);
    --rce;  if (a_source == NULL) {
