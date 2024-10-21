@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.5- update to nodes being dynamic"
-#define     P_VERNUM    "0.5l"
-#define     P_VERTXT    "INCL unit test complete, and MAKE_gather unit test done"
+#define     P_VERNUM    "0.5m"
+#define     P_VERTXT    "DATA_gather_file for makefiles unit tested in ouroboros_data.unit"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
