@@ -591,7 +591,7 @@ INCL_gather_detail      (char a_project [LEN_LABEL], char a_entry [LEN_TITLE])
       return 0;
    }
    /*---(add to list)--------------------*/
-   rc = DEPS_add (t, a_project);
+   rc = DEPS_force (t, a_project);
    if (n < 0) {
       DEBUG_DATA  yLOG_exit    (__FUNCTION__);
       return 0;

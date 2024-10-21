@@ -69,7 +69,7 @@ MAKE_gather             (char a_proj [LEN_LABEL], char a_recd [LEN_RECD])
       return 0;
    }
    /*---(handle)----------------------*/
-   rc = DEPS_add ("zenodotus", a_proj);
+   rc = DEPS_force ("zenodotus", a_proj);
    DEBUG_DATA   yLOG_value   ("add"       , rc);
    /*---(complete)-----------------------*/
    DEBUG_DATA  yLOG_exit    (__FUNCTION__);
