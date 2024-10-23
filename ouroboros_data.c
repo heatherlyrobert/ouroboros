@@ -228,7 +228,7 @@ DATA_gather_file        (char a_project [LEN_LABEL], char a_entry [LEN_TITLE], c
          DEBUG_DATA   yLOG_note    ("WAVE files should not be handled here");
          break;
       case TYPE_UNIT  :  /* handle unit test "incl" lines */
-         rc = YUNIT_gather  (a_project, x_recd, x_end);
+         rc = YUNIT_gather  (a_project, x_recd);
          break;
       case TYPE_HEAD  :  /* handle c/h "#include" lines */
       case TYPE_CODE  :
