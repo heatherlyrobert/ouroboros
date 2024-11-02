@@ -35,8 +35,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "0.-- preparing for production use"
 #define     P_VERMINOR  "0.5- update to nodes being dynamic"
-#define     P_VERNUM    "0.5o"
-#define     P_VERTXT    "YUNIT updated and unit tests passing again"
+#define     P_VERNUM    "0.5p"
+#define     P_VERTXT    "massive data set updated to include waves and tdb unit test"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
